@@ -14,7 +14,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      font-family: "Chalkboard SE", "Comic Sans MS", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
     }
     #game-container {
@@ -35,8 +35,8 @@
       height: 100%;
     }
     .btn {
-      padding: 12px 24px;
-      font-size: 18px;
+      padding: 12px 20px;
+      font-size: 15px;
       font-weight: bold;
       color: #fff;
       background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
@@ -44,6 +44,7 @@
       border-radius: 40px;
       cursor: pointer;
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
+      font-family: inherit;
     }
     .btn:active {
       transform: translateY(2px);
@@ -77,8 +78,8 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       z-index: 10;
       transition: transform 0.1s ease, background 0.1s ease;
+      font-family: inherit;
       
-      /* 画像ボタン化する時のための共通準備 */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -90,11 +91,6 @@
       transform: scale(0.92);
       background: #fff;
     }
-
-    /* 【将来画像に置き換える時用の追加CSS例】
-       自作画像を使う場合は HTMLのボタンに <img src="btn_back.png"> を入れるか、
-       以下のようにCSSで背景画像指定にすると綺麗に切り替えられます。
-    */
 
     .overlay-screen {
       position: absolute;
@@ -123,7 +119,6 @@
       z-index: 2;
     }
 
-    /* タイトルを自作画像（文字画像）にする場合のラッパー */
     .title-img {
       max-width: 240px;
       height: auto;
@@ -283,15 +278,11 @@
 <div id="game-container">
   <div id="score-display">SCORE: 0</div>
   
-  <!-- 右上の「戻る」ボタン -->
-  <!-- 画像に差し替える時は ◀ 戻る の部分を <img src="back.png" alt="戻る" style="height:20px;"> 等にするだけOKです -->
   <button id="back-to-select-btn">◀ 戻る</button>
 
   <!-- 選曲画面 -->
   <div id="select-screen" class="overlay-screen">
     <div id="particle-container"></div>
-    
-    <!-- タイトルテキスト (画像にする場合は <img src="music_select.png" class="title-img"> に置き換えられます) -->
     <div id="select-title">★ music select ★</div>
     
     <div id="virtual-scroll-viewport">
@@ -315,7 +306,7 @@
       </div>
 
       <div class="btn-group">
-        <button id="select-btn" class="btn" style="background: #b2bec3;">えらびなおす</button>
+        <button id="select-btn" class="btn" style="background: #b2bec3;">曲選択へ戻る</button>
         <button id="retry-btn" class="btn">もう一度</button>
       </div>
     </div>
@@ -325,7 +316,6 @@
 </div>
 
 <script>
-  // 5曲のデータ
   const songList = [
     { id: 'song_1', name: '1. きらきら星', totalNotes: 25, speed: '4.2', color: '#ff7675' },
     { id: 'song_2', name: '2. チューリップ', totalNotes: 30, speed: '4.5', color: '#00b894' },
