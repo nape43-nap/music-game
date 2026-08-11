@@ -569,6 +569,7 @@
     notes.forEach((note, index) => {
       if (note.holding) return;
       if (note.type === 'slide') return;
+      if (note.type === 'hold_slide' && note.holdCompleted) return; // スライド待ち時は通常タッチの対象外
 
       let expectedX = laneXPositions[note.lane];
       if (note.type === 'curved_hold') {
@@ -667,7 +668,7 @@
         } else {
           if (note.type === 'hold_slide') {
             note.holding = false;
-            note.holdCompleted = true; // ホールド完了、スライド待ちへ移行
+            note.holdCompleted = true; // ホールド完了、あとはスライド通過待ち
             touchData.activeNote = null;
           } else {
             const distance = Math.abs(tailY - targetY);
@@ -808,6 +809,15 @@
       let note = notes[i];
       note.y += note.speed;
 
+      // hold_slide でホールド部分が完全に終わったら（本体が判定ラインを通過したら）、自動でスライド待ち状態へ移行
+      if (note.type === 'hold_slide' && !note.holdCompleted) {
+        const headY = note.holding ? targetY : note.y;
+        if (headY > targetY + 20) {
+          note.holdCompleted = true;
+          note.holding = false;
+        }
+      }
+
       ctx.save();
 
       if (note.type === 'normal') {
@@ -935,6 +945,7 @@
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, tailY + 7);
 
+        // スライド終点が画面下部を通り過ぎたらミス判定
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
           triggerMiss();
