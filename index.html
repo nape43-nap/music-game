@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Daruma+Drop+One&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Daruma+Drop+One&family=Indie+Flower&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -120,13 +120,14 @@
     }
 
     #select-title {
-      font-size: 26px;
+      font-size: 32px;
       color: #6c5ce7;
       margin-bottom: 10px;
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
       z-index: 2;
-      font-family: "Daruma Drop One", cursive;
+      font-family: "Indie Flower", cursive;
+      font-weight: bold;
       letter-spacing: 1px;
     }
 
@@ -265,9 +266,10 @@
     .badge-tag {
       display: inline-block;
       color: #fff;
-      font-size: 12px;
+      font-size: 13px;
       padding: 2px 8px;
       border-radius: 205px 25px 195px 25px/25px 195px 25px 205px;
+      font-family: "Indie Flower", cursive;
       font-weight: bold;
     }
     .result-details {
@@ -364,6 +366,7 @@
   const noMissTag = document.getElementById('no-miss-tag');
 
   const GAME_FONT = '"Kaisei Opti", serif';
+  const INDIE_FONT = '"Indie Flower", cursive';
 
   let audioCtx = null;
   let isPlaying = false;
@@ -784,13 +787,10 @@
       newRecordTag.style.display = 'none';
     }
 
-    // ALL PERFECT判定（全ノート数が Perfect の数と一致する場合）
     if (counts.perfect === currentSong.totalNotes) {
       allPerfectTag.style.display = 'inline-block';
       noMissTag.style.display = 'none';
-    } 
-    // NO MISS判定（ミスが0回かつ、最大コンボが全ノート数以上、またはコンボが途切れなかった場合）
-    else if (counts.miss === 0) {
+    } else if (counts.miss === 0) {
       allPerfectTag.style.display = 'none';
       noMissTag.style.display = 'inline-block';
     } else {
@@ -1098,7 +1098,7 @@
 
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
-      ctx.font = `bold 30px ${GAME_FONT}`;
+      ctx.font = `bold 36px ${INDIE_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(judgeText, canvas.width / 2, targetY - 80);
       judgeTimer--;
@@ -1106,7 +1106,7 @@
 
     if (combo > 1) {
       ctx.fillStyle = '#6c5ce7';
-      ctx.font = `bold 24px ${GAME_FONT}`;
+      ctx.font = `bold 30px ${INDIE_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
