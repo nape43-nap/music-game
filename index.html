@@ -569,6 +569,7 @@
     notes.forEach((note, index) => {
       if (note.holding) return;
       if (note.type === 'slide') return;
+      // hold_slideでホールド本体が終わっている場合、ここは無視してスライド単体の判定に任せる
       if (note.type === 'hold_slide' && note.holdCompleted) return;
 
       let expectedX = laneXPositions[note.lane];
@@ -608,7 +609,7 @@
     }
   }
 
-  // タッチ移動
+  // タッチ移動（指を滑らせているときの判定）
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -616,12 +617,12 @@
 
     touchData.x = touchX;
 
-    // スライド単体の判定
+    // スライド・hold_slide終点の判定
     notes.forEach((n, index) => {
       if (n.type === 'slide') {
         const distanceY = Math.abs(n.y - targetY);
         const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-        if (distanceY < 70 && distanceX < laneWidth * 0.8) {
+        if (distanceY < 70 && distanceX < laneWidth * 0.9) {
           notes.splice(index, 1);
           applyJudgement(distanceY, laneXPositions[n.lane]);
         }
@@ -629,7 +630,7 @@
         const tailY = n.y - n.length;
         const distanceY = Math.abs(tailY - targetY);
         const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-        if (distanceY < 70 && distanceX < laneWidth * 0.8) {
+        if (distanceY < 70 && distanceX < laneWidth * 0.9) {
           notes.splice(index, 1);
           applyJudgement(distanceY, laneXPositions[n.lane]);
         }
@@ -669,10 +670,11 @@
           triggerMiss();
         } else {
           if (note.type === 'hold_slide' && !note.holdCompleted) {
-            // ホールドが終わったとき、ホールド完了（スライド待ち）状態にして指の追跡を少し維持
+            // ホールドが終わった瞬間、指を離してもスライドを待つ状態に移行
             note.holding = false;
             note.holdCompleted = true;
             touchData.activeNote = null;
+            // 一定時間（約0.6秒）はスライドのヒット判定を残す
             setTimeout(() => {
               if (activeTouches[touchId] === touchData) {
                 delete activeTouches[touchId];
@@ -818,13 +820,37 @@
       let note = notes[i];
       note.y += note.speed;
 
-      // hold_slideでホールド本体が通過し終えたら自動的にホールド完了（スライド待ち）状態に切り替え
+      // hold_slideでホールド部分が通過し終えたら自動的にスライド待ち状態へ切り替え
       if (note.type === 'hold_slide' && !note.holdCompleted) {
-        const headY = note.holding ? targetY : note.y;
-        if (headY > targetY + 20) {
+        const tailY = note.y - note.length;
+        if (tailY > targetY) {
           note.holdCompleted = true;
           note.holding = false;
         }
+      }
+
+      // 画面下を通過して取り逃した場合のミス判定
+      let missCheckTailY = note.y;
+      if (note.type === 'hold' || note.type === 'curved_hold' || note.type === 'hold_slide') {
+        missCheckTailY = note.y - note.length;
+      }
+      if (missCheckTailY > targetY + 70) {
+        notes.splice(i, 1);
+        if (note.type === 'hold_slide' && note.holdCompleted) {
+          // スライド部分をやり過ごした場合はミス
+          triggerMiss();
+        } else if (note.type === 'hold' || note.type === 'curved_hold') {
+          if (note.holding) {
+            let endX = laneXPositions[note.lane];
+            if (note.type === 'curved_hold') endX = laneXPositions[note.path[note.path.length - 1].lane];
+            applyJudgement(0, endX);
+          } else {
+            triggerMiss();
+          }
+        } else {
+          triggerMiss();
+        }
+        continue;
       }
 
       ctx.save();
@@ -843,11 +869,6 @@
         ctx.beginPath();
         ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2);
         ctx.fill();
-
-        if (note.y > targetY + 70) {
-          notes.splice(i, 1);
-          triggerMiss();
-        }
       } else if (note.type === 'hold') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
@@ -868,15 +889,6 @@
         ctx.beginPath();
         ctx.arc(x, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
-
-        if (tailY > targetY + 70) {
-          notes.splice(i, 1);
-          if (note.holding) {
-            applyJudgement(0, x);
-          } else {
-            triggerMiss();
-          }
-        }
       } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
@@ -913,15 +925,6 @@
         ctx.beginPath();
         ctx.arc(endX, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
-
-        if (tailY > targetY + 70) {
-          notes.splice(i, 1);
-          if (note.holding) {
-            applyJudgement(0, endX);
-          } else {
-            triggerMiss();
-          }
-        }
       } else if (note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
@@ -953,12 +956,6 @@
         ctx.font = `bold 20px ${GAME_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, tailY + 7);
-
-        // スライド終点が画面下部を通り過ぎたらミス判定
-        if (tailY > targetY + 70) {
-          notes.splice(i, 1);
-          triggerMiss();
-        }
       } else if (note.type === 'slide') {
         const x = laneXPositions[note.lane];
         ctx.shadowBlur = 12;
@@ -973,11 +970,6 @@
         ctx.font = `bold 20px ${GAME_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, note.y + 7);
-
-        if (note.y > targetY + 70) {
-          notes.splice(i, 1);
-          triggerMiss();
-        }
       }
 
       ctx.restore();
