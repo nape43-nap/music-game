@@ -363,7 +363,7 @@
   let judgeTimer = 0;
   let hitEffects = [];
   let particleInterval = null;
-  let globalAnimTimer = 0; // ノーツの伸縮・脈動用タイマー
+  let globalAnimTimer = 0;
 
   const laneCount = 4;
   const laneWidth = canvas.width / laneCount;
@@ -784,7 +784,6 @@
     if (!isPlaying) return;
 
     globalAnimTimer += 0.15;
-    // ぷるん♪と伸縮させるためのスケール値（1.0を中心に0.92〜1.08の間で周期的に変化）
     const pulseScale = 1.0 + Math.sin(globalAnimTimer) * 0.08;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -874,7 +873,6 @@
         ctx.shadowColor = '#ff7675';
         ctx.fillStyle = '#ff7675';
         
-        // 伸縮アニメーション適用
         ctx.save();
         ctx.translate(x, note.y);
         ctx.scale(pulseScale, pulseScale);
@@ -903,7 +901,7 @@
           ctx.fillRect(x - 16, tailY, 32, headY - tailY);
         }
 
-        // ヘッド・テイルに伸縮を適用
+        // 始点
         ctx.save();
         ctx.translate(x, headY);
         ctx.scale(pulseScale, pulseScale);
@@ -914,12 +912,22 @@
         ctx.fill();
         ctx.restore();
 
+        // 終点（始点と同じ緑色系に変更）
         ctx.save();
         ctx.translate(x, tailY);
         ctx.scale(pulseScale, pulseScale);
         ctx.translate(-x, -tailY);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#00b894';
+        ctx.fillStyle = '#00b894';
         ctx.beginPath();
         ctx.arc(x, tailY, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x - 4, tailY - 4, 5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
@@ -951,6 +959,7 @@
         const startX = note.holding ? getHoldXAtY(note, targetY) : laneXPositions[note.path[0].lane];
         const endX = laneXPositions[note.path[note.path.length - 1].lane];
 
+        // 始点
         ctx.save();
         ctx.translate(startX, headY);
         ctx.scale(pulseScale, pulseScale);
@@ -961,12 +970,22 @@
         ctx.fill();
         ctx.restore();
 
+        // 終点（始点と同じ紫系＋白いハイライトに変更）
         ctx.save();
         ctx.translate(endX, tailY);
         ctx.scale(pulseScale, pulseScale);
         ctx.translate(-endX, -tailY);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#6c5ce7';
+        ctx.fillStyle = '#6c5ce7';
         ctx.beginPath();
         ctx.arc(endX, tailY, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(endX - 4, tailY - 4, 5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
