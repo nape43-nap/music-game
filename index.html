@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 長押しスライド一体型</title>
+  <title>絵本風音ゲー 楽曲選択＆スコア保存版</title>
   <style>
     body {
       margin: 0;
@@ -35,12 +35,8 @@
       height: 100%;
     }
     .btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 16px 36px;
-      font-size: 22px;
+      padding: 12px 24px;
+      font-size: 18px;
       font-weight: bold;
       color: #fff;
       background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
@@ -48,40 +44,82 @@
       border-radius: 40px;
       cursor: pointer;
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
-      z-index: 10;
     }
     .btn:active {
-      transform: translate(-50%, -44%);
-      box-shadow: 0 2px 4px rgba(214, 48, 49, 0.4);
+      transform: translateY(2px);
     }
+
     #score-display {
       position: absolute;
       top: 16px;
       left: 20px;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: #6c5ce7;
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
+      z-index: 5;
     }
 
-    /* リザルト画面スタイル */
-    #result-screen {
-      display: none;
+    .overlay-screen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(255, 253, 249, 0.92);
+      background: rgba(255, 253, 249, 0.95);
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 20;
     }
+
+    #select-title {
+      font-size: 24px;
+      color: #6c5ce7;
+      margin-bottom: 16px;
+      font-weight: bold;
+    }
+    .song-card {
+      width: 280px;
+      padding: 12px 16px;
+      margin: 8px 0;
+      background: #fff;
+      border: 3px solid #fdcb6e;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .song-card:active {
+      transform: scale(0.98);
+    }
+    .song-info {
+      text-align: left;
+    }
+    .song-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2d3436;
+    }
+    .song-meta {
+      font-size: 12px;
+      color: #b2bec3;
+      margin-top: 2px;
+    }
+    .song-highscore {
+      font-size: 14px;
+      font-weight: bold;
+      color: #6c5ce7;
+      text-align: right;
+    }
+
     #result-card {
       width: 280px;
-      padding: 24px 20px;
+      padding: 20px;
       background: #fff;
       border: 4px solid #fdcb6e;
       border-radius: 20px;
@@ -89,28 +127,33 @@
       text-align: center;
     }
     .result-title {
-      font-size: 28px;
+      font-size: 26px;
       color: #ff7675;
-      margin: 0 0 12px 0;
+      margin: 0 0 8px 0;
       font-weight: bold;
-    }
-    .result-score-label {
-      font-size: 14px;
-      color: #b2bec3;
-      margin-bottom: 2px;
     }
     .result-score-val {
-      font-size: 36px;
+      font-size: 32px;
       color: #6c5ce7;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
+    }
+    .new-record-tag {
+      display: inline-block;
+      background: #ff7675;
+      color: #fff;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-weight: bold;
     }
     .result-details {
       width: 100%;
-      margin: 12px 0 20px 0;
+      margin: 8px 0 16px 0;
       border-top: 2px dashed #dfe6e9;
-      padding-top: 12px;
-      font-size: 16px;
+      padding-top: 8px;
+      font-size: 15px;
       color: #2d3436;
     }
     .result-row {
@@ -118,15 +161,10 @@
       justify-content: space-between;
       margin: 4px 0;
     }
-    #retry-btn {
-      position: static;
-      transform: none;
-      margin-top: 8px;
-      padding: 12px 28px;
-      font-size: 18px;
-    }
-    #retry-btn:active {
-      transform: translateY(2px);
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
   </style>
 </head>
@@ -134,13 +172,18 @@
 
 <div id="game-container">
   <div id="score-display">SCORE: 0</div>
-  <button id="start-btn" class="btn">★ あそぶ ★</button>
+
+  <!-- 選曲画面 -->
+  <div id="select-screen" class="overlay-screen">
+    <div id="select-title">★ きょくをえらぶ ★</div>
+    <div id="song-list-container"></div>
+  </div>
 
   <!-- リザルト画面 -->
-  <div id="result-screen">
+  <div id="result-screen" class="overlay-screen" style="display: none;">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
-      <div class="result-score-label">FINAL SCORE</div>
+      <div id="new-record" class="new-record-tag" style="display: none;">NEW HIGH SCORE!</div>
       <div id="res-score" class="result-score-val">0</div>
       
       <div class="result-details">
@@ -151,7 +194,10 @@
         <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031;">0</strong></div>
       </div>
 
-      <button id="retry-btn" class="btn">もう一度あそぶ</button>
+      <div class="btn-group">
+        <button id="select-btn" class="btn" style="background: #b2bec3;">えらびなおす</button>
+        <button id="retry-btn" class="btn">もう一度</button>
+      </div>
     </div>
   </div>
 
@@ -159,53 +205,82 @@
 </div>
 
 <script>
+  const songList = [
+    { id: 'song1', name: 'きらきら星', totalNotes: 30, speed: 4, color: '#ff7675' },
+    { id: 'song2', name: 'チューリップ', totalNotes: 40, speed: 4.2, color: '#00b894' },
+    { id: 'song3', name: 'どんぐりころころ', totalNotes: 50, speed: 4.6, color: '#6c5ce7' }
+  ];
+
+  let currentSong = songList[0];
+
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('start-btn');
-  const retryBtn = document.getElementById('retry-btn');
-  const scoreDisplay = document.getElementById('score-display');
+  const selectScreen = document.getElementById('select-screen');
   const resultScreen = document.getElementById('result-screen');
+  const songListContainer = document.getElementById('song-list-container');
+  const scoreDisplay = document.getElementById('score-display');
+  const retryBtn = document.getElementById('retry-btn');
+  const selectBtn = document.getElementById('select-btn');
+  const newRecordTag = document.getElementById('new-record');
 
   let audioCtx = null;
   let isPlaying = false;
   let score = 0;
   let combo = 0;
   let maxCombo = 0;
-
-  // 判定カウント用
   let counts = { perfect: 0, great: 0, good: 0, miss: 0 };
 
-  // 判定表示アニメーション
   let judgeText = '';
   let judgeColor = '#2d3436';
   let judgeTimer = 0;
-
-  // ヒットエフェクト
   let hitEffects = [];
 
-  // レーン設定
   const laneCount = 4;
   const laneWidth = canvas.width / laneCount;
-  const laneXPositions = [
-    laneWidth * 0.5,
-    laneWidth * 1.5,
-    laneWidth * 2.5,
-    laneWidth * 3.5
-  ];
+  const laneXPositions = [laneWidth * 0.5, laneWidth * 1.5, laneWidth * 2.5, laneWidth * 3.5];
   const keyLabels = ['D', 'F', 'J', 'K'];
 
-  // 判定ライン
   const targetY = 500;
   const targetRadius = 28;
-
-  // ホールド状態
   let isLaneHolding = [false, false, false, false];
 
-  // ノーツデータ & 生成制御（100個制限）
   let notes = [];
   let spawnTimer = 0;
   let spawnedCount = 0;
-  const totalNotesToSpawn = 100;
+
+  function renderSongSelectUI() {
+    songListContainer.innerHTML = '';
+    songList.forEach(song => {
+      const savedScore = localStorage.getItem(`highscore_${song.id}`) || 0;
+      const card = document.createElement('div');
+      card.className = 'song-card';
+      card.style.borderColor = song.color;
+      card.innerHTML = `
+        <div class="song-info">
+          <div class="song-name">${song.name}</div>
+          <div class="song-meta">ノーツ数: ${song.totalNotes} / スピード: ${song.speed}</div>
+        </div>
+        <div class="song-highscore">
+          <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
+          <div>${Number(savedScore).toLocaleString()}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => startSong(song));
+      songListContainer.appendChild(card);
+    });
+  }
+
+  function startSong(song) {
+    currentSong = song;
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    selectScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+    resetGame();
+    isPlaying = true;
+    gameLoop();
+  }
 
   function resetGame() {
     score = 0;
@@ -215,25 +290,20 @@
     notes = [];
     spawnTimer = 0;
     spawnedCount = 0;
-    scoreDisplay.textContent = 'SCORE: 0';
-    resultScreen.style.display = 'none';
+    scoreDisplay.textContent = `SCORE: 0`;
   }
 
   function playSound(freqMult = 1) {
     if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    
     osc.type = 'sine';
     osc.frequency.setValueAtTime(400 * freqMult, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(600 * freqMult, audioCtx.currentTime + 0.08);
-    
     gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-    
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    
     osc.start();
     osc.stop(audioCtx.currentTime + 0.08);
   }
@@ -294,7 +364,7 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      if (note.lane === laneIndex && !note.holding && note.type !== 'slide') {
+      if (note.lane === laneIndex && !note.holding) {
         const distance = Math.abs(note.y - targetY);
         if (distance < minDistance) {
           minDistance = distance;
@@ -305,7 +375,7 @@
 
     if (hitIndex !== -1 && minDistance < 70) {
       const note = notes[hitIndex];
-      if (note.type === 'normal') {
+      if (note.type === 'normal' || note.type === 'slide') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, laneIndex);
       } else if (note.type === 'hold') {
@@ -321,8 +391,7 @@
 
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
-      // ホールドノーツの離し処理（スライドノーツがついていない通常ホールドのみ）
-      if (note.lane === laneIndex && note.type === 'hold' && note.holding && !note.hasSlide) {
+      if (note.lane === laneIndex && note.type === 'hold' && note.holding) {
         const tailY = note.y - note.length;
         const distance = Math.abs(tailY - targetY);
         notes.splice(i, 1);
@@ -336,18 +405,8 @@
 
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
-      // 独立した単体スライドノーツの判定
       if (note.lane === laneIndex && note.type === 'slide') {
         const distance = Math.abs(note.y - targetY);
-        if (distance < 70) {
-          notes.splice(i, 1);
-          applyJudgement(distance, laneIndex);
-        }
-      }
-      // ホールドノーツの終点についているスライドの判定
-      else if (note.type === 'hold' && note.holding && note.hasSlide) {
-        const tailY = note.y - note.length;
-        const distance = Math.abs(tailY - targetY);
         if (distance < 70) {
           notes.splice(i, 1);
           applyJudgement(distance, laneIndex);
@@ -357,25 +416,20 @@
   }
 
   function spawnNotes() {
-    if (spawnedCount >= totalNotesToSpawn) return;
+    if (spawnedCount >= currentSong.totalNotes) return;
 
     spawnTimer++;
-    if (spawnTimer > 45) {
+    if (spawnTimer > 40) {
       const lane = Math.floor(Math.random() * laneCount);
       const rand = Math.random();
+      const spd = currentSong.speed;
 
-      if (rand < 0.45) {
-        // ノーマルノーツ
-        notes.push({ type: 'normal', lane: lane, y: 0, speed: 4 });
-      } else if (rand < 0.70) {
-        // 通常ホールドノーツ
-        notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: 4, holding: false, hasSlide: false });
-      } else if (rand < 0.85) {
-        // 長押しの終点にスライドがくっついたコネクトノーツ！
-        notes.push({ type: 'hold', lane: lane, y: 0, length: 130, speed: 4, holding: false, hasSlide: true });
+      if (rand < 0.50) {
+        notes.push({ type: 'normal', lane: lane, y: 0, speed: spd });
+      } else if (rand < 0.75) {
+        notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: spd, holding: false });
       } else {
-        // 単体スライドノーツ
-        notes.push({ type: 'slide', lane: lane, y: 0, speed: 4 });
+        notes.push({ type: 'slide', lane: lane, y: 0, speed: spd });
       }
 
       spawnTimer = 0;
@@ -385,13 +439,22 @@
 
   function showResult() {
     isPlaying = false;
+
+    const prevScore = Number(localStorage.getItem(`highscore_${currentSong.id}`)) || 0;
+    if (score > prevScore) {
+      localStorage.setItem(`highscore_${currentSong.id}`, score);
+      newRecordTag.style.display = 'inline-block';
+    } else {
+      newRecordTag.style.display = 'none';
+    }
+
     document.getElementById('res-score').textContent = score;
     document.getElementById('res-combo').textContent = maxCombo;
     document.getElementById('res-perfect').textContent = counts.perfect;
     document.getElementById('res-great').textContent = counts.great;
     document.getElementById('res-good').textContent = counts.good;
     document.getElementById('res-miss').textContent = counts.miss;
-    
+
     resultScreen.style.display = 'flex';
   }
 
@@ -400,7 +463,6 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // レーン区切り線
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
@@ -412,7 +474,6 @@
     }
     ctx.setLineDash([]);
 
-    // 判定ライン
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       ctx.save();
@@ -435,10 +496,8 @@
       ctx.fillText(keyLabels[i], x, targetY + 52);
     }
 
-    // ノーツ生成
     spawnNotes();
 
-    // ノーツ移動・描画
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
@@ -468,35 +527,19 @@
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
 
-        // 帯部分
         ctx.shadowBlur = 12;
-        ctx.shadowColor = note.hasSlide ? '#0984e3' : '#55efc4';
-        ctx.fillStyle = note.hasSlide ? 'rgba(116, 185, 255, 0.7)' : 'rgba(85, 239, 196, 0.7)';
+        ctx.shadowColor = '#55efc4';
+        ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
         ctx.fillRect(x - 16, tailY, 32, headY - tailY);
 
-        // 始点（円）
-        ctx.fillStyle = note.hasSlide ? '#74b9ff' : '#00b894';
+        ctx.fillStyle = '#00b894';
         ctx.beginPath();
         ctx.arc(x, headY, 18, 0, Math.PI * 2);
         ctx.fill();
 
-        // 終点（スライド一体型ならスライド記号を描画）
-        if (note.hasSlide) {
-          ctx.fillStyle = '#0984e3';
-          ctx.beginPath();
-          ctx.roundRect(x - 22, tailY - 14, 44, 28, 14);
-          ctx.fill();
-
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#fff';
-          ctx.font = 'bold 20px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('〰', x, tailY + 7);
-        } else {
-          ctx.beginPath();
-          ctx.arc(x, tailY, 18, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.beginPath();
+        ctx.arc(x, tailY, 18, 0, Math.PI * 2);
+        ctx.fill();
 
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
@@ -525,7 +568,6 @@
       ctx.restore();
     }
 
-    // ヒットエフェクト描画
     for (let i = hitEffects.length - 1; i >= 0; i--) {
       let effect = hitEffects[i];
       effect.radius += 2.5;
@@ -543,7 +585,6 @@
       if (effect.alpha <= 0) hitEffects.splice(i, 1);
     }
 
-    // 判定文字 & コンボ表示
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
       ctx.font = 'bold 28px sans-serif';
@@ -559,8 +600,7 @@
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
 
-    // クリア判定
-    if (spawnedCount >= totalNotesToSpawn && notes.length === 0) {
+    if (spawnedCount >= currentSong.totalNotes && notes.length === 0) {
       showResult();
       return;
     }
@@ -568,22 +608,13 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // イベント登録
-  startBtn.addEventListener('click', () => {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    startBtn.style.display = 'none';
-    resetGame();
-    isPlaying = true;
-    gameLoop();
+  retryBtn.addEventListener('click', () => startSong(currentSong));
+  selectBtn.addEventListener('click', () => {
+    resultScreen.style.display = 'none';
+    renderSongSelectUI();
+    selectScreen.style.display = 'flex';
   });
 
-  retryBtn.addEventListener('click', () => {
-    resetGame();
-    isPlaying = true;
-    gameLoop();
-  });
-
-  // タッチ操作
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -618,38 +649,7 @@
     }
   });
 
-  // マウス＆キーボード操作
-  canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const laneIndex = Math.floor((e.clientX - rect.left) / (rect.width / laneCount));
-    if (laneIndex >= 0 && laneIndex < laneCount) handleTouchStart(laneIndex);
-  });
-  canvas.addEventListener('mousemove', (e) => {
-    if (e.buttons === 1) {
-      const rect = canvas.getBoundingClientRect();
-      const laneIndex = Math.floor((e.clientX - rect.left) / (rect.width / laneCount));
-      if (laneIndex >= 0 && laneIndex < laneCount) handleSlide(laneIndex);
-    }
-  });
-  canvas.addEventListener('mouseup', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const laneIndex = Math.floor((e.clientX - rect.left) / (rect.width / laneCount));
-    if (laneIndex >= 0 && laneIndex < laneCount) handleTouchEnd(laneIndex);
-  });
-
-  window.addEventListener('keydown', (e) => {
-    if (e.repeat) return;
-    if (e.key === 'd' || e.key === 'D') handleTouchStart(0);
-    if (e.key === 'f' || e.key === 'F') handleTouchStart(1);
-    if (e.key === 'j' || e.key === 'J') handleTouchStart(2);
-    if (e.key === 'k' || e.key === 'K') handleTouchEnd(3);
-  });
-  window.addEventListener('keyup', (e) => {
-    if (e.key === 'd' || e.key === 'D') handleTouchEnd(0);
-    if (e.key === 'f' || e.key === 'F') handleTouchEnd(1);
-    if (e.key === 'j' || e.key === 'J') handleTouchEnd(2);
-    if (e.key === 'k' || e.key === 'K') handleTouchEnd(3);
-  });
+  renderSongSelectUI();
 </script>
 
 </body>
