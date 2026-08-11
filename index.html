@@ -471,6 +471,7 @@
     notes = [];
     spawnTimer = 0;
     spawnedCount = 0;
+    isLaneHolding = [false, false, false, false];
     scoreDisplay.textContent = `SCORE: 0`;
   }
 
@@ -595,7 +596,7 @@
       let note = notes[i];
       if (note.holding) {
         const currentX = getHoldXAtY(note, targetY);
-        const currentLane = Math.floor(currentX / laneWidth);
+        const currentLane = Math.min(laneCount - 1, Math.max(0, Math.floor(currentX / laneWidth)));
 
         if (currentLane === laneIndex) {
           const tailY = note.y - note.length;
@@ -738,6 +739,7 @@
         const expectedX = getHoldXAtY(note, targetY);
         const expectedLane = Math.min(laneCount - 1, Math.max(0, Math.floor(expectedX / laneWidth)));
 
+        // 期待するレーンを現在押し込めているか
         if (!isLaneHolding[expectedLane]) {
           note.holding = false;
         }
@@ -940,52 +942,75 @@
   retryBtn.addEventListener('click', () => startSong(currentSong));
   selectBtn.addEventListener('click', () => renderSongSelectUI());
 
-  /* --- PCキーボード操作対応 --- */
+  /* --- PCキーボード操作対応 (スライド動作模倣含む) --- */
   const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     const lane = keyLaneMap[e.code];
-    if (lane !== undefined) handleTouchStart(lane);
+    if (lane !== undefined) {
+      handleTouchStart(lane);
+    }
   });
 
   window.addEventListener('keyup', (e) => {
     const lane = keyLaneMap[e.code];
-    if (lane !== undefined) handleTouchEnd(lane);
+    if (lane !== undefined) {
+      handleTouchEnd(lane);
+    }
   });
 
-  /* --- タッチ操作対応 --- */
+  /* --- タッチ操作対応 (スライド追従の核心部分) --- */
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     for (let i = 0; i < e.touches.length; i++) {
       const touchX = e.touches[i].clientX - rect.left;
-      const laneIndex = Math.floor(touchX / (rect.width / laneCount));
-      if (laneIndex >= 0 && laneIndex < laneCount) handleTouchStart(laneIndex);
+      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
+      handleTouchStart(laneIndex);
     }
   });
 
   canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
+    
+    // 現在の各レーンのホールド状態をリセットして全タッチから再構築する
+    const activeLanes = [false, false, false, false];
+
     for (let i = 0; i < e.touches.length; i++) {
       const touchX = e.touches[i].clientX - rect.left;
-      const laneIndex = Math.floor(touchX / (rect.width / laneCount));
-      if (laneIndex >= 0 && laneIndex < laneCount) handleSlide(laneIndex);
+      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
+      
+      if (laneIndex >= 0 && laneIndex < laneCount) {
+        activeLanes[laneIndex] = true;
+        handleSlide(laneIndex);
+      }
+    }
+
+    // 各レーンのホールド状態をタッチ位置に追従させる
+    for (let l = 0; l < laneCount; l++) {
+      isLaneHolding[l] = activeLanes[l];
     }
   });
 
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    for (let lane = 0; lane < laneCount; lane++) {
-      let stillTouching = false;
-      for (let i = 0; i < e.touches.length; i++) {
-        const touchX = e.touches[i].clientX - rect.left;
-        const laneIndex = Math.floor(touchX / (rect.width / laneCount));
-        if (laneIndex === lane) stillTouching = true;
+    const activeLanes = [false, false, false, false];
+
+    for (let i = 0; i < e.touches.length; i++) {
+      const touchX = e.touches[i].clientX - rect.left;
+      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
+      if (laneIndex >= 0 && laneIndex < laneCount) {
+        activeLanes[laneIndex] = true;
       }
-      if (!stillTouching && isLaneHolding[lane]) handleTouchEnd(lane);
+    }
+
+    for (let lane = 0; lane < laneCount; lane++) {
+      if (!activeLanes[lane] && isLaneHolding[lane]) {
+        handleTouchEnd(lane);
+      }
     }
   });
 
