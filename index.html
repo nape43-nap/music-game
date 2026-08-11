@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 楽曲選択＆スコア保存版</title>
+  <title>絵本風音ゲー 15曲無限ループ選曲版</title>
   <style>
     body {
       margin: 0;
@@ -71,15 +71,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       z-index: 20;
+      padding-top: 20px;
+      box-sizing: border-box;
     }
 
-    /* 浮遊するアニメーション付きタイトル */
     #select-title {
-      font-size: 24px;
+      font-size: 22px;
       color: #6c5ce7;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-weight: bold;
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
@@ -87,75 +88,75 @@
     }
 
     @keyframes floatTitle {
-      0% {
-        transform: translateY(0) rotate(-1.5deg);
-      }
-      100% {
-        transform: translateY(-8px) rotate(1.5deg);
-      }
+      0% { transform: translateY(0) rotate(-1.5deg); }
+      100% { transform: translateY(-6px) rotate(1.5deg); }
+    }
+
+    /* 無限スクロール用の表示エリア */
+    #infinite-scroll-viewport {
+      width: 300px;
+      height: 480px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      z-index: 2;
+      position: relative;
+      /* スクロールバー非表示（Chrome, Safari, Firefox） */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #infinite-scroll-viewport::-webkit-scrollbar {
+      display: none;
     }
 
     #song-list-container {
-      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    /* 楽曲カードのスタイルと弾む演出 */
+    /* 楽曲カードのスタイル */
     .song-card {
-      width: 280px;
-      padding: 14px 16px;
-      margin: 10px 0;
+      width: 270px;
+      padding: 12px 14px;
+      margin: 8px 0;
       background: #fff;
       border: 3px solid #fdcb6e;
       border-radius: 18px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s ease;
-      animation: floatCard 3s ease-in-out infinite alternate;
-    }
-
-    /* 1曲ごとに時間差で揺らす */
-    .song-card:nth-child(1) { animation-delay: 0s; }
-    .song-card:nth-child(2) { animation-delay: 0.4s; }
-    .song-card:nth-child(3) { animation-delay: 0.8s; }
-
-    @keyframes floatCard {
-      0% {
-        transform: translateY(0px);
-      }
-      100% {
-        transform: translateY(-6px);
-      }
+      box-sizing: border-box;
+      transition: transform 0.1s ease;
+      flex-shrink: 0;
     }
 
     .song-card:active {
-      transform: scale(0.94) !important;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transform: scale(0.95) !important;
     }
 
     .song-info {
       text-align: left;
     }
     .song-name {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       color: #2d3436;
     }
     .song-meta {
-      font-size: 12px;
+      font-size: 11px;
       color: #b2bec3;
       margin-top: 2px;
     }
     .song-highscore {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       color: #6c5ce7;
       text-align: right;
     }
 
-    /* --- 背景パーティクル用のスタイル --- */
+    /* 背景パーティクル */
     #particle-container {
       position: absolute;
       top: 0;
@@ -176,20 +177,10 @@
     }
 
     @keyframes floatUp {
-      0% {
-        transform: translateY(0) rotate(0deg) scale(0.8);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.8;
-      }
-      90% {
-        opacity: 0.8;
-      }
-      100% {
-        transform: translateY(-630px) rotate(360deg) scale(1.2);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { transform: translateY(-630px) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
     #result-card {
@@ -252,11 +243,13 @@
   <div id="select-screen" class="overlay-screen">
     <div id="particle-container"></div>
     <div id="select-title">★ きょくをえらぶ ★</div>
-    <div id="song-list-container"></div>
+    <div id="infinite-scroll-viewport">
+      <div id="song-list-container"></div>
+    </div>
   </div>
 
   <!-- リザルト画面 -->
-  <div id="result-screen" class="overlay-screen" style="display: none;">
+  <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
       <div id="new-record" class="new-record-tag" style="display: none;">NEW HIGH SCORE!</div>
@@ -281,10 +274,23 @@
 </div>
 
 <script>
+  // 15曲の楽曲リスト定義
   const songList = [
-    { id: 'song1', name: 'きらきら星', totalNotes: 30, speed: 4, color: '#ff7675' },
-    { id: 'song2', name: 'チューリップ', totalNotes: 40, speed: 4.2, color: '#00b894' },
-    { id: 'song3', name: 'どんぐりころころ', totalNotes: 50, speed: 4.6, color: '#6c5ce7' }
+    { id: 'song1', name: '1. きらきら星', totalNotes: 30, speed: 4, color: '#ff7675' },
+    { id: 'song2', name: '2. チューリップ', totalNotes: 35, speed: 4.1, color: '#00b894' },
+    { id: 'song3', name: '3. どんぐりころころ', totalNotes: 40, speed: 4.2, color: '#6c5ce7' },
+    { id: 'song4', name: '4. ちょうちょう', totalNotes: 32, speed: 4.0, color: '#fdcb6e' },
+    { id: 'song5', name: '5. 大きな栗の木の下で', totalNotes: 45, speed: 4.4, color: '#e84393' },
+    { id: 'song6', name: '6. ぶんぶんぶん', totalNotes: 38, speed: 4.3, color: '#0984e3' },
+    { id: 'song7', name: '7. むすんでひらいて', totalNotes: 42, speed: 4.2, color: '#10ac84' },
+    { id: 'song8', name: '8. かえるの合唱', totalNotes: 48, speed: 4.5, color: '#2e86de' },
+    { id: 'song9', name: '9. メリーさんのひつじ', totalNotes: 36, speed: 4.1, color: '#ff9ff3' },
+    { id: 'song10', name: '10. ロンドン橋', totalNotes: 50, speed: 4.6, color: '#f39c12' },
+    { id: 'song11', name: '11. 線路はつづくよどこまでも', totalNotes: 55, speed: 4.8, color: '#ee5253' },
+    { id: 'song12', name: '12. アルプス一万尺', totalNotes: 60, speed: 5.0, color: '#00d2d3' },
+    { id: 'song13', name: '13. おもちゃのチャチャチャ', totalNotes: 52, speed: 4.7, color: '#54a0ff' },
+    { id: 'song14', name: '14. クラリネットをこわしちゃった', totalNotes: 58, speed: 4.9, color: '#5f27cd' },
+    { id: 'song15', name: '15. 森のくまさん', totalNotes: 65, speed: 5.2, color: '#ff6b6b' }
   ];
 
   let currentSong = songList[0];
@@ -293,6 +299,7 @@
   const ctx = canvas.getContext('2d');
   const selectScreen = document.getElementById('select-screen');
   const resultScreen = document.getElementById('result-screen');
+  const viewport = document.getElementById('infinite-scroll-viewport');
   const songListContainer = document.getElementById('song-list-container');
   const particleContainer = document.getElementById('particle-container');
   const scoreDisplay = document.getElementById('score-display');
@@ -326,7 +333,7 @@
   let spawnTimer = 0;
   let spawnedCount = 0;
 
-  /* --- パーティクル生成ロジック --- */
+  /* --- パーティクル生成 --- */
   const symbols = ['♪', '♫', '♬', '✨', '★', '🌸', '🎶'];
   const colors = ['#ff7675', '#fdcb6e', '#00b894', '#0984e3', '#6c5ce7', '#e84393'];
 
@@ -335,23 +342,17 @@
 
     const p = document.createElement('div');
     p.className = 'particle';
-    
-    // ランダムな記号・色・配置・サイズを設定
     p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
     p.style.color = colors[Math.floor(Math.random() * colors.length)];
     p.style.left = Math.random() * 320 + 20 + 'px';
     p.style.fontSize = Math.floor(Math.random() * 12 + 16) + 'px';
     
-    // アニメーション速度にランダム感を持たせる
     const duration = (Math.random() * 2 + 3).toFixed(1);
     p.style.animationDuration = duration + 's';
 
     particleContainer.appendChild(p);
 
-    // アニメーション終了後にDOMから削除（軽量化）
-    setTimeout(() => {
-      p.remove();
-    }, duration * 1000);
+    setTimeout(() => { p.remove(); }, duration * 1000);
   }
 
   function startParticles() {
@@ -364,9 +365,16 @@
     particleContainer.innerHTML = '';
   }
 
+  /* --- 15曲無限ループスクロール構築 --- */
+  let singleSetHeight = 0;
+
   function renderSongSelectUI() {
     songListContainer.innerHTML = '';
-    songList.forEach(song => {
+
+    // 無限ループ用にセットを3つ生成（[前クローン] [本データ] [後クローン]）
+    const fullList = [...songList, ...songList, ...songList];
+
+    fullList.forEach((song, idx) => {
       const savedScore = localStorage.getItem(`highscore_${song.id}`) || 0;
       const card = document.createElement('div');
       card.className = 'song-card';
@@ -374,18 +382,46 @@
       card.innerHTML = `
         <div class="song-info">
           <div class="song-name">${song.name}</div>
-          <div class="song-meta">ノーツ数: ${song.totalNotes} / スピード: ${song.speed}</div>
+          <div class="song-meta">ノーツ: ${song.totalNotes} / スピード: ${song.speed}</div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
+          <div style="font-size: 9px; color: #b2bec3;">HIGH SCORE</div>
           <div>${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
       card.addEventListener('click', () => startSong(song));
       songListContainer.appendChild(card);
     });
+
     startParticles();
+
+    // DOM描画完了後にスクロール位置を中央セットの先頭に調整
+    requestAnimationFrame(() => {
+      const cardElements = songListContainer.querySelectorAll('.song-card');
+      if (cardElements.length > 0) {
+        // カード1枚の高さ（マージン含む）× 15曲分 ＝ 1セットの高さ
+        const cardHeight = cardElements[0].offsetHeight + 16; 
+        singleSetHeight = cardHeight * songList.length;
+
+        // 初期位置を中央セットの最上部にセット
+        viewport.scrollTop = singleSetHeight;
+      }
+    });
   }
+
+  // スクロール時のループ判定処理
+  viewport.addEventListener('scroll', () => {
+    if (singleSetHeight === 0) return;
+
+    // 上端近くまで来たら中央セットへ一瞬でワープ
+    if (viewport.scrollTop < singleSetHeight * 0.5) {
+      viewport.scrollTop += singleSetHeight;
+    }
+    // 下端近くまで来たら中央セットへ一瞬でワープ
+    else if (viewport.scrollTop > singleSetHeight * 1.8) {
+      viewport.scrollTop -= singleSetHeight;
+    }
+  });
 
   function startSong(song) {
     currentSong = song;
