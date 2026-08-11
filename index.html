@@ -357,8 +357,6 @@
   const targetY = 500;
   const targetRadius = 28;
   
-  // タッチごとの追従状態管理
-  // activeTouches[touchId] = { x, y, activeNote }
   let activeTouches = {};
   let isLaneHolding = [false, false, false, false];
 
@@ -542,7 +540,6 @@
     updateCombo(0);
   }
 
-  // ノーツ上の指定Y座標における期待されるX座標（レーン座標）を補間計算
   function getHoldXAtY(note, checkY) {
     if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
 
@@ -562,15 +559,12 @@
     return laneXPositions[note.path[0].lane];
   }
 
-  // タッチ開始（タップ判定・ホールド開始判定）
+  // タッチ開始
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
 
     let hitIndex = -1;
     let minDistance = Infinity;
-
-    // タッチされたX座標から最も近いレーンを計算
-    const touchLane = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / laneWidth)));
 
     notes.forEach((note, index) => {
       if (note.holding) return;
@@ -580,11 +574,11 @@
         expectedX = laneXPositions[note.path[0].lane];
       }
 
-      // 判定ライン付近かつ横の距離が近いノーツを探す
       const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      if (distanceY < 70 && distanceX < laneWidth) {
+      // 通常・ホールド・スライドの開始位置タップ判定
+      if (distanceY < 70 && distanceX < laneWidth * 0.8) {
         if (distanceY < minDistance) {
           minDistance = distanceY;
           hitIndex = index;
@@ -600,7 +594,6 @@
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
       } else {
-        // ホールド系
         note.holding = true;
         note.touchId = touchId;
         activeTouches[touchId] = { x: touchX, activeNote: note };
@@ -611,33 +604,32 @@
     }
   }
 
-  // タッチ移動（スライド追従判定）
+  // タッチ移動（スライドおよびホールド追従）
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
     if (!touchData) return;
 
     touchData.x = touchX;
-    const note = touchData.activeNote;
 
-    // 単体スライドノーツが移動によって引っかかった場合
+    // スライド単体ノーツの通過検知
     notes.forEach((n, index) => {
       if (n.type === 'slide') {
         const distanceY = Math.abs(n.y - targetY);
         const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-        if (distanceY < 70 && distanceX < laneWidth / 2) {
+        if (distanceY < 70 && distanceX < laneWidth * 0.8) {
           notes.splice(index, 1);
           applyJudgement(distanceY, laneXPositions[n.lane]);
         }
       }
     });
 
+    const note = touchData.activeNote;
     if (note && note.holding) {
-      // 期待されるX座標を計算
       const expectedX = getHoldXAtY(note, targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      // 指がノーツの追従範囲から外れすぎた場合ミス
+      // 指が離れすぎたらホールド途切れミス
       if (distanceX > laneWidth * 0.9) {
         note.holding = false;
         touchData.activeNote = null;
@@ -646,7 +638,7 @@
     }
   }
 
-  // タッチ離脱（ホールド終了判定）
+  // タッチ離脱（ホールド終点判定）
   function handleTouchUp(touchId) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -657,11 +649,20 @@
         const tailY = note.y - note.length;
         const distance = Math.abs(tailY - targetY);
         const expectedX = getHoldXAtY(note, targetY);
+        
+        // 指を離した実際のX座標と、終点の正しいX座標のズレをチェック
+        const actualTouchX = touchData.x;
+        const xDiff = Math.abs(actualTouchX - expectedX);
 
         const index = notes.indexOf(note);
         if (index !== -1) {
           notes.splice(index, 1);
-          applyJudgement(distance, expectedX);
+          // 終点位置での正確な距離（Y軸のズレ + X軸のズレを総合）
+          if (distance < 70 && xDiff < laneWidth * 0.9) {
+            applyJudgement(distance, expectedX);
+          } else {
+            triggerMiss();
+          }
         }
       }
     }
@@ -735,7 +736,6 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 各レーンのハイライト更新
     isLaneHolding = [false, false, false, false];
     Object.values(activeTouches).forEach(touch => {
       const l = Math.min(laneCount - 1, Math.max(0, Math.floor(touch.x / laneWidth)));
@@ -828,7 +828,6 @@
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
           if (note.holding) {
-            // 自動解放
             applyJudgement(0, x);
           } else {
             triggerMiss();
@@ -1006,7 +1005,7 @@
     }
   });
 
-  /* --- タッチ操作対応（マルチタッチ・スライド追従対応） --- */
+  /* --- タッチ操作対応 --- */
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
