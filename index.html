@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Daruma+Drop+One&family=Indie+Flower&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -64,13 +64,14 @@
       position: absolute;
       top: 14px;
       left: 20px;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: bold;
       color: #6c5ce7;
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
       z-index: 5;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
+      letter-spacing: 1px;
     }
 
     #back-to-select-btn {
@@ -120,13 +121,13 @@
     }
 
     #select-title {
-      font-size: 28px;
+      font-size: 34px;
       color: #6c5ce7;
       margin-bottom: 10px;
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
       z-index: 2;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
       font-weight: bold;
       letter-spacing: 1px;
     }
@@ -263,9 +264,9 @@
       margin-bottom: 16px;
     }
     .credit-loading {
-      font-size: 14px;
+      font-size: 22px;
       color: #b2bec3;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
       letter-spacing: 2px;
     }
 
@@ -310,19 +311,19 @@
       font-family: "Kaisei Opti", serif;
     }
     .result-title {
-      font-size: 26px;
+      font-size: 32px;
       color: #ff7675;
       margin: 0 0 4px 0;
       font-weight: bold;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
       letter-spacing: 1px;
     }
     .result-score-val {
-      font-size: 32px;
+      font-size: 38px;
       color: #6c5ce7;
       font-weight: bold;
       margin-bottom: 2px;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
     }
     .tag-container {
       display: flex;
@@ -335,20 +336,22 @@
     .badge-tag {
       display: inline-block;
       color: #fff;
-      font-size: 12px;
-      padding: 2px 8px;
+      font-size: 15px;
+      padding: 2px 10px;
       border-radius: 205px 25px 195px 25px/25px 195px 25px 205px;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
       font-weight: bold;
+      letter-spacing: 0.5px;
     }
     .result-details {
       width: 100%;
       margin: 4px 0 12px 0;
       border-top: 2px dashed #dfe6e9;
       padding-top: 6px;
-      font-size: 15px;
+      font-size: 18px;
       color: #2d3436;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Caveat", cursive;
+      letter-spacing: 0.5px;
     }
     .result-row {
       display: flex;
@@ -408,11 +411,11 @@
       <div id="res-score" class="result-score-val">0</div>
       
       <div class="result-details">
-        <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #6c5ce7;">0</strong></div>
-        <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e;">0</strong></div>
-        <div class="result-row"><span>GREAT</span><strong id="res-great" style="color: #00b894;">0</strong></div>
-        <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3;">0</strong></div>
-        <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031;">0</strong></div>
+        <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #6c5ce7; font-size: 20px;">0</strong></div>
+        <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e; font-size: 20px;">0</strong></div>
+        <div class="result-row"><span>GREAT</span><strong id="res-great" style="color: #00b894; font-size: 20px;">0</strong></div>
+        <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3; font-size: 20px;">0</strong></div>
+        <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031; font-size: 20px;">0</strong></div>
       </div>
 
       <div class="btn-group">
@@ -454,6 +457,7 @@
   const noMissTag = document.getElementById('no-miss-tag');
 
   const KAISEI_FONT = '"Kaisei Opti", serif';
+  const CAVEAT_FONT = '"Caveat", cursive';
 
   let audioCtx = null;
   let isPlaying = false;
@@ -555,8 +559,8 @@
           </div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 10px; color: #b2bec3; font-family: ${KAISEI_FONT};">HIGH SCORE</div>
-          <div style="font-size: 12px;">${Number(savedScore).toLocaleString()}</div>
+          <div style="font-size: 11px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
+          <div style="font-size: 15px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
       
@@ -1151,7 +1155,7 @@
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.font = `bold 18px ${KAISEI_FONT}`;
+        ctx.font = `bold 18px ${CAVEAT_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, tailY + 6);
         ctx.restore();
@@ -1173,7 +1177,7 @@
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.font = `bold 18px ${KAISEI_FONT}`;
+        ctx.font = `bold 18px ${CAVEAT_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, note.y + 6);
         ctx.restore();
@@ -1201,7 +1205,7 @@
 
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
-      ctx.font = `bold 32px ${KAISEI_FONT}`;
+      ctx.font = `bold 42px ${CAVEAT_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(judgeText, canvas.width / 2, targetY - 80);
       judgeTimer--;
@@ -1209,7 +1213,7 @@
 
     if (combo > 1) {
       ctx.fillStyle = '#6c5ce7';
-      ctx.font = `bold 26px ${KAISEI_FONT}`;
+      ctx.font = `bold 36px ${CAVEAT_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
