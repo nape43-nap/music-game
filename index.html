@@ -411,7 +411,6 @@
 </div>
 
 <script>
-  // 曲データにジャケット(jacket)と作曲者(composer)を追加
   const songList = [
     { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
     { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
@@ -572,14 +571,13 @@
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    // 曲選択画面を消して、クレジット画面を表示
     selectScreen.style.display = 'none';
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
-    document.getElementById('credit-composer').textContent = `Music by ${song.composer}`;
+    // 「Music by」をなくし、作曲者名だけを表示するように変更
+    document.getElementById('credit-composer').textContent = song.composer;
     creditScreen.style.display = 'flex';
 
-    // 2.2秒間クレジットを見せたあと、ゲーム画面へ移行
     setTimeout(() => {
       creditScreen.style.display = 'none';
       startSong();
@@ -687,7 +685,6 @@
     return laneXPositions[note.path[0].lane];
   }
 
-  // タッチ開始
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
 
@@ -736,7 +733,6 @@
     }
   }
 
-  // タッチ移動
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -781,7 +777,6 @@
     }
   }
 
-  // タッチ離脱
   function handleTouchUp(touchId) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -1221,7 +1216,6 @@
   retryBtn.addEventListener('click', () => triggerCreditAndStart(currentSong));
   selectBtn.addEventListener('click', () => renderSongSelectUI());
 
-  /* --- PCキーボード操作対応 --- */
   const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
 
   window.addEventListener('keydown', (e) => {
@@ -1239,7 +1233,6 @@
     }
   });
 
-  /* --- タッチ操作対応 --- */
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
