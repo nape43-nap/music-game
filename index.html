@@ -7,7 +7,6 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Kaisei Opti と Daruma Drop One（だるまどろっぷ）を読み込み -->
   <link href="https://fonts.googleapis.com/css2?family=Daruma+Drop+One&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
 
   <style>
@@ -127,7 +126,6 @@
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
       z-index: 2;
-      /* だるまどろっぷフォントを適用 */
       font-family: "Daruma Drop One", cursive;
       letter-spacing: 1px;
     }
@@ -166,7 +164,6 @@
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      /* 曲カードの枠線をより淡いパステルカラーに */
       border: 3px solid #fbd28b;
       border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
@@ -234,7 +231,7 @@
 
     #result-card {
       width: 280px;
-      padding: 20px;
+      padding: 16px 20px;
       background: #fff;
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
@@ -246,39 +243,45 @@
       font-family: inherit;
     }
     .result-title {
-      font-size: 28px;
+      font-size: 26px;
       color: #ff7675;
-      margin: 0 0 8px 0;
+      margin: 0 0 4px 0;
       font-weight: bold;
     }
     .result-score-val {
-      font-size: 34px;
+      font-size: 32px;
       color: #6c5ce7;
       font-weight: bold;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
-    .new-record-tag {
+    .tag-container {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+      min-height: 22px;
+    }
+    .badge-tag {
       display: inline-block;
-      background: #ff7675;
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       padding: 2px 8px;
       border-radius: 205px 25px 195px 25px/25px 195px 25px 205px;
-      margin-bottom: 8px;
       font-weight: bold;
     }
     .result-details {
       width: 100%;
-      margin: 8px 0 16px 0;
+      margin: 4px 0 12px 0;
       border-top: 2px dashed #dfe6e9;
-      padding-top: 8px;
-      font-size: 16px;
+      padding-top: 6px;
+      font-size: 15px;
       color: #2d3436;
     }
     .result-row {
       display: flex;
       justify-content: space-between;
-      margin: 4px 0;
+      margin: 3px 0;
     }
     .btn-group {
       display: flex;
@@ -306,7 +309,13 @@
   <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
-      <div id="new-record" class="new-record-tag" style="display: none;">NEW HIGH SCORE!</div>
+      
+      <div class="tag-container">
+        <div id="new-record" class="badge-tag" style="background: #ff7675; display: none;">NEW RECORD!</div>
+        <div id="all-perfect-tag" class="badge-tag" style="background: #fdcb6e; color: #2d3436; display: none;">ALL PERFECT!</div>
+        <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
+      </div>
+
       <div id="res-score" class="result-score-val">0</div>
       
       <div class="result-details">
@@ -351,6 +360,8 @@
   const retryBtn = document.getElementById('retry-btn');
   const selectBtn = document.getElementById('select-btn');
   const newRecordTag = document.getElementById('new-record');
+  const allPerfectTag = document.getElementById('all-perfect-tag');
+  const noMissTag = document.getElementById('no-miss-tag');
 
   const GAME_FONT = '"Kaisei Opti", serif';
 
@@ -771,6 +782,20 @@
       newRecordTag.style.display = 'inline-block';
     } else {
       newRecordTag.style.display = 'none';
+    }
+
+    // ALL PERFECT判定（全ノート数が Perfect の数と一致する場合）
+    if (counts.perfect === currentSong.totalNotes) {
+      allPerfectTag.style.display = 'inline-block';
+      noMissTag.style.display = 'none';
+    } 
+    // NO MISS判定（ミスが0回かつ、最大コンボが全ノート数以上、またはコンボが途切れなかった場合）
+    else if (counts.miss === 0) {
+      allPerfectTag.style.display = 'none';
+      noMissTag.style.display = 'inline-block';
+    } else {
+      allPerfectTag.style.display = 'none';
+      noMissTag.style.display = 'none';
     }
 
     document.getElementById('res-score').textContent = score;
