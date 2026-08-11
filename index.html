@@ -179,11 +179,6 @@
       text-overflow: ellipsis;
       max-width: 160px;
     }
-    .song-meta {
-      font-size: 12px;
-      color: #b2bec3;
-      margin-top: 2px;
-    }
     .song-highscore {
       font-size: 14px;
       font-weight: bold;
@@ -427,7 +422,6 @@
       card.innerHTML = `
         <div class="song-info">
           <div class="song-name">${song.name}</div>
-          <div class="song-meta">ノーツ: ${song.totalNotes} / スピード: ${song.speed}</div>
         </div>
         <div class="song-highscore">
           <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
@@ -569,7 +563,6 @@
     notes.forEach((note, index) => {
       if (note.holding) return;
       if (note.type === 'slide') return;
-      // hold_slideでホールド本体が終わっている場合、ここは無視してスライド単体の判定に任せる
       if (note.type === 'hold_slide' && note.holdCompleted) return;
 
       let expectedX = laneXPositions[note.lane];
@@ -609,7 +602,7 @@
     }
   }
 
-  // タッチ移動（指を滑らせているときの判定）
+  // タッチ移動
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -617,7 +610,6 @@
 
     touchData.x = touchX;
 
-    // スライド・hold_slide終点の判定
     notes.forEach((n, index) => {
       if (n.type === 'slide') {
         const distanceY = Math.abs(n.y - targetY);
@@ -670,11 +662,9 @@
           triggerMiss();
         } else {
           if (note.type === 'hold_slide' && !note.holdCompleted) {
-            // ホールドが終わった瞬間、指を離してもスライドを待つ状態に移行
             note.holding = false;
             note.holdCompleted = true;
             touchData.activeNote = null;
-            // 一定時間（約0.6秒）はスライドのヒット判定を残す
             setTimeout(() => {
               if (activeTouches[touchId] === touchData) {
                 delete activeTouches[touchId];
@@ -820,7 +810,6 @@
       let note = notes[i];
       note.y += note.speed;
 
-      // hold_slideでホールド部分が通過し終えたら自動的にスライド待ち状態へ切り替え
       if (note.type === 'hold_slide' && !note.holdCompleted) {
         const tailY = note.y - note.length;
         if (tailY > targetY) {
@@ -829,7 +818,6 @@
         }
       }
 
-      // 画面下を通過して取り逃した場合のミス判定
       let missCheckTailY = note.y;
       if (note.type === 'hold' || note.type === 'curved_hold' || note.type === 'hold_slide') {
         missCheckTailY = note.y - note.length;
@@ -837,7 +825,6 @@
       if (missCheckTailY > targetY + 70) {
         notes.splice(i, 1);
         if (note.type === 'hold_slide' && note.holdCompleted) {
-          // スライド部分をやり過ごした場合はミス
           triggerMiss();
         } else if (note.type === 'hold' || note.type === 'curved_hold') {
           if (note.holding) {
