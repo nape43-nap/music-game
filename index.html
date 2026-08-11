@@ -541,14 +541,16 @@
   function getHoldXAtY(note, checkY) {
     if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
 
-    // 経路上でcheckYがどのセグメントにあるか探索
     for (let i = 0; i < note.path.length - 1; i++) {
       const p1 = { x: laneXPositions[note.path[i].lane], y: note.y - note.path[i].offsetY };
       const p2 = { x: laneXPositions[note.path[i+1].lane], y: note.y - note.path[i+1].offsetY };
 
-      // yがp1とp2の間にある場合（画面上は下から上に向かってYが減少）
-      if ((checkY <= p1.y && checkY >= p2.y) || (checkY >= p1.y && checkY <= p2.y)) {
-        const t = (checkY - p1.y) / (p2.y - p1.y || 1);
+      const minY = Math.min(p1.y, p2.y);
+      const maxY = Math.max(p1.y, p2.y);
+
+      if (checkY >= minY && checkY <= maxY) {
+        if (Math.abs(p2.y - p1.y) < 0.1) return p1.x;
+        const t = (checkY - p1.y) / (p2.y - p1.y);
         return p1.x + t * (p2.x - p1.x);
       }
     }
@@ -563,7 +565,6 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // 初期レーンが一致するノーツを探す
       const startLane = (note.type === 'curved_hold') ? note.path[0].lane : note.lane;
       if (startLane === laneIndex && !note.holding) {
         const distance = Math.abs(note.y - targetY);
@@ -593,7 +594,6 @@
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       if (note.holding) {
-        // 現在のY座標における正しいX位置を取得
         const currentX = getHoldXAtY(note, targetY);
         const currentLane = Math.floor(currentX / laneWidth);
 
@@ -643,7 +643,6 @@
       } else if (rand < 0.50) {
         notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
       } else if (rand < 0.70) {
-        /* ★ 新規追加：折れ曲がる長押しノーツ */
         const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
         const length = 180;
         notes.push({
@@ -653,10 +652,10 @@
           speed: spd,
           holding: false,
           path: [
-            { lane: startLane, offsetY: 0 },         // 始点
-            { lane: startLane, offsetY: 60 },        // まっすぐ進む
-            { lane: targetLane, offsetY: 120 },       // 隣のレーンへ曲がる
-            { lane: targetLane, offsetY: length }     // 終点
+            { lane: startLane, offsetY: 0 },
+            { lane: startLane, offsetY: 60 },
+            { lane: targetLane, offsetY: 120 },
+            { lane: targetLane, offsetY: length }
           ]
         });
       } else if (rand < 0.85) {
@@ -737,9 +736,8 @@
     notes.forEach((note) => {
       if (note.type === 'curved_hold' && note.holding) {
         const expectedX = getHoldXAtY(note, targetY);
-        const expectedLane = Math.floor(expectedX / laneWidth);
+        const expectedLane = Math.min(laneCount - 1, Math.max(0, Math.floor(expectedX / laneWidth)));
 
-        // 指が正しい位置（レーン）を押せていなければ長押し状態を解除
         if (!isLaneHolding[expectedLane]) {
           note.holding = false;
         }
@@ -797,7 +795,6 @@
           triggerMiss();
         }
       } else if (note.type === 'curved_hold') {
-        /* ★ 曲がるホールドの描画処理 */
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
 
@@ -808,22 +805,21 @@
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // 胴体の曲がり線の描画
         ctx.beginPath();
         note.path.forEach((pt, index) => {
           const ptX = laneXPositions[pt.lane];
-          const ptY = note.y - pt.offsetY;
-          
-          // 押し込み中なら判定ラインより下部分は描画カット
-          const drawY = note.holding ? Math.min(ptY, targetY) : ptY;
+          let ptY = note.y - pt.offsetY;
 
-          if (index === 0) ctx.moveTo(ptX, drawY);
-          else ctx.lineTo(ptX, drawY);
+          if (note.holding && ptY > targetY) {
+            ptY = targetY;
+          }
+
+          if (index === 0) ctx.moveTo(ptX, ptY);
+          else ctx.lineTo(ptX, ptY);
         });
         ctx.stroke();
 
-        // 始点・終点円マーク
-        const startX = laneXPositions[note.path[0].lane];
+        const startX = getHoldXAtY(note, headY);
         const endX = laneXPositions[note.path[note.path.length - 1].lane];
 
         ctx.fillStyle = '#6c5ce7';
@@ -944,6 +940,21 @@
   retryBtn.addEventListener('click', () => startSong(currentSong));
   selectBtn.addEventListener('click', () => renderSongSelectUI());
 
+  /* --- PCキーボード操作対応 --- */
+  const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
+
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const lane = keyLaneMap[e.code];
+    if (lane !== undefined) handleTouchStart(lane);
+  });
+
+  window.addEventListener('keyup', (e) => {
+    const lane = keyLaneMap[e.code];
+    if (lane !== undefined) handleTouchEnd(lane);
+  });
+
+  /* --- タッチ操作対応 --- */
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
