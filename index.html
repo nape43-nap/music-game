@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 4レーン版</title>
+  <title>絵本風音ゲー 判定＆コンボ版</title>
   <style>
     body {
       margin: 0;
@@ -27,7 +27,7 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
       overflow: hidden;
       touch-action: manipulation;
-      transform: translateY(-19px); /* 5mm下へ微調整 */
+      transform: translateY(-19px);
     }
     canvas {
       display: block;
@@ -82,8 +82,14 @@
   let audioCtx = null;
   let isPlaying = false;
   let score = 0;
+  let combo = 0;
 
-  // レーン設定（4レーン）
+  // 判定文字アニメーション用
+  let judgeText = '';
+  let judgeColor = '#2d3436';
+  let judgeTimer = 0;
+
+  // レーン設定
   const laneCount = 4;
   const laneWidth = canvas.width / laneCount;
   const laneXPositions = [
@@ -94,7 +100,7 @@
   ];
   const keyLabels = ['D', 'F', 'J', 'K'];
 
-  // 判定ライン（Y座標）
+  // 判定ライン
   const targetY = 500;
   const targetRadius = 28;
 
@@ -124,6 +130,7 @@
     osc.stop(audioCtx.currentTime + 0.1);
   }
 
+  // 判定処理
   function handleTap(laneIndex) {
     if (!isPlaying) return;
 
@@ -142,18 +149,59 @@
       }
     });
 
-    if (hitIndex !== -1 && minDistance < 50) {
+    // 距離に応じた判定
+    if (hitIndex !== -1 && minDistance < 70) {
       notes.splice(hitIndex, 1);
-      score += 100;
+      
+      if (minDistance < 20) {
+        judgeText = 'PERFECT!';
+        judgeColor = '#fdcb6e';
+        score += 100;
+        combo++;
+      } else if (minDistance < 40) {
+        judgeText = 'GREAT!';
+        judgeColor = '#00b894';
+        score += 80;
+        combo++;
+      } else if (minDistance < 70) {
+        judgeText = 'GOOD';
+        judgeColor = '#0984e3';
+        score += 50;
+        combo++;
+      }
+      judgeTimer = 30; // 30フレーム間判定を表示
       scoreDisplay.textContent = `SCORE: ${score}`;
     }
   }
 
+  // ノーツ生成（たまに同時押しを発生させる）
+  function spawnNotes() {
+    spawnTimer++;
+    if (spawnTimer > 40) {
+      const isSimultaneous = Math.random() < 0.25; // 25%の確率で同時押し
+
+      const lane1 = Math.floor(Math.random() * laneCount);
+      notes.push({ lane: lane1, y: 0, speed: 4.5 });
+
+      if (isSimultaneous) {
+        let lane2 = Math.floor(Math.random() * laneCount);
+        while (lane2 === lane1) {
+          lane2 = Math.floor(Math.random() * laneCount);
+        }
+        notes.push({ lane: lane2, y: 0, speed: 4.5 });
+      }
+
+      spawnTimer = 0;
+    }
+  }
+
+  // メインゲームループ
   function gameLoop() {
     if (!isPlaying) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 1. レーン区切り線
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 2;
     for (let i = 1; i < laneCount; i++) {
@@ -163,6 +211,7 @@
       ctx.stroke();
     }
 
+    // 2. 判定ライン
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       
@@ -180,13 +229,10 @@
       ctx.fillText(keyLabels[i], x, targetY + 55);
     }
 
-    spawnTimer++;
-    if (spawnTimer > 40) {
-      const randomLane = Math.floor(Math.random() * laneCount);
-      notes.push({ lane: randomLane, y: 0, speed: 4.5 });
-      spawnTimer = 0;
-    }
+    // 3. ノーツ生成
+    spawnNotes();
 
+    // 4. ノーツの移動・描画・MISS判定
     ctx.fillStyle = '#ff7675';
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
@@ -197,9 +243,30 @@
       ctx.arc(x, note.y, 18, 0, Math.PI * 2);
       ctx.fill();
 
-      if (note.y > canvas.height + 20) {
+      // 判定ラインを通り過ぎたらMISS
+      if (note.y > targetY + 70) {
         notes.splice(i, 1);
+        judgeText = 'MISS...';
+        judgeColor = '#d63031';
+        judgeTimer = 30;
+        combo = 0; // コンボリセット
       }
+    }
+
+    // 5. 判定文字 & コンボ表示
+    if (judgeTimer > 0) {
+      ctx.fillStyle = judgeColor;
+      ctx.font = 'bold 28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(judgeText, canvas.width / 2, targetY - 80);
+      judgeTimer--;
+    }
+
+    if (combo > 1) {
+      ctx.fillStyle = '#6c5ce7';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
 
     requestAnimationFrame(gameLoop);
@@ -212,6 +279,7 @@
     gameLoop();
   });
 
+  // マルチタッチ対応
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
