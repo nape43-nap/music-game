@@ -356,6 +356,10 @@
 
   const targetY = 500;
   const targetRadius = 28;
+  
+  // タッチごとの追従状態管理
+  // activeTouches[touchId] = { x, y, activeNote }
+  let activeTouches = {};
   let isLaneHolding = [false, false, false, false];
 
   let notes = [];
@@ -471,6 +475,7 @@
     notes = [];
     spawnTimer = 0;
     spawnedCount = 0;
+    activeTouches = {};
     isLaneHolding = [false, false, false, false];
     scoreDisplay.textContent = `SCORE: 0`;
   }
@@ -499,8 +504,7 @@
     if (combo > maxCombo) maxCombo = combo;
   }
 
-  function applyJudgement(distance, laneIndex) {
-    const x = laneXPositions[laneIndex];
+  function applyJudgement(distance, xPos) {
     if (distance < 25) {
       judgeText = 'PERFECT!';
       judgeColor = '#fdcb6e';
@@ -508,7 +512,7 @@
       counts.perfect++;
       updateCombo(combo + 1);
       playSound(1.5);
-      createHitEffect(x, targetY, '#fdcb6e');
+      createHitEffect(xPos, targetY, '#fdcb6e');
     } else if (distance < 45) {
       judgeText = 'GREAT!';
       judgeColor = '#00b894';
@@ -516,7 +520,7 @@
       counts.great++;
       updateCombo(combo + 1);
       playSound(1.2);
-      createHitEffect(x, targetY, '#00b894');
+      createHitEffect(xPos, targetY, '#00b894');
     } else if (distance < 70) {
       judgeText = 'GOOD';
       judgeColor = '#0984e3';
@@ -524,7 +528,7 @@
       counts.good++;
       updateCombo(combo + 1);
       playSound(1.0);
-      createHitEffect(x, targetY, '#0984e3');
+      createHitEffect(xPos, targetY, '#0984e3');
     }
     judgeTimer = 30;
     scoreDisplay.textContent = `SCORE: ${score}`;
@@ -538,7 +542,7 @@
     updateCombo(0);
   }
 
-  // ノーツ上の指定Y座標における現在のX座標（レーン位置）を補間計算する関数
+  // ノーツ上の指定Y座標における期待されるX座標（レーン座標）を補間計算
   function getHoldXAtY(note, checkY) {
     if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
 
@@ -558,76 +562,111 @@
     return laneXPositions[note.path[0].lane];
   }
 
-  function handleTouchStart(laneIndex) {
+  // タッチ開始（タップ判定・ホールド開始判定）
+  function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
-    isLaneHolding[laneIndex] = true;
 
     let hitIndex = -1;
     let minDistance = Infinity;
 
+    // タッチされたX座標から最も近いレーンを計算
+    const touchLane = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / laneWidth)));
+
     notes.forEach((note, index) => {
-      const startLane = (note.type === 'curved_hold') ? note.path[0].lane : note.lane;
-      if (startLane === laneIndex && !note.holding) {
-        const distance = Math.abs(note.y - targetY);
-        if (distance < minDistance) {
-          minDistance = distance;
+      if (note.holding) return;
+
+      let expectedX = laneXPositions[note.lane];
+      if (note.type === 'curved_hold') {
+        expectedX = laneXPositions[note.path[0].lane];
+      }
+
+      // 判定ライン付近かつ横の距離が近いノーツを探す
+      const distanceY = Math.abs(note.y - targetY);
+      const distanceX = Math.abs(touchX - expectedX);
+
+      if (distanceY < 70 && distanceX < laneWidth) {
+        if (distanceY < minDistance) {
+          minDistance = distanceY;
           hitIndex = index;
         }
       }
     });
 
-    if (hitIndex !== -1 && minDistance < 70) {
+    if (hitIndex !== -1) {
       const note = notes[hitIndex];
-      if (note.type === 'normal') {
+      const noteX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+
+      if (note.type === 'normal' || note.type === 'slide') {
         notes.splice(hitIndex, 1);
-        applyJudgement(minDistance, laneIndex);
-      } else if (note.type === 'hold' || note.type === 'hold_slide' || note.type === 'curved_hold') {
+        applyJudgement(minDistance, noteX);
+      } else {
+        // ホールド系
         note.holding = true;
-        applyJudgement(minDistance, laneIndex);
+        note.touchId = touchId;
+        activeTouches[touchId] = { x: touchX, activeNote: note };
+        applyJudgement(minDistance, noteX);
+      }
+    } else {
+      activeTouches[touchId] = { x: touchX, activeNote: null };
+    }
+  }
+
+  // タッチ移動（スライド追従判定）
+  function handleTouchMove(touchId, touchX) {
+    if (!isPlaying) return;
+    const touchData = activeTouches[touchId];
+    if (!touchData) return;
+
+    touchData.x = touchX;
+    const note = touchData.activeNote;
+
+    // 単体スライドノーツが移動によって引っかかった場合
+    notes.forEach((n, index) => {
+      if (n.type === 'slide') {
+        const distanceY = Math.abs(n.y - targetY);
+        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
+        if (distanceY < 70 && distanceX < laneWidth / 2) {
+          notes.splice(index, 1);
+          applyJudgement(distanceY, laneXPositions[n.lane]);
+        }
+      }
+    });
+
+    if (note && note.holding) {
+      // 期待されるX座標を計算
+      const expectedX = getHoldXAtY(note, targetY);
+      const distanceX = Math.abs(touchX - expectedX);
+
+      // 指がノーツの追従範囲から外れすぎた場合ミス
+      if (distanceX > laneWidth * 0.9) {
+        note.holding = false;
+        touchData.activeNote = null;
+        triggerMiss();
       }
     }
   }
 
-  function handleTouchEnd(laneIndex) {
+  // タッチ離脱（ホールド終了判定）
+  function handleTouchUp(touchId) {
     if (!isPlaying) return;
-    isLaneHolding[laneIndex] = false;
+    const touchData = activeTouches[touchId];
 
-    for (let i = notes.length - 1; i >= 0; i--) {
-      let note = notes[i];
+    if (touchData && touchData.activeNote) {
+      const note = touchData.activeNote;
       if (note.holding) {
-        const currentX = getHoldXAtY(note, targetY);
-        const currentLane = Math.min(laneCount - 1, Math.max(0, Math.floor(currentX / laneWidth)));
-
-        if (currentLane === laneIndex) {
-          const tailY = note.y - note.length;
-          const distance = Math.abs(tailY - targetY);
-          notes.splice(i, 1);
-          applyJudgement(distance, laneIndex);
-        }
-      }
-    }
-  }
-
-  function handleSlide(laneIndex) {
-    if (!isPlaying) return;
-
-    for (let i = notes.length - 1; i >= 0; i--) {
-      let note = notes[i];
-      if (note.lane === laneIndex && note.type === 'slide') {
-        const distance = Math.abs(note.y - targetY);
-        if (distance < 70) {
-          notes.splice(i, 1);
-          applyJudgement(distance, laneIndex);
-        }
-      } else if (note.lane === laneIndex && note.type === 'hold_slide' && note.holding) {
         const tailY = note.y - note.length;
         const distance = Math.abs(tailY - targetY);
-        if (distance < 70) {
-          notes.splice(i, 1);
-          applyJudgement(distance, laneIndex);
+        const expectedX = getHoldXAtY(note, targetY);
+
+        const index = notes.indexOf(note);
+        if (index !== -1) {
+          notes.splice(index, 1);
+          applyJudgement(distance, expectedX);
         }
       }
     }
+
+    delete activeTouches[touchId];
   }
 
   function spawnNotes() {
@@ -696,6 +735,13 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // 各レーンのハイライト更新
+    isLaneHolding = [false, false, false, false];
+    Object.values(activeTouches).forEach(touch => {
+      const l = Math.min(laneCount - 1, Math.max(0, Math.floor(touch.x / laneWidth)));
+      isLaneHolding[l] = true;
+    });
+
     // レーン区切り線
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
@@ -732,19 +778,6 @@
     }
 
     spawnNotes();
-
-    // 曲がるホールド中に指が正しいレーン上にあるか毎フレーム判定
-    notes.forEach((note) => {
-      if (note.type === 'curved_hold' && note.holding) {
-        const expectedX = getHoldXAtY(note, targetY);
-        const expectedLane = Math.min(laneCount - 1, Math.max(0, Math.floor(expectedX / laneWidth)));
-
-        // 期待するレーンを現在押し込めているか
-        if (!isLaneHolding[expectedLane]) {
-          note.holding = false;
-        }
-      }
-    });
 
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
@@ -794,7 +827,12 @@
 
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
-          triggerMiss();
+          if (note.holding) {
+            // 自動解放
+            applyJudgement(0, x);
+          } else {
+            triggerMiss();
+          }
         }
       } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
@@ -821,7 +859,7 @@
         });
         ctx.stroke();
 
-        const startX = getHoldXAtY(note, headY);
+        const startX = note.holding ? getHoldXAtY(note, targetY) : laneXPositions[note.path[0].lane];
         const endX = laneXPositions[note.path[note.path.length - 1].lane];
 
         ctx.fillStyle = '#6c5ce7';
@@ -835,7 +873,11 @@
 
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
-          triggerMiss();
+          if (note.holding) {
+            applyJudgement(0, endX);
+          } else {
+            triggerMiss();
+          }
         }
       } else if (note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
@@ -869,7 +911,11 @@
 
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
-          triggerMiss();
+          if (note.holding) {
+            applyJudgement(0, x);
+          } else {
+            triggerMiss();
+          }
         }
       } else if (note.type === 'slide') {
         const x = laneXPositions[note.lane];
@@ -942,75 +988,62 @@
   retryBtn.addEventListener('click', () => startSong(currentSong));
   selectBtn.addEventListener('click', () => renderSongSelectUI());
 
-  /* --- PCキーボード操作対応 (スライド動作模倣含む) --- */
+  /* --- PCキーボード操作対応 --- */
   const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     const lane = keyLaneMap[e.code];
     if (lane !== undefined) {
-      handleTouchStart(lane);
+      handleTouchDown(`key_${lane}`, laneXPositions[lane]);
     }
   });
 
   window.addEventListener('keyup', (e) => {
     const lane = keyLaneMap[e.code];
     if (lane !== undefined) {
-      handleTouchEnd(lane);
+      handleTouchUp(`key_${lane}`);
     }
   });
 
-  /* --- タッチ操作対応 (スライド追従の核心部分) --- */
+  /* --- タッチ操作対応（マルチタッチ・スライド追従対応） --- */
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    for (let i = 0; i < e.touches.length; i++) {
-      const touchX = e.touches[i].clientX - rect.left;
-      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
-      handleTouchStart(laneIndex);
+    const scaleX = canvas.width / rect.width;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const touchX = (touch.clientX - rect.left) * scaleX;
+      handleTouchDown(touch.identifier, touchX);
     }
   });
 
   canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    
-    // 現在の各レーンのホールド状態をリセットして全タッチから再構築する
-    const activeLanes = [false, false, false, false];
+    const scaleX = canvas.width / rect.width;
 
-    for (let i = 0; i < e.touches.length; i++) {
-      const touchX = e.touches[i].clientX - rect.left;
-      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
-      
-      if (laneIndex >= 0 && laneIndex < laneCount) {
-        activeLanes[laneIndex] = true;
-        handleSlide(laneIndex);
-      }
-    }
-
-    // 各レーンのホールド状態をタッチ位置に追従させる
-    for (let l = 0; l < laneCount; l++) {
-      isLaneHolding[l] = activeLanes[l];
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const touchX = (touch.clientX - rect.left) * scaleX;
+      handleTouchMove(touch.identifier, touchX);
     }
   });
 
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const activeLanes = [false, false, false, false];
-
-    for (let i = 0; i < e.touches.length; i++) {
-      const touchX = e.touches[i].clientX - rect.left;
-      const laneIndex = Math.min(laneCount - 1, Math.max(0, Math.floor(touchX / (rect.width / laneCount))));
-      if (laneIndex >= 0 && laneIndex < laneCount) {
-        activeLanes[laneIndex] = true;
-      }
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      handleTouchUp(touch.identifier);
     }
+  });
 
-    for (let lane = 0; lane < laneCount; lane++) {
-      if (!activeLanes[lane] && isLaneHolding[lane]) {
-        handleTouchEnd(lane);
-      }
+  canvas.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      handleTouchUp(touch.identifier);
     }
   });
 
