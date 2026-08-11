@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>絵本風音ゲー 5曲版</title>
+  
+  <!-- ★ Google Fonts から手書き風・絵本風フォント (Zen Kurenaido / Kiwi Maru) を読み込み -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Zen+Kurenaido&display=swap" rel="stylesheet">
+
   <style>
     body {
       margin: 0;
@@ -14,8 +20,9 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      /* iOS: Chalkboard SE / Hiragino Maru Gothic, Win: Yu Gothic / Tsukushi A Round Gothic, Android: sans-serif-round */
-      font-family: "Chalkboard SE", "Hiragino Maru Gothic ProN", "Tsukushi A Round Gothic", "Comic Sans MS", "Arial Rounded MT Bold", sans-serif-round, sans-serif;
+      
+      /* ★ 手書き風フォント (Zen Kurenaido) を最優先に指定 */
+      font-family: "Zen Kurenaido", "Kiwi Maru", "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif;
       overflow: hidden;
     }
     #game-container {
@@ -55,7 +62,7 @@
       position: absolute;
       top: 16px;
       left: 20px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       color: #6c5ce7;
       pointer-events: none;
@@ -69,7 +76,7 @@
       position: absolute;
       top: 12px;
       right: 14px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
       color: #6c5ce7;
       background: rgba(255, 255, 255, 0.88);
@@ -85,9 +92,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
     }
     #back-to-select-btn:active {
       transform: scale(0.92);
@@ -112,7 +116,7 @@
 
     /* --- 選曲画面タイトル --- */
     #select-title {
-      font-size: 22px;
+      font-size: 24px;
       color: #6c5ce7;
       margin-bottom: 10px;
       font-weight: bold;
@@ -120,11 +124,6 @@
       display: inline-block;
       z-index: 2;
       font-family: inherit;
-    }
-
-    .title-img {
-      max-width: 240px;
-      height: auto;
     }
 
     @keyframes floatTitle {
@@ -179,7 +178,7 @@
       text-align: left;
     }
     .song-name {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: bold;
       color: #2d3436;
       white-space: nowrap;
@@ -188,12 +187,12 @@
       max-width: 160px;
     }
     .song-meta {
-      font-size: 11px;
+      font-size: 12px;
       color: #b2bec3;
       margin-top: 2px;
     }
     .song-highscore {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
       color: #6c5ce7;
       text-align: right;
@@ -237,13 +236,13 @@
       font-family: inherit;
     }
     .result-title {
-      font-size: 26px;
+      font-size: 28px;
       color: #ff7675;
       margin: 0 0 8px 0;
       font-weight: bold;
     }
     .result-score-val {
-      font-size: 32px;
+      font-size: 34px;
       color: #6c5ce7;
       font-weight: bold;
       margin-bottom: 4px;
@@ -252,7 +251,7 @@
       display: inline-block;
       background: #ff7675;
       color: #fff;
-      font-size: 12px;
+      font-size: 13px;
       padding: 2px 8px;
       border-radius: 10px;
       margin-bottom: 8px;
@@ -263,7 +262,7 @@
       margin: 8px 0 16px 0;
       border-top: 2px dashed #dfe6e9;
       padding-top: 8px;
-      font-size: 15px;
+      font-size: 16px;
       color: #2d3436;
     }
     .result-row {
@@ -344,6 +343,9 @@
   const retryBtn = document.getElementById('retry-btn');
   const selectBtn = document.getElementById('select-btn');
   const newRecordTag = document.getElementById('new-record');
+
+  /* ★ Canvas内の文字用フォント設定 */
+  const GAME_FONT = '"Zen Kurenaido", "Kiwi Maru", sans-serif';
 
   let audioCtx = null;
   let isPlaying = false;
@@ -437,7 +439,7 @@
           <div class="song-meta">ノーツ: ${song.totalNotes} / スピード: ${song.speed}</div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 9px; color: #b2bec3;">HIGH SCORE</div>
+          <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
           <div>${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
@@ -682,8 +684,9 @@
       ctx.fill();
       ctx.restore();
 
+      /* レーンラベルフォント */
       ctx.fillStyle = '#b2bec3';
-      ctx.font = 'bold 16px "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif';
+      ctx.font = `bold 18px ${GAME_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(keyLabels[i], x, targetY + 52);
     }
@@ -750,7 +753,7 @@
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 20px "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif';
+        ctx.font = `bold 20px ${GAME_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, note.y + 7);
 
@@ -783,7 +786,7 @@
 
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
-      ctx.font = 'bold 28px "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif';
+      ctx.font = `bold 30px ${GAME_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(judgeText, canvas.width / 2, targetY - 80);
       judgeTimer--;
@@ -791,7 +794,7 @@
 
     if (combo > 1) {
       ctx.fillStyle = '#6c5ce7';
-      ctx.font = 'bold 22px "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif';
+      ctx.font = `bold 24px ${GAME_FONT}`;
       ctx.textAlign = 'center';
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
