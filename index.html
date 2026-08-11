@@ -569,7 +569,6 @@
     notes.forEach((note, index) => {
       if (note.holding) return;
       if (note.type === 'slide') return;
-      // hold_slideで既にホールドを完了しているものは対象外
       if (note.type === 'hold_slide' && note.holdCompleted) return;
 
       let expectedX = laneXPositions[note.lane];
@@ -626,25 +625,20 @@
           notes.splice(index, 1);
           applyJudgement(distanceY, laneXPositions[n.lane]);
         }
+      } else if (n.type === 'hold_slide' && n.holdCompleted) {
+        const tailY = n.y - n.length;
+        const distanceY = Math.abs(tailY - targetY);
+        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
+        if (distanceY < 70 && distanceX < laneWidth * 0.8) {
+          notes.splice(index, 1);
+          applyJudgement(distanceY, laneXPositions[n.lane]);
+        }
       }
     });
 
-    // ホールド中の移動チェック（hold_slideの場合は、ホールド完了後に指を離さずそのままスライド位置に移動できる）
     const note = touchData.activeNote;
     if (note && note.holding) {
-      if (note.type === 'hold_slide' && note.holdCompleted) {
-        // スライド部分のレーン位置に来たらクリア！
-        const distanceX = Math.abs(touchX - laneXPositions[note.lane]);
-        const tailY = note.y - note.length;
-        const distanceY = Math.abs(tailY - targetY);
-        if (distanceY < 70 && distanceX < laneWidth * 0.8) {
-          note.holding = false;
-          touchData.activeNote = null;
-          const index = notes.indexOf(note);
-          if (index !== -1) notes.splice(index, 1);
-          applyJudgement(distanceY, laneXPositions[note.lane]);
-        }
-      } else {
+      if (note.type !== 'hold_slide') {
         let expectedX = laneXPositions[note.lane];
         if (note.type === 'curved_hold') {
           expectedX = getHoldXAtY(note, targetY);
@@ -675,10 +669,15 @@
           triggerMiss();
         } else {
           if (note.type === 'hold_slide' && !note.holdCompleted) {
-            // ホールドが終わった瞬間、指を離さずにスライドへ繋げられるよう保持継続状態にする
+            // ホールドが終わったとき、ホールド完了（スライド待ち）状態にして指の追跡を少し維持
             note.holding = false;
             note.holdCompleted = true;
-            touchData.activeNote = note; // まだ紐付けておく
+            touchData.activeNote = null;
+            setTimeout(() => {
+              if (activeTouches[touchId] === touchData) {
+                delete activeTouches[touchId];
+              }
+            }, 600);
           } else {
             const distance = Math.abs(tailY - targetY);
             let expectedX = laneXPositions[note.lane];
@@ -819,7 +818,7 @@
       let note = notes[i];
       note.y += note.speed;
 
-      // hold_slideでホールド本体が通過し終えたら自動的にホールド完了状態に切り替え
+      // hold_slideでホールド本体が通過し終えたら自動的にホールド完了（スライド待ち）状態に切り替え
       if (note.type === 'hold_slide' && !note.holdCompleted) {
         const headY = note.holding ? targetY : note.y;
         if (headY > targetY + 20) {
