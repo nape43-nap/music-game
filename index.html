@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー プロトタイプ</title>
+  <title>絵本風音ゲー 4レーン版</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background-color: #f7f1e3; /* 温かみのある紙のような背景色 */
+      background-color: #f7f1e3;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -81,24 +81,38 @@
   let audioCtx = null;
   let isPlaying = false;
   let score = 0;
-  
-  // 判定ラインの位置（Y座標）
-  const targetY = 500;
-  const targetRadius = 35;
 
-  // ノーツ（落ちてくるオブジェクト）の配列
+  // レーン設定（4レーン）
+  const laneCount = 4;
+  const laneWidth = canvas.width / laneCount; // 1レーンあたり90px
+  const laneXPositions = [
+    laneWidth * 0.5,
+    laneWidth * 1.5,
+    laneWidth * 2.5,
+    laneWidth * 3.5
+  ];
+  const keyLabels = ['D', 'F', 'J', 'K'];
+
+  // 判定ライン（Y座標）
+  const targetY = 500;
+  const targetRadius = 28;
+
+  // ノーツデータ
   let notes = [];
   let spawnTimer = 0;
 
-  // Web Audio API で効果音（ポコッという音）を生成して鳴らす関数
-  function playHitSound() {
+  // 各レーンの効果音の高さ（音階をつけてポ・パ・ピ・プのように）
+  const laneFrequencies = [300, 400, 500, 600];
+
+  function playHitSound(laneIndex) {
     if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
+    const freq = laneFrequencies[laneIndex] || 400;
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + 0.1);
     
     gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
@@ -110,67 +124,89 @@
     osc.stop(audioCtx.currentTime + 0.1);
   }
 
-  // タップ・クリック時の判定処理
-  function handleTap() {
+  // 指定されたレーンのタップ判定処理
+  function handleTap(laneIndex) {
     if (!isPlaying) return;
 
-    playHitSound();
+    playHitSound(laneIndex);
 
-    // 判定ラインに最も近いノーツを探す
+    // 該当レーン内で最も判定ラインに近いノーツを探す
     let hitIndex = -1;
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      const distance = Math.abs(note.y - targetY);
-      if (distance < minDistance) {
-        minDistance = distance;
-        hitIndex = index;
+      if (note.lane === laneIndex) {
+        const distance = Math.abs(note.y - targetY);
+        if (distance < minDistance) {
+          minDistance = distance;
+          hitIndex = index;
+        }
       }
     });
 
-    // 距離が50px以内ならヒット判定
+    // 距離が50px以内ならヒット
     if (hitIndex !== -1 && minDistance < 50) {
-      notes.splice(hitIndex, 1); // ノーツを消す
+      notes.splice(hitIndex, 1);
       score += 100;
       scoreDisplay.textContent = `SCORE: ${score}`;
     }
   }
 
-  // ゲームのメインループ（1秒間に約60回実行される）
+  // メインループ
   function gameLoop() {
     if (!isPlaying) return;
 
-    // 画面のクリア
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. 判定ライン（絵本風のターゲット枠）の描画
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, targetY, targetRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = '#fdcb6e';
-    ctx.lineWidth = 6;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(253, 203, 110, 0.2)';
-    ctx.fill();
+    // 1. レーン区切り線の描画
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 2;
+    for (let i = 1; i < laneCount; i++) {
+      ctx.beginPath();
+      ctx.moveTo(laneWidth * i, 0);
+      ctx.lineTo(laneWidth * i, canvas.height);
+      ctx.stroke();
+    }
 
-    // 2. ノーツの追加（一定時間ごとに上から降らせる）
+    // 2. 判定ライン＆キー表示の描画
+    for (let i = 0; i < laneCount; i++) {
+      const x = laneXPositions[i];
+      
+      // ターゲット枠
+      ctx.beginPath();
+      ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#fdcb6e';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(253, 203, 110, 0.2)';
+      ctx.fill();
+
+      // ガイド文字（D F J K）
+      ctx.fillStyle = '#b2bec3';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(keyLabels[i], x, targetY + 55);
+    }
+
+    // 3. ランダムなレーンにノーツを生成
     spawnTimer++;
-    if (spawnTimer > 60) { // 約1秒ごと
-      notes.push({ y: 0, speed: 4 });
+    if (spawnTimer > 40) { // スピード調整
+      const randomLane = Math.floor(Math.random() * laneCount);
+      notes.push({ lane: randomLane, y: 0, speed: 4.5 });
       spawnTimer = 0;
     }
 
-    // 3. ノーツの移動と描画
+    // 4. ノーツの移動と描画
     ctx.fillStyle = '#ff7675';
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
 
-      // ノーツ（丸）を描画
+      const x = laneXPositions[note.lane];
       ctx.beginPath();
-      ctx.arc(canvas.width / 2, note.y, 20, 0, Math.PI * 2);
+      ctx.arc(x, note.y, 18, 0, Math.PI * 2);
       ctx.fill();
 
-      // 画面下に消えたら削除
       if (note.y > canvas.height + 20) {
         notes.splice(i, 1);
       }
@@ -179,26 +215,42 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // スタートボタンを押した時の処理
   startBtn.addEventListener('click', () => {
-    // スマホのWeb Audio API制限を解除するためにボタン押下時に初期化
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     startBtn.style.display = 'none';
     isPlaying = true;
     gameLoop();
   });
 
-  // 操作イベントの登録（画面タップ・キーボード）
+  // タッチ操作（タッチされたX座標からどのレーンか特定）
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    handleTap();
-  });
-  canvas.addEventListener('mousedown', handleTap);
-  window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-      handleTap();
+    const rect = canvas.getBoundingClientRect();
+    for (let i = 0; i < e.touches.length; i++) {
+      const touchX = e.touches[i].clientX - rect.left;
+      const laneIndex = Math.floor(touchX / (rect.width / laneCount));
+      if (laneIndex >= 0 && laneIndex < laneCount) {
+        handleTap(laneIndex);
+      }
     }
+  });
+
+  // マウスクリック操作
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const laneIndex = Math.floor(clickX / (rect.width / laneCount));
+    if (laneIndex >= 0 && laneIndex < laneCount) {
+      handleTap(laneIndex);
+    }
+  });
+
+  // キーボード操作 (D, F, J, K キー)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'd' || e.key === 'D') handleTap(0);
+    if (e.key === 'f' || e.key === 'F') handleTap(1);
+    if (e.key === 'j' || e.key === 'J') handleTap(2);
+    if (e.key === 'k' || e.key === 'K') handleTap(3);
   });
 </script>
 
