@@ -22,23 +22,74 @@
       font-family: "Kaisei Opti", serif;
       overflow: hidden;
     }
-    #game-container {
+
+    #stage-wrapper {
       position: relative;
       width: 360px;
-      height: 600px;
-      border: 4px solid #6c5ce7;
-      border-radius: 16px;
+      height: 640px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #floating-title {
+      position: absolute;
+      top: 15px;
+      left: 30px;
+      width: 140px;
+      height: 50px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60"><path d="M20,30 Q10,10 40,12 Q60,2 90,8 Q130,2 140,25 Q155,40 130,50 Q100,60 70,52 Q30,60 20,30 Z" fill="%23fffdf0" stroke="%23d6a25b" stroke-width="3" stroke-dasharray="3,2"/></svg>') no-repeat center/contain;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      animation: floatTitle 2s ease-in-out infinite alternate;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08));
+    }
+    #floating-title span {
+      font-family: "Caveat", cursive;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff7675;
+      letter-spacing: 0.5px;
+      transform: rotate(-3deg);
+    }
+
+    @keyframes floatTitle {
+      0% { transform: translateY(0) rotate(-2deg); }
+      100% { transform: translateY(-5px) rotate(2deg); }
+    }
+
+    #game-container {
+      position: absolute;
+      top: 45px;
+      left: 0;
+      width: 360px;
+      height: 580px;
+      border: 5px solid #b84a4a;
+      border-radius: 20px;
       background-color: #fcf9f2;
       background-image: 
-        radial-gradient(rgba(0, 0, 0, 0.03) 15%, transparent 16%),
+        radial-gradient(rgba(0, 0, 0, 0.04) 15%, transparent 16%),
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
       background-position: 0 0, 2px 2px;
-      box-shadow: 0 12px 24px rgba(108, 92, 231, 0.25);
+      box-shadow: 0 12px 28px rgba(184, 74, 74, 0.25);
       overflow: hidden;
       touch-action: none;
-      transform: translateY(-19px);
     }
+
+    #girl-peek {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      width: 54px;
+      height: 40px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45"><ellipse cx="30" cy="25" rx="22" ry="18" fill="%238b5a2b"/><circle cx="30" cy="22" r="16" fill="%23ffeaa7"/><path d="M18,18 Q30,8 42,18 Z" fill="%23654321"/><circle cx="23" cy="22" r="2" fill="%232d3436"/><circle cx="37" cy="22" r="2" fill="%232d3436"/><path d="M28,26 Q30,29 32,26" fill="none" stroke="%23d63031" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><circle cx="41" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><path d="M10,32 Q15,22 22,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/><path d="M50,32 Q45,22 38,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/></svg>') no-repeat center/contain;
+      z-index: 26;
+      pointer-events: none;
+    }
+
     canvas {
       display: block;
       width: 100%;
@@ -66,7 +117,7 @@
       left: 20px;
       font-size: 24px;
       font-weight: bold;
-      color: #6c5ce7;
+      color: #b84a4a;
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
       z-index: 5;
@@ -80,9 +131,9 @@
       right: 14px;
       font-size: 14px;
       font-weight: bold;
-      color: #6c5ce7;
+      color: #b84a4a;
       background: rgba(255, 255, 255, 0.88);
-      border: 2px solid #6c5ce7;
+      border: 2px solid #b84a4a;
       border-radius: 8px;
       padding: 5px 12px;
       cursor: pointer;
@@ -105,7 +156,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(252, 249, 242, 0.96);
+      background-color: rgba(252, 249, 242, 0.94);
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.03) 15%, transparent 16%),
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
@@ -116,30 +167,13 @@
       align-items: center;
       justify-content: flex-start;
       z-index: 20;
-      padding-top: 20px;
+      padding-top: 65px;
       box-sizing: border-box;
     }
 
-    #select-title {
-      font-size: 34px;
-      color: #6c5ce7;
-      margin-bottom: 10px;
-      animation: floatTitle 2s ease-in-out infinite alternate;
-      display: inline-block;
-      z-index: 2;
-      font-family: "Caveat", cursive;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    @keyframes floatTitle {
-      0% { transform: translateY(0) rotate(-1.5deg); }
-      100% { transform: translateY(-6px) rotate(1.5deg); }
-    }
-
     #virtual-scroll-viewport {
-      width: 320px;
-      height: 480px;
+      width: 330px;
+      height: 485px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -159,16 +193,15 @@
     .song-card {
       position: absolute;
       left: 10px;
-      width: 300px;
-      height: 68px;
-      padding: 6px 10px;
-      background: #fff;
-      background-image: 
-        radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
+      width: 310px;
+      height: 72px;
+      padding: 6px 14px 6px 10px;
+      background: #ffffff;
+      background-image: radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      border: 3px solid #fbd28b;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      border: 3px solid #b2bec3;
+      border-radius: 6px 24px 24px 6px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -178,6 +211,19 @@
       font-family: "Kaisei Opti", serif;
     }
 
+    .song-card::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border: 2px solid #b2bec3;
+      border-radius: 50%;
+      background: #fcf9f2;
+    }
+
     .song-card:active {
       transform: scale(0.95) !important;
     }
@@ -185,8 +231,9 @@
     .song-info {
       text-align: left;
       flex-grow: 1;
-      margin-left: 8px;
+      margin-left: 6px;
       min-width: 0;
+      padding-right: 15px;
     }
     .song-name {
       font-size: 13px;
@@ -196,13 +243,10 @@
       overflow: hidden;
       text-overflow: ellipsis;
       width: 100%;
-      font-family: "Kaisei Opti", serif;
     }
     .song-composer {
-      font-size: 13px;
-      font-weight: bold;
-      color: #2d3436;
-      font-family: "Kaisei Opti", serif;
+      font-size: 12px;
+      color: #636e72;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -210,14 +254,12 @@
     .song-highscore {
       font-size: 13px;
       font-weight: bold;
-      color: #6c5ce7;
+      color: #b84a4a;
       text-align: right;
       flex-shrink: 0;
-      margin-left: 6px;
-      font-family: "Kaisei Opti", serif;
+      margin-right: 16px;
     }
 
-    /* クレジット画面 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -230,7 +272,7 @@
       width: 280px;
       padding: 24px;
       background: #fff;
-      border: 4px solid #fbd28b;
+      border: 4px solid #b84a4a;
       border-radius: 16px;
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       text-align: center;
@@ -255,12 +297,10 @@
       font-weight: bold;
       color: #2d3436;
       margin-bottom: 6px;
-      font-family: "Kaisei Opti", serif;
     }
     .credit-composer-text {
       font-size: 15px;
-      color: #6c5ce7;
-      font-family: "Kaisei Opti", serif;
+      color: #b84a4a;
       margin-bottom: 16px;
     }
     .credit-loading {
@@ -293,18 +333,16 @@
       0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
       10% { opacity: 0.8; }
       90% { opacity: 0.8; }
-      100% { transform: translateY(-630px) rotate(360deg) scale(1.2); opacity: 0; }
+      100% { transform: translateY(-600px) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
-    /* リザルト画面 */
     #result-card {
       width: 280px;
       padding: 16px 20px;
       background: #fff;
-      background-image: 
-        radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
+      background-image: radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      border: 4px solid #fbd28b;
+      border: 4px solid #b84a4a;
       border-radius: 16px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
       text-align: center;
@@ -320,7 +358,7 @@
     }
     .result-score-val {
       font-size: 38px;
-      color: #6c5ce7;
+      color: #b84a4a;
       font-weight: bold;
       margin-bottom: 2px;
       font-family: "Caveat", cursive;
@@ -341,7 +379,6 @@
       border-radius: 8px;
       font-family: "Caveat", cursive;
       font-weight: bold;
-      letter-spacing: 0.5px;
     }
     .result-details {
       width: 100%;
@@ -351,7 +388,6 @@
       font-size: 18px;
       color: #2d3436;
       font-family: "Caveat", cursive;
-      letter-spacing: 0.5px;
     }
     .result-row {
       display: flex;
@@ -366,68 +402,65 @@
     #result-screen .btn {
       font-family: "Kaisei Opti", serif;
       font-size: 15px;
-      letter-spacing: 0.5px;
     }
   </style>
 </head>
 <body>
 
-<div id="game-container">
-  <div id="score-display">SCORE: 0</div>
-  
-  <button id="back-to-select-btn">◀ 戻る</button>
+<div id="stage-wrapper">
+  <div id="floating-title"><span>Music Select</span></div>
 
-  <!-- 曲選択画面 -->
-  <div id="select-screen" class="overlay-screen">
-    <div id="particle-container"></div>
-    <div id="select-title">★ music select ★</div>
-    
-    <div id="virtual-scroll-viewport">
-      <div id="virtual-scroll-spacer"></div>
-    </div>
-  </div>
+  <div id="game-container">
+    <div id="girl-peek"></div>
+    <div id="score-display">SCORE: 0</div>
+    <button id="back-to-select-btn">◀ 戻る</button>
 
-  <!-- クレジット演出画面 -->
-  <div id="credit-screen" class="overlay-screen">
-    <div class="credit-card">
-      <div id="credit-jacket" class="credit-jacket">🌟</div>
-      <div id="credit-title" class="credit-title">曲名</div>
-      <div id="credit-composer" class="credit-composer-text">Composer</div>
-      <div class="credit-loading">Now Loading...</div>
-    </div>
-  </div>
-
-  <!-- リザルト画面 -->
-  <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
-    <div id="result-card">
-      <h2 class="result-title">STAGE CLEAR!</h2>
-      
-      <div class="tag-container">
-        <div id="new-record" class="badge-tag" style="background: #ff7675; display: none;">NEW RECORD!</div>
-        <div id="all-perfect-tag" class="badge-tag" style="background: #fdcb6e; color: #2d3436; display: none;">ALL PERFECT!</div>
-        <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
-      </div>
-
-      <div id="res-score" class="result-score-val">0</div>
-      
-      <div class="result-details">
-        <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #6c5ce7; font-size: 20px;">0</strong></div>
-        <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e; font-size: 20px;">0</strong></div>
-        <div class="result-row"><span>GREAT</span><strong id="res-great" style="color: #00b894; font-size: 20px;">0</strong></div>
-        <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3; font-size: 20px;">0</strong></div>
-        <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031; font-size: 20px;">0</strong></div>
-      </div>
-
-      <div class="btn-group">
-        <button id="select-btn" class="btn" style="background: #b2bec3;">曲選択へ戻る</button>
-        <button id="retry-btn" class="btn">もう一度</button>
+    <div id="select-screen" class="overlay-screen">
+      <div id="particle-container"></div>
+      <div id="virtual-scroll-viewport">
+        <div id="virtual-scroll-spacer"></div>
       </div>
     </div>
-  </div>
 
-  <canvas id="gameCanvas" width="360" height="600"></canvas>
+    <div id="credit-screen" class="overlay-screen">
+      <div class="credit-card">
+        <div id="credit-jacket" class="credit-jacket">🌟</div>
+        <div id="credit-title" class="credit-title">曲名</div>
+        <div id="credit-composer" class="credit-composer-text">Composer</div>
+        <div class="credit-loading">Now Loading...</div>
+      </div>
+    </div>
+
+    <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
+      <div id="result-card">
+        <h2 class="result-title">STAGE CLEAR!</h2>
+        
+        <div class="tag-container">
+          <div id="new-record" class="badge-tag" style="background: #ff7675; display: none;">NEW RECORD!</div>
+          <div id="all-perfect-tag" class="badge-tag" style="background: #fdcb6e; color: #2d3436; display: none;">ALL PERFECT!</div>
+          <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
+        </div>
+
+        <div id="res-score" class="result-score-val">0</div>
+        
+        <div class="result-details">
+          <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #b84a4a; font-size: 20px;">0</strong></div>
+          <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e; font-size: 20px;">0</strong></div>
+          <div class="result-row"><span>GREAT</span><strong id="res-great" style="color: #00b894; font-size: 20px;">0</strong></div>
+          <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3; font-size: 20px;">0</strong></div>
+          <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031; font-size: 20px;">0</strong></div>
+        </div>
+
+        <div class="btn-group">
+          <button id="select-btn" class="btn" style="background: #b2bec3;">曲選択へ戻る</button>
+          <button id="retry-btn" class="btn">もう一度</button>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas" width="360" height="580"></canvas>
+  </div>
 </div>
-
 <script>
   const songList = [
     { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
@@ -478,8 +511,8 @@
   const laneXPositions = [laneWidth * 0.5, laneWidth * 1.5, laneWidth * 2.5, laneWidth * 3.5];
   const keyLabels = ['D', 'F', 'J', 'K'];
 
-  const targetY = 500;
-  const targetRadius = 28;
+  const targetY = 480;
+  const targetRadius = 26;
   
   let activeTouches = {};
   let isLaneHolding = [false, false, false, false];
@@ -488,7 +521,6 @@
   let spawnTimer = 0;
   let spawnedCount = 0;
 
-  /* --- パーティクル --- */
   const symbols = ['♪', '♫', '♬', '✨', '★', '🌸', '🎶'];
   function createParticle() {
     if (selectScreen.style.display === 'none') return;
@@ -496,7 +528,7 @@
     p.className = 'particle';
     p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
     p.style.color = colors[Math.floor(Math.random() * colors.length)];
-    p.style.left = Math.random() * 320 + 20 + 'px';
+    p.style.left = Math.random() * 300 + 10 + 'px';
     p.style.fontSize = Math.floor(Math.random() * 12 + 16) + 'px';
     const duration = (Math.random() * 2 + 3).toFixed(1);
     p.style.animationDuration = duration + 's';
@@ -514,8 +546,7 @@
     particleContainer.innerHTML = '';
   }
 
-  /* --- 仮想スクロール --- */
-  const ITEM_HEIGHT = 80;
+  const ITEM_HEIGHT = 82;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
   
@@ -550,7 +581,7 @@
 
       card.innerHTML = `
         <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 26px; width: 36px; text-align: center; margin-right: 4px; flex-shrink: 0;">
+          <div style="font-size: 24px; width: 34px; text-align: center; margin-right: 4px; flex-shrink: 0;">
             ${song.jacket}
           </div>
           <div class="song-info">
@@ -559,8 +590,8 @@
           </div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 11px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
-          <div style="font-size: 15px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
+          <div style="font-size: 10px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
+          <div style="font-size: 14px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
       
@@ -581,7 +612,6 @@
     resultScreen.style.display = 'none';
   }
 
-  /* --- 曲選択時のクレジット演出 & スタート処理 --- */
   function triggerCreditAndStart(song) {
     currentSong = song;
     stopParticles();
@@ -957,9 +987,9 @@
       ctx.restore();
 
       ctx.fillStyle = '#b2bec3';
-      ctx.font = `bold 20px ${KAISEI_FONT}`;
+      ctx.font = `bold 18px ${KAISEI_FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(keyLabels[i], x, targetY + 54);
+      ctx.fillText(keyLabels[i], x, targetY + 50);
     }
 
     spawnNotes();
@@ -1207,15 +1237,15 @@
       ctx.fillStyle = judgeColor;
       ctx.font = `bold 42px ${CAVEAT_FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(judgeText, canvas.width / 2, targetY - 80);
+      ctx.fillText(judgeText, canvas.width / 2, targetY - 70);
       judgeTimer--;
     }
 
     if (combo > 1) {
-      ctx.fillStyle = '#6c5ce7';
+      ctx.fillStyle = '#b84a4a';
       ctx.font = `bold 36px ${CAVEAT_FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
+      ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 110);
     }
 
     if (spawnedCount >= currentSong.totalNotes && notes.length === 0) {
