@@ -363,6 +363,7 @@
   let judgeTimer = 0;
   let hitEffects = [];
   let particleInterval = null;
+  let globalAnimTimer = 0; // ノーツの伸縮・脈動用タイマー
 
   const laneCount = 4;
   const laneWidth = canvas.width / laneCount;
@@ -489,6 +490,7 @@
     spawnedCount = 0;
     activeTouches = {};
     isLaneHolding = [false, false, false, false];
+    globalAnimTimer = 0;
     scoreDisplay.textContent = `SCORE: 0`;
   }
 
@@ -781,6 +783,10 @@
   function gameLoop() {
     if (!isPlaying) return;
 
+    globalAnimTimer += 0.15;
+    // ぷるん♪と伸縮させるためのスケール値（1.0を中心に0.92〜1.08の間で周期的に変化）
+    const pulseScale = 1.0 + Math.sin(globalAnimTimer) * 0.08;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     isLaneHolding = [false, false, false, false];
@@ -867,6 +873,13 @@
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#ff7675';
         ctx.fillStyle = '#ff7675';
+        
+        // 伸縮アニメーション適用
+        ctx.save();
+        ctx.translate(x, note.y);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-x, -note.y);
+
         ctx.beginPath();
         ctx.arc(x, note.y, 18, 0, Math.PI * 2);
         ctx.fill();
@@ -876,6 +889,8 @@
         ctx.beginPath();
         ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
       } else if (note.type === 'hold') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
@@ -888,14 +903,26 @@
           ctx.fillRect(x - 16, tailY, 32, headY - tailY);
         }
 
+        // ヘッド・テイルに伸縮を適用
+        ctx.save();
+        ctx.translate(x, headY);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-x, -headY);
         ctx.fillStyle = '#00b894';
         ctx.beginPath();
         ctx.arc(x, headY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
 
+        ctx.save();
+        ctx.translate(x, tailY);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-x, -tailY);
         ctx.beginPath();
         ctx.arc(x, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
       } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
@@ -924,14 +951,25 @@
         const startX = note.holding ? getHoldXAtY(note, targetY) : laneXPositions[note.path[0].lane];
         const endX = laneXPositions[note.path[note.path.length - 1].lane];
 
+        ctx.save();
+        ctx.translate(startX, headY);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-startX, -headY);
         ctx.fillStyle = '#6c5ce7';
         ctx.beginPath();
         ctx.arc(startX, headY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
 
+        ctx.save();
+        ctx.translate(endX, tailY);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-endX, -tailY);
         ctx.beginPath();
         ctx.arc(endX, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
       } else if (note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
@@ -945,12 +983,21 @@
         }
 
         if (!note.holdCompleted) {
+          ctx.save();
+          ctx.translate(x, headY);
+          ctx.scale(pulseScale, pulseScale);
+          ctx.translate(-x, -headY);
           ctx.fillStyle = '#00b894';
           ctx.beginPath();
           ctx.arc(x, headY, 18, 0, Math.PI * 2);
           ctx.fill();
+          ctx.restore();
         }
 
+        ctx.save();
+        ctx.translate(x, tailY);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-x, -tailY);
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#0984e3';
         ctx.fillStyle = '#74b9ff';
@@ -963,8 +1010,16 @@
         ctx.font = `bold 20px ${GAME_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, tailY + 7);
+        ctx.restore();
+
       } else if (note.type === 'slide') {
         const x = laneXPositions[note.lane];
+
+        ctx.save();
+        ctx.translate(x, note.y);
+        ctx.scale(pulseScale, pulseScale);
+        ctx.translate(-x, -note.y);
+
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#0984e3';
         ctx.fillStyle = '#74b9ff';
@@ -977,6 +1032,7 @@
         ctx.font = `bold 20px ${GAME_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, note.y + 7);
+        ctx.restore();
       }
 
       ctx.restore();
