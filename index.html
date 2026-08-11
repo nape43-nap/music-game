@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版 (選曲へ戻るボタン追加)</title>
+  <title>絵本風音ゲー 5曲版</title>
   <style>
     body {
       margin: 0;
@@ -61,27 +61,40 @@
       z-index: 5;
     }
 
-    /* 右上の「選曲に戻る」ボタン */
+    /* --- 右上「戻る」ボタン --- */
     #back-to-select-btn {
       position: absolute;
       top: 12px;
       right: 14px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: bold;
       color: #6c5ce7;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.88);
       border: 2px solid #6c5ce7;
       border-radius: 16px;
-      padding: 4px 10px;
+      padding: 5px 12px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       z-index: 10;
       transition: transform 0.1s ease, background 0.1s ease;
+      
+      /* 画像ボタン化する時のための共通準備 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
     }
     #back-to-select-btn:active {
       transform: scale(0.92);
       background: #fff;
     }
+
+    /* 【将来画像に置き換える時用の追加CSS例】
+       自作画像を使う場合は HTMLのボタンに <img src="btn_back.png"> を入れるか、
+       以下のようにCSSで背景画像指定にすると綺麗に切り替えられます。
+    */
 
     .overlay-screen {
       position: absolute;
@@ -99,6 +112,7 @@
       box-sizing: border-box;
     }
 
+    /* --- 選曲画面タイトル --- */
     #select-title {
       font-size: 22px;
       color: #6c5ce7;
@@ -107,6 +121,12 @@
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
       z-index: 2;
+    }
+
+    /* タイトルを自作画像（文字画像）にする場合のラッパー */
+    .title-img {
+      max-width: 240px;
+      height: auto;
     }
 
     @keyframes floatTitle {
@@ -262,12 +282,18 @@
 
 <div id="game-container">
   <div id="score-display">SCORE: 0</div>
-  <button id="back-to-select-btn">◀ きょくをえらぶ</button>
+  
+  <!-- 右上の「戻る」ボタン -->
+  <!-- 画像に差し替える時は ◀ 戻る の部分を <img src="back.png" alt="戻る" style="height:20px;"> 等にするだけOKです -->
+  <button id="back-to-select-btn">◀ 戻る</button>
 
   <!-- 選曲画面 -->
   <div id="select-screen" class="overlay-screen">
     <div id="particle-container"></div>
-    <div id="select-title">★ きょくをえらぶ ★</div>
+    
+    <!-- タイトルテキスト (画像にする場合は <img src="music_select.png" class="title-img"> に置き換えられます) -->
+    <div id="select-title">★ music select ★</div>
+    
     <div id="virtual-scroll-viewport">
       <div id="virtual-scroll-spacer"></div>
     </div>
