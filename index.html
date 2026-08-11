@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー こだわりデザイン版</title>
+  <title>絵本風音ゲー リザルト画面版</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      /* 温かみのある絵本風パステルグラデーション背景 */
       background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #ffeaa7 100%);
       display: flex;
       flex-direction: column;
@@ -35,7 +34,7 @@
       width: 100%;
       height: 100%;
     }
-    #start-btn {
+    .btn {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -50,9 +49,8 @@
       cursor: pointer;
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
       z-index: 10;
-      transition: transform 0.1s;
     }
-    #start-btn:active {
+    .btn:active {
       transform: translate(-50%, -44%);
       box-shadow: 0 2px 4px rgba(214, 48, 49, 0.4);
     }
@@ -66,13 +64,97 @@
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
     }
+
+    /* リザルト画面用スタイル */
+    #result-screen {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 253, 249, 0.92);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    #result-card {
+      width: 280px;
+      padding: 24px 20px;
+      background: #fff;
+      border: 4px solid #fdcb6e;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .result-title {
+      font-size: 28px;
+      color: #ff7675;
+      margin: 0 0 12px 0;
+      font-weight: bold;
+    }
+    .result-score-label {
+      font-size: 14px;
+      color: #b2bec3;
+      margin-bottom: 2px;
+    }
+    .result-score-val {
+      font-size: 36px;
+      color: #6c5ce7;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .result-details {
+      width: 100%;
+      margin: 12px 0 20px 0;
+      border-top: 2px dashed #dfe6e9;
+      padding-top: 12px;
+      font-size: 16px;
+      color: #2d3436;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+    #retry-btn {
+      position: static;
+      transform: none;
+      margin-top: 8px;
+      padding: 12px 28px;
+      font-size: 18px;
+    }
+    #retry-btn:active {
+      transform: translateY(2px);
+    }
   </style>
 </head>
 <body>
 
 <div id="game-container">
   <div id="score-display">SCORE: 0</div>
-  <button id="start-btn">★ あそぶ ★</button>
+  <button id="start-btn" class="btn">★ あそぶ ★</button>
+
+  <!-- リザルト画面のUI構造 -->
+  <div id="result-screen">
+    <div id="result-card">
+      <h2 class="result-title">STAGE CLEAR!</h2>
+      <div class="result-score-label">FINAL SCORE</div>
+      <div id="res-score" class="result-score-val">0</div>
+      
+      <div class="result-details">
+        <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #6c5ce7;">0</strong></div>
+        <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e;">0</strong></div>
+        <div class="result-row"><span>GREAT</span><strong id="res-great" style="color: #00b894;">0</strong></div>
+        <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3;">0</strong></div>
+        <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031;">0</strong></div>
+      </div>
+
+      <button id="retry-btn" class="btn">もう一度あそぶ</button>
+    </div>
+  </div>
+
   <canvas id="gameCanvas" width="360" height="600"></canvas>
 </div>
 
@@ -80,12 +162,18 @@
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const startBtn = document.getElementById('start-btn');
+  const retryBtn = document.getElementById('retry-btn');
   const scoreDisplay = document.getElementById('score-display');
+  const resultScreen = document.getElementById('result-screen');
 
   let audioCtx = null;
   let isPlaying = false;
   let score = 0;
   let combo = 0;
+  let maxCombo = 0;
+
+  // 判定カウント用オブジェクト
+  let counts = { perfect: 0, great: 0, good: 0, miss: 0 };
 
   // 判定アニメーション
   let judgeText = '';
@@ -113,9 +201,23 @@
   // ホールド状態
   let isLaneHolding = [false, false, false, false];
 
-  // ノーツデータ
+  // ノーツデータ & 生成カウント制限（テスト用100個）
   let notes = [];
   let spawnTimer = 0;
+  let spawnedCount = 0;
+  const totalNotesToSpawn = 100;
+
+  function resetGame() {
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    counts = { perfect: 0, great: 0, good: 0, miss: 0 };
+    notes = [];
+    spawnTimer = 0;
+    spawnedCount = 0;
+    scoreDisplay.textContent = 'SCORE: 0';
+    resultScreen.style.display = 'none';
+  }
 
   function playSound(freqMult = 1) {
     if (!audioCtx) return;
@@ -137,9 +239,12 @@
   }
 
   function createHitEffect(x, y, color) {
-    hitEffects.push({
-      x: x, y: y, radius: 20, maxRadius: 55, alpha: 1.0, color: color
-    });
+    hitEffects.push({ x: x, y: y, radius: 20, maxRadius: 55, alpha: 1.0, color: color });
+  }
+
+  function updateCombo(newCombo) {
+    combo = newCombo;
+    if (combo > maxCombo) maxCombo = combo;
   }
 
   function applyJudgement(distance, laneIndex) {
@@ -148,21 +253,24 @@
       judgeText = 'PERFECT!';
       judgeColor = '#fdcb6e';
       score += 100;
-      combo++;
+      counts.perfect++;
+      updateCombo(combo + 1);
       playSound(1.5);
       createHitEffect(x, targetY, '#fdcb6e');
     } else if (distance < 45) {
       judgeText = 'GREAT!';
       judgeColor = '#00b894';
       score += 80;
-      combo++;
+      counts.great++;
+      updateCombo(combo + 1);
       playSound(1.2);
       createHitEffect(x, targetY, '#00b894');
     } else if (distance < 70) {
       judgeText = 'GOOD';
       judgeColor = '#0984e3';
       score += 50;
-      combo++;
+      counts.good++;
+      updateCombo(combo + 1);
       playSound(1.0);
       createHitEffect(x, targetY, '#0984e3');
     }
@@ -170,7 +278,14 @@
     scoreDisplay.textContent = `SCORE: ${score}`;
   }
 
-  // タップ＆長押し開始（※スライドノーツは無視するよう修正）
+  function triggerMiss() {
+    judgeText = 'MISS...';
+    judgeColor = '#d63031';
+    judgeTimer = 30;
+    counts.miss++;
+    updateCombo(0);
+  }
+
   function handleTouchStart(laneIndex) {
     if (!isPlaying) return;
     isLaneHolding[laneIndex] = true;
@@ -179,7 +294,6 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // スライドノーツ(slide)はこのタップ判定から除外！
       if (note.lane === laneIndex && !note.holding && note.type !== 'slide') {
         const distance = Math.abs(note.y - targetY);
         if (distance < minDistance) {
@@ -216,7 +330,6 @@
     }
   }
 
-  // スライド（なぞった時専用の判定）
   function handleSlide(laneIndex) {
     if (!isPlaying) return;
 
@@ -233,6 +346,8 @@
   }
 
   function spawnNotes() {
+    if (spawnedCount >= totalNotesToSpawn) return; // 規定数に達したら生成停止
+
     spawnTimer++;
     if (spawnTimer > 45) {
       const lane = Math.floor(Math.random() * laneCount);
@@ -247,7 +362,21 @@
       }
 
       spawnTimer = 0;
+      spawnedCount++;
     }
+  }
+
+  // リザルト画面の表示処理
+  function showResult() {
+    isPlaying = false;
+    document.getElementById('res-score').textContent = score;
+    document.getElementById('res-combo').textContent = maxCombo;
+    document.getElementById('res-perfect').textContent = counts.perfect;
+    document.getElementById('res-great').textContent = counts.great;
+    document.getElementById('res-good').textContent = counts.good;
+    document.getElementById('res-miss').textContent = counts.miss;
+    
+    resultScreen.style.display = 'flex';
   }
 
   // メイン描画ループ
@@ -256,7 +385,7 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. レーン区切り線（点線風）
+    // レーン区切り線
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
@@ -266,12 +395,11 @@
       ctx.lineTo(laneWidth * i, canvas.height);
       ctx.stroke();
     }
-    ctx.setLineDash([]); // 点線リセット
+    ctx.setLineDash([]);
 
-    // 2. 判定ライン描画
+    // 判定ライン
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
-      
       ctx.save();
       if (isLaneHolding[i]) {
         ctx.shadowBlur = 15;
@@ -292,10 +420,10 @@
       ctx.fillText(keyLabels[i], x, targetY + 52);
     }
 
-    // 3. ノーツ生成
+    // ノーツ生成
     spawnNotes();
 
-    // 4. ノーツの移動・描画
+    // ノーツ移動・描画
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
@@ -304,11 +432,9 @@
       ctx.save();
 
       if (note.type === 'normal') {
-        // 赤ノーツ（ほのぼのピンク）
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#ff7675';
         ctx.fillStyle = '#ff7675';
-        
         ctx.beginPath();
         ctx.arc(x, note.y, 18, 0, Math.PI * 2);
         ctx.fill();
@@ -324,13 +450,11 @@
           triggerMiss();
         }
       } else if (note.type === 'hold') {
-        // ロングノーツ（黄緑）
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
 
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#55efc4';
-
         ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
         ctx.fillRect(x - 16, tailY, 32, headY - tailY);
 
@@ -345,20 +469,18 @@
           triggerMiss();
         }
       } else if (note.type === 'slide') {
-        // スライドノーツ（鮮やかブルー・横帯デザイン）
         ctx.shadowBlur = 12;
         ctx.shadowColor = '#0984e3';
-
         ctx.fillStyle = '#74b9ff';
         ctx.beginPath();
-        ctx.roundRect(x - 22, note.y - 14, 44, 28, 14); // 丸みのある四角形
+        ctx.roundRect(x - 22, note.y - 14, 44, 28, 14);
         ctx.fill();
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 20px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('〰', x, note.y + 7); // スライドを象徴するウェーブ記号
+        ctx.fillText('〰', x, note.y + 7);
 
         if (note.y > targetY + 70) {
           notes.splice(i, 1);
@@ -369,7 +491,7 @@
       ctx.restore();
     }
 
-    // 5. ヒットエフェクト描画
+    // ヒットエフェクト描画
     for (let i = hitEffects.length - 1; i >= 0; i--) {
       let effect = hitEffects[i];
       effect.radius += 2.5;
@@ -387,7 +509,7 @@
       if (effect.alpha <= 0) hitEffects.splice(i, 1);
     }
 
-    // 6. 判定文字 & コンボ表示
+    // 判定文字 & コンボ表示
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
       ctx.font = 'bold 28px sans-serif';
@@ -403,33 +525,38 @@
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
 
+    // クリア判定（ノーツが全部生成され、画面上からもなくなった場合）
+    if (spawnedCount >= totalNotesToSpawn && notes.length === 0) {
+      showResult();
+      return;
+    }
+
     requestAnimationFrame(gameLoop);
   }
 
-  function triggerMiss() {
-    judgeText = 'MISS...';
-    judgeColor = '#d63031';
-    judgeTimer = 30;
-    combo = 0;
-  }
-
+  // イベント登録
   startBtn.addEventListener('click', () => {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     startBtn.style.display = 'none';
+    resetGame();
     isPlaying = true;
     gameLoop();
   });
 
-  // タッチ操作（※スライドとなぞりを厳密に分離）
+  retryBtn.addEventListener('click', () => {
+    resetGame();
+    isPlaying = true;
+    gameLoop();
+  });
+
+  // タッチ操作
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     for (let i = 0; i < e.touches.length; i++) {
       const touchX = e.touches[i].clientX - rect.left;
       const laneIndex = Math.floor(touchX / (rect.width / laneCount));
-      if (laneIndex >= 0 && laneIndex < laneCount) {
-        handleTouchStart(laneIndex); // スライド以外を判定
-      }
+      if (laneIndex >= 0 && laneIndex < laneCount) handleTouchStart(laneIndex);
     }
   });
 
@@ -439,9 +566,7 @@
     for (let i = 0; i < e.touches.length; i++) {
       const touchX = e.touches[i].clientX - rect.left;
       const laneIndex = Math.floor(touchX / (rect.width / laneCount));
-      if (laneIndex >= 0 && laneIndex < laneCount) {
-        handleSlide(laneIndex); // 指を滑らせた時だけスライド判定！
-      }
+      if (laneIndex >= 0 && laneIndex < laneCount) handleSlide(laneIndex);
     }
   });
 
@@ -455,9 +580,7 @@
         const laneIndex = Math.floor(touchX / (rect.width / laneCount));
         if (laneIndex === lane) stillTouching = true;
       }
-      if (!stillTouching && isLaneHolding[lane]) {
-        handleTouchEnd(lane);
-      }
+      if (!stillTouching && isLaneHolding[lane]) handleTouchEnd(lane);
     }
   });
 
@@ -468,7 +591,7 @@
     if (laneIndex >= 0 && laneIndex < laneCount) handleTouchStart(laneIndex);
   });
   canvas.addEventListener('mousemove', (e) => {
-    if (e.buttons === 1) { // クリックしながらドラッグ時
+    if (e.buttons === 1) {
       const rect = canvas.getBoundingClientRect();
       const laneIndex = Math.floor((e.clientX - rect.left) / (rect.width / laneCount));
       if (laneIndex >= 0 && laneIndex < laneCount) handleSlide(laneIndex);
