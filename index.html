@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>絵本風音ゲー 5曲版</title>
   
-  <!-- ★ Google Fonts から「解星オプティ (Kaisei Opti)」を読み込み -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
@@ -20,8 +19,6 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      
-      /* ★ 全体に「解星オプティ」を適用 */
       font-family: "Kaisei Opti", serif;
       overflow: hidden;
     }
@@ -71,7 +68,6 @@
       font-family: inherit;
     }
 
-    /* --- 右上「戻る」ボタン --- */
     #back-to-select-btn {
       position: absolute;
       top: 12px;
@@ -88,7 +84,6 @@
       z-index: 10;
       transition: transform 0.1s ease, background 0.1s ease;
       font-family: inherit;
-      
       display: flex;
       align-items: center;
       justify-content: center;
@@ -114,7 +109,6 @@
       box-sizing: border-box;
     }
 
-    /* --- 選曲画面タイトル --- */
     #select-title {
       font-size: 24px;
       color: #6c5ce7;
@@ -131,7 +125,6 @@
       100% { transform: translateY(-6px) rotate(1.5deg); }
     }
 
-    /* 仮想スクロール用ビューポート */
     #virtual-scroll-viewport {
       width: 300px;
       height: 480px;
@@ -198,7 +191,6 @@
       text-align: right;
     }
 
-    /* 背景パーティクル */
     #particle-container {
       position: absolute;
       top: 0;
@@ -284,7 +276,6 @@
   
   <button id="back-to-select-btn">◀ 戻る</button>
 
-  <!-- 選曲画面 -->
   <div id="select-screen" class="overlay-screen">
     <div id="particle-container"></div>
     <div id="select-title">★ music select ★</div>
@@ -294,7 +285,6 @@
     </div>
   </div>
 
-  <!-- リザルト画面 -->
   <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
@@ -344,7 +334,6 @@
   const selectBtn = document.getElementById('select-btn');
   const newRecordTag = document.getElementById('new-record');
 
-  /* ★ Canvas内の文字用フォント設定を「Kaisei Opti」に変更 */
   const GAME_FONT = '"Kaisei Opti", serif';
 
   let audioCtx = null;
@@ -548,6 +537,7 @@
     updateCombo(0);
   }
 
+  /* ★ タップ開始時処理：スライドノーツ(slide)を除外 */
   function handleTouchStart(laneIndex) {
     if (!isPlaying) return;
     isLaneHolding[laneIndex] = true;
@@ -567,13 +557,14 @@
 
     if (hitIndex !== -1 && minDistance < 70) {
       const note = notes[hitIndex];
-      if (note.type === 'normal' || note.type === 'slide') {
+      if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, laneIndex);
       } else if (note.type === 'hold') {
         note.holding = true;
         applyJudgement(minDistance, laneIndex);
       }
+      // スライドノーツ(slide)はタップでは判定されないように変更
     }
   }
 
@@ -592,6 +583,7 @@
     }
   }
 
+  /* ★ スライド時処理：なぞって通過した時のみ判定 */
   function handleSlide(laneIndex) {
     if (!isPlaying) return;
 
@@ -655,7 +647,6 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    /* レーン区切り線 */
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
@@ -667,7 +658,6 @@
     }
     ctx.setLineDash([]);
 
-    /* 判定枠 */
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       ctx.save();
@@ -684,7 +674,6 @@
       ctx.fill();
       ctx.restore();
 
-      /* レーンラベルフォント */
       ctx.fillStyle = '#b2bec3';
       ctx.font = `bold 18px ${GAME_FONT}`;
       ctx.textAlign = 'center';
@@ -693,7 +682,6 @@
 
     spawnNotes();
 
-    /* ノーツ描画 */
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
@@ -766,7 +754,6 @@
       ctx.restore();
     }
 
-    /* エフェクト・文字描画 */
     for (let i = hitEffects.length - 1; i >= 0; i--) {
       let effect = hitEffects[i];
       effect.radius += 2.5;
@@ -807,7 +794,6 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // イベントリスナー設定
   backToSelectBtn.addEventListener('click', () => {
     renderSongSelectUI();
   });
