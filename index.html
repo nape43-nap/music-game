@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版</title>
+  <title>絵本風音ゲー 5曲版（クレジット演出付き）</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -159,8 +159,8 @@
       position: absolute;
       left: 10px;
       width: 300px;
-      height: 64px;
-      padding: 10px 14px;
+      height: 68px;
+      padding: 8px 12px;
       background: #fff;
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
@@ -184,11 +184,11 @@
     .song-info {
       text-align: left;
       flex-grow: 1;
-      margin-right: 8px;
+      margin-left: 10px;
       min-width: 0;
     }
     .song-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: bold;
       color: #2d3436;
       white-space: nowrap;
@@ -196,12 +196,72 @@
       text-overflow: ellipsis;
       width: 100%;
     }
+    .song-composer {
+      font-size: 12px;
+      color: #636e72;
+      font-family: "Indie Flower", cursive;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .song-highscore {
       font-size: 14px;
       font-weight: bold;
       color: #6c5ce7;
       text-align: right;
       flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    /* クレジット（曲前演出）画面のスタイル */
+    #credit-screen {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 30;
+      background-color: rgba(252, 249, 242, 0.98);
+    }
+    .credit-card {
+      width: 280px;
+      padding: 24px;
+      background: #fff;
+      border: 4px solid #fbd28b;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .credit-jacket {
+      font-size: 64px;
+      margin-bottom: 12px;
+      animation: pulseJacket 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulseJacket {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+    .credit-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2d3436;
+      margin-bottom: 6px;
+    }
+    .credit-composer-text {
+      font-size: 16px;
+      color: #6c5ce7;
+      font-family: "Indie Flower", cursive;
+      margin-bottom: 16px;
+    }
+    .credit-loading {
+      font-size: 14px;
+      color: #b2bec3;
+      font-family: "Indie Flower", cursive;
+      letter-spacing: 2px;
     }
 
     #particle-container {
@@ -299,6 +359,7 @@
   
   <button id="back-to-select-btn">◀ 戻る</button>
 
+  <!-- 曲選択画面 -->
   <div id="select-screen" class="overlay-screen">
     <div id="particle-container"></div>
     <div id="select-title">★ music select ★</div>
@@ -308,6 +369,17 @@
     </div>
   </div>
 
+  <!-- クレジット演出画面 -->
+  <div id="credit-screen" class="overlay-screen">
+    <div class="credit-card">
+      <div id="credit-jacket" class="credit-jacket">🌟</div>
+      <div id="credit-title" class="credit-title">曲名</div>
+      <div id="credit-composer" class="credit-composer-text">Composer</div>
+      <div class="credit-loading">Now Loading...</div>
+    </div>
+  </div>
+
+  <!-- リザルト画面 -->
   <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
@@ -339,12 +411,13 @@
 </div>
 
 <script>
+  // 曲データにジャケット(jacket)と作曲者(composer)を追加
   const songList = [
-    { id: 'song_1', name: '1. きらきら星', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
-    { id: 'song_2', name: '2. チューリップ', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
-    { id: 'song_3', name: '3. どんぐりころころ', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
-    { id: 'song_4', name: '4. ちょうちょう', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
-    { id: 'song_5', name: '5. 大きな栗の木の下で', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
+    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
+    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
+    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
+    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
   ];
 
   const colors = ['#ffb8b8', '#85e3d4', '#b5b2ff', '#fbd28b', '#ffc1e3'];
@@ -353,6 +426,7 @@
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const selectScreen = document.getElementById('select-screen');
+  const creditScreen = document.getElementById('credit-screen');
   const resultScreen = document.getElementById('result-screen');
   const viewport = document.getElementById('virtual-scroll-viewport');
   const spacer = document.getElementById('virtual-scroll-spacer');
@@ -424,7 +498,7 @@
   }
 
   /* --- 仮想スクロール --- */
-  const ITEM_HEIGHT = 76;
+  const ITEM_HEIGHT = 80;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
   
@@ -458,8 +532,14 @@
       card.style.top = `${i * ITEM_HEIGHT}px`;
 
       card.innerHTML = `
-        <div class="song-info">
-          <div class="song-name">${song.name}</div>
+        <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 28px; width: 40px; text-align: center; margin-right: 6px; flex-shrink: 0;">
+            ${song.jacket}
+          </div>
+          <div class="song-info">
+            <div class="song-name">${song.name}</div>
+            <div class="song-composer">${song.composer}</div>
+          </div>
         </div>
         <div class="song-highscore">
           <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
@@ -467,7 +547,7 @@
         </div>
       `;
       
-      card.addEventListener('click', () => startSong(song));
+      card.addEventListener('click', () => triggerCreditAndStart(song));
       spacer.appendChild(card);
     }
   }
@@ -480,18 +560,33 @@
     updateVirtualScroll();
     startParticles();
     selectScreen.style.display = 'flex';
+    creditScreen.style.display = 'none';
     resultScreen.style.display = 'none';
   }
 
-  /* --- ゲームメイン処理 --- */
-  function startSong(song) {
+  /* --- 曲選択時のクレジット演出 & スタート処理 --- */
+  function triggerCreditAndStart(song) {
     currentSong = song;
     stopParticles();
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+
+    // 曲選択画面を消して、クレジット画面を表示
     selectScreen.style.display = 'none';
-    resultScreen.style.display = 'none';
+    document.getElementById('credit-jacket').textContent = song.jacket;
+    document.getElementById('credit-title').textContent = song.name;
+    document.getElementById('credit-composer').textContent = `Music by ${song.composer}`;
+    creditScreen.style.display = 'flex';
+
+    // 2.2秒間クレジットを見せたあと、ゲーム画面へ移行
+    setTimeout(() => {
+      creditScreen.style.display = 'none';
+      startSong();
+    }, 2200);
+  }
+
+  function startSong() {
     resetGame();
     isPlaying = true;
     gameLoop();
@@ -1123,7 +1218,7 @@
     renderSongSelectUI();
   });
 
-  retryBtn.addEventListener('click', () => startSong(currentSong));
+  retryBtn.addEventListener('click', () => triggerCreditAndStart(currentSong));
   selectBtn.addEventListener('click', () => renderSongSelectUI());
 
   /* --- PCキーボード操作対応 --- */
