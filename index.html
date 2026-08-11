@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 速度調整版</title>
+  <title>絵本風音ゲー 長押しスライド一体型</title>
   <style>
     body {
       margin: 0;
@@ -321,7 +321,8 @@
 
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
-      if (note.lane === laneIndex && note.type === 'hold' && note.holding) {
+      // ホールドノーツの離し処理（スライドノーツがついていない通常ホールドのみ）
+      if (note.lane === laneIndex && note.type === 'hold' && note.holding && !note.hasSlide) {
         const tailY = note.y - note.length;
         const distance = Math.abs(tailY - targetY);
         notes.splice(i, 1);
@@ -335,8 +336,18 @@
 
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
+      // 独立した単体スライドノーツの判定
       if (note.lane === laneIndex && note.type === 'slide') {
         const distance = Math.abs(note.y - targetY);
+        if (distance < 70) {
+          notes.splice(i, 1);
+          applyJudgement(distance, laneIndex);
+        }
+      }
+      // ホールドノーツの終点についているスライドの判定
+      else if (note.type === 'hold' && note.holding && note.hasSlide) {
+        const tailY = note.y - note.length;
+        const distance = Math.abs(tailY - targetY);
         if (distance < 70) {
           notes.splice(i, 1);
           applyJudgement(distance, laneIndex);
@@ -353,12 +364,17 @@
       const lane = Math.floor(Math.random() * laneCount);
       const rand = Math.random();
 
-      if (rand < 0.55) {
+      if (rand < 0.45) {
+        // ノーマルノーツ
         notes.push({ type: 'normal', lane: lane, y: 0, speed: 4 });
-      } else if (rand < 0.8) {
-        notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: 4, holding: false });
+      } else if (rand < 0.70) {
+        // 通常ホールドノーツ
+        notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: 4, holding: false, hasSlide: false });
+      } else if (rand < 0.85) {
+        // 長押しの終点にスライドがくっついたコネクトノーツ！
+        notes.push({ type: 'hold', lane: lane, y: 0, length: 130, speed: 4, holding: false, hasSlide: true });
       } else {
-        // スライドノーツのスピードを他のノーツに合わせて 4 に変更
+        // 単体スライドノーツ
         notes.push({ type: 'slide', lane: lane, y: 0, speed: 4 });
       }
 
@@ -452,16 +468,35 @@
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
 
+        // 帯部分
         ctx.shadowBlur = 12;
-        ctx.shadowColor = '#55efc4';
-        ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
+        ctx.shadowColor = note.hasSlide ? '#0984e3' : '#55efc4';
+        ctx.fillStyle = note.hasSlide ? 'rgba(116, 185, 255, 0.7)' : 'rgba(85, 239, 196, 0.7)';
         ctx.fillRect(x - 16, tailY, 32, headY - tailY);
 
-        ctx.fillStyle = '#00b894';
+        // 始点（円）
+        ctx.fillStyle = note.hasSlide ? '#74b9ff' : '#00b894';
         ctx.beginPath();
         ctx.arc(x, headY, 18, 0, Math.PI * 2);
-        ctx.arc(x, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
+
+        // 終点（スライド一体型ならスライド記号を描画）
+        if (note.hasSlide) {
+          ctx.fillStyle = '#0984e3';
+          ctx.beginPath();
+          ctx.roundRect(x - 22, tailY - 14, 44, 28, 14);
+          ctx.fill();
+
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 20px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('〰', x, tailY + 7);
+        } else {
+          ctx.beginPath();
+          ctx.arc(x, tailY, 18, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
@@ -607,7 +642,7 @@
     if (e.key === 'd' || e.key === 'D') handleTouchStart(0);
     if (e.key === 'f' || e.key === 'F') handleTouchStart(1);
     if (e.key === 'j' || e.key === 'J') handleTouchStart(2);
-    if (e.key === 'k' || e.key === 'K') handleTouchStart(3);
+    if (e.key === 'k' || e.key === 'K') handleTouchEnd(3);
   });
   window.addEventListener('keyup', (e) => {
     if (e.key === 'd' || e.key === 'D') handleTouchEnd(0);
