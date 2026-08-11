@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー リザルト画面版</title>
+  <title>絵本風音ゲー 速度調整版</title>
   <style>
     body {
       margin: 0;
@@ -65,7 +65,7 @@
       text-shadow: 1px 1px 0px #fff;
     }
 
-    /* リザルト画面用スタイル */
+    /* リザルト画面スタイル */
     #result-screen {
       display: none;
       position: absolute;
@@ -136,7 +136,7 @@
   <div id="score-display">SCORE: 0</div>
   <button id="start-btn" class="btn">★ あそぶ ★</button>
 
-  <!-- リザルト画面のUI構造 -->
+  <!-- リザルト画面 -->
   <div id="result-screen">
     <div id="result-card">
       <h2 class="result-title">STAGE CLEAR!</h2>
@@ -172,10 +172,10 @@
   let combo = 0;
   let maxCombo = 0;
 
-  // 判定カウント用オブジェクト
+  // 判定カウント用
   let counts = { perfect: 0, great: 0, good: 0, miss: 0 };
 
-  // 判定アニメーション
+  // 判定表示アニメーション
   let judgeText = '';
   let judgeColor = '#2d3436';
   let judgeTimer = 0;
@@ -201,7 +201,7 @@
   // ホールド状態
   let isLaneHolding = [false, false, false, false];
 
-  // ノーツデータ & 生成カウント制限（テスト用100個）
+  // ノーツデータ & 生成制御（100個制限）
   let notes = [];
   let spawnTimer = 0;
   let spawnedCount = 0;
@@ -346,7 +346,7 @@
   }
 
   function spawnNotes() {
-    if (spawnedCount >= totalNotesToSpawn) return; // 規定数に達したら生成停止
+    if (spawnedCount >= totalNotesToSpawn) return;
 
     spawnTimer++;
     if (spawnTimer > 45) {
@@ -358,7 +358,8 @@
       } else if (rand < 0.8) {
         notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: 4, holding: false });
       } else {
-        notes.push({ type: 'slide', lane: lane, y: 0, speed: 4.5 });
+        // スライドノーツのスピードを他のノーツに合わせて 4 に変更
+        notes.push({ type: 'slide', lane: lane, y: 0, speed: 4 });
       }
 
       spawnTimer = 0;
@@ -366,7 +367,6 @@
     }
   }
 
-  // リザルト画面の表示処理
   function showResult() {
     isPlaying = false;
     document.getElementById('res-score').textContent = score;
@@ -379,7 +379,6 @@
     resultScreen.style.display = 'flex';
   }
 
-  // メイン描画ループ
   function gameLoop() {
     if (!isPlaying) return;
 
@@ -525,7 +524,7 @@
       ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 120);
     }
 
-    // クリア判定（ノーツが全部生成され、画面上からもなくなった場合）
+    // クリア判定
     if (spawnedCount >= totalNotesToSpawn && notes.length === 0) {
       showResult();
       return;
