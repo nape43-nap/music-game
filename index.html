@@ -44,7 +44,7 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: 100% 100%;
-      background-color: #fcf9f2;
+      background-color: transparent; /* 白い背景を消して透明に */
       box-shadow: 0 12px 28px rgba(184, 74, 74, 0.25);
       overflow: hidden;
       touch-action: none;
@@ -72,16 +72,7 @@
       100% { transform: translateY(-5px) rotate(2deg); }
     }
 
-    #girl-peek {
-      position: absolute;
-      top: 20px;
-      right: 35px;
-      width: 54px;
-      height: 40px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45"><ellipse cx="30" cy="25" rx="22" ry="18" fill="%238b5a2b"/><circle cx="30" cy="22" r="16" fill="%23ffeaa7"/><path d="M18,18 Q30,8 42,18 Z" fill="%23654321"/><circle cx="23" cy="22" r="2" fill="%232d3436"/><circle cx="37" cy="22" r="2" fill="%232d3436"/><path d="M28,26 Q30,29 32,26" fill="none" stroke="%23d63031" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><circle cx="41" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><path d="M10,32 Q15,22 22,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/><path d="M50,32 Q45,22 38,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/></svg>') no-repeat center/contain;
-      z-index: 26;
-      pointer-events: none;
-    }
+    /* 女の子のイラスト（#girl-peek）は削除しました */
 
     canvas { display: block; width: 100%; height: 100%; }
     .btn {
@@ -138,7 +129,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(252, 249, 242, 0.94);
+      background-color: rgba(252, 249, 242, 0.85); /* 選択画面等の中身が見やすいよう薄めの背景に */
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.03) 15%, transparent 16%),
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
@@ -165,18 +156,19 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    /* 3.png をカード枠として設定 */
+    /* 3.png を約5倍の大きさに拡大（高さ 76px -> 380px） */
     .song-card {
       position: absolute;
       left: 10px;
       width: 330px;
-      height: 76px;
-      padding: 8px 18px;
+      height: 380px;
+      padding: 30px 20px;
       background: url('images/3.png') no-repeat center center;
       background-size: 100% 100%;
       border: none;
       cursor: pointer;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
       align-items: center;
       box-sizing: border-box;
@@ -187,34 +179,30 @@
     .song-card:active { transform: scale(0.95) !important; }
 
     .song-info {
-      text-align: left;
+      text-align: center;
       flex-grow: 1;
-      margin-left: 10px;
-      min-width: 0;
-      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
     }
     .song-name {
-      font-size: 13px;
+      font-size: 20px;
       font-weight: bold;
       color: #2d3436;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
+      margin-bottom: 8px;
     }
     .song-composer {
-      font-size: 11px;
+      font-size: 14px;
       color: #636e72;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     .song-highscore {
-      font-size: 13px;
+      font-size: 15px;
       font-weight: bold;
       color: #b84a4a;
-      text-align: right;
-      flex-shrink: 0;
+      text-align: center;
+      margin-bottom: 10px;
     }
 
     #credit-screen { display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 25; background-color: rgba(252, 249, 242, 0.98); }
@@ -249,7 +237,7 @@
   <div id="floating-title"><span>Music Select</span></div>
 
   <div id="game-container">
-    <div id="girl-peek"></div>
+    <!-- 女の子のイラスト要素は削除されました -->
     <div id="score-display">SCORE: 0</div>
     <button id="back-to-select-btn">◀ 戻る</button>
 
@@ -380,7 +368,8 @@
     particleContainer.innerHTML = '';
   }
 
-  const ITEM_HEIGHT = 86;
+  /* 拡大したカードサイズ（380px）に合わせてスクロールの高さを変更 */
+  const ITEM_HEIGHT = 390;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
   spacer.style.height = `${SET_HEIGHT * 3}px`;
@@ -411,20 +400,18 @@
       card.className = 'song-card';
       card.style.top = `${i * ITEM_HEIGHT}px`;
 
-      // 3.png の枠内に各要素を配置
+      // 拡大された枠に合わせたレイアウト
       card.innerHTML = `
-        <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 24px; width: 36px; text-align: center; margin-right: 6px; flex-shrink: 0;">
-            ${song.jacket}
-          </div>
-          <div class="song-info">
-            <div class="song-name">${song.name}</div>
-            <div class="song-composer">${song.composer}</div>
-          </div>
+        <div style="font-size: 56px; margin-top: 10px;">
+          ${song.jacket}
+        </div>
+        <div class="song-info">
+          <div class="song-name">${song.name}</div>
+          <div class="song-composer">${song.composer}</div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 9px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
-          <div style="font-size: 14px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
+          <div style="font-size: 11px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
+          <div style="font-size: 22px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
       
