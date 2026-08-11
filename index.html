@@ -7,7 +7,8 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
+  <!-- Kaisei Opti と Daruma Drop One（だるまどろっぷ）を読み込み -->
+  <link href="https://fonts.googleapis.com/css2?family=Daruma+Drop+One&family=Kaisei+Opti:wght@700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -26,8 +27,8 @@
       position: relative;
       width: 360px;
       height: 600px;
-      border: 6px solid #6c5ce7;
-      border-radius: 24px;
+      border: 5px solid #6c5ce7;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       background-color: #fcf9f2;
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.03) 15%, transparent 16%),
@@ -51,7 +52,7 @@
       color: #fff;
       background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
       border: 3px solid #fff;
-      border-radius: 40px;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       cursor: pointer;
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
       font-family: inherit;
@@ -82,7 +83,7 @@
       color: #6c5ce7;
       background: rgba(255, 255, 255, 0.88);
       border: 2px solid #6c5ce7;
-      border-radius: 16px;
+      border-radius: 205px 25px 195px 25px/25px 195px 25px 205px;
       padding: 5px 12px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -120,14 +121,15 @@
     }
 
     #select-title {
-      font-size: 24px;
+      font-size: 26px;
       color: #6c5ce7;
       margin-bottom: 10px;
-      font-weight: bold;
       animation: floatTitle 2s ease-in-out infinite alternate;
       display: inline-block;
       z-index: 2;
-      font-family: inherit;
+      /* だるまどろっぷフォントを適用 */
+      font-family: "Daruma Drop One", cursive;
+      letter-spacing: 1px;
     }
 
     @keyframes floatTitle {
@@ -164,9 +166,10 @@
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      border: 3px solid #fdcb6e;
-      border-radius: 18px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      /* 曲カードの枠線をより淡いパステルカラーに */
+      border: 3px solid #fbd28b;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -236,9 +239,9 @@
       background-image: 
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      border: 4px solid #fdcb6e;
-      border-radius: 20px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border: 4px solid #fbd28b;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
       text-align: center;
       font-family: inherit;
     }
@@ -260,7 +263,7 @@
       color: #fff;
       font-size: 13px;
       padding: 2px 8px;
-      border-radius: 10px;
+      border-radius: 205px 25px 195px 25px/25px 195px 25px 205px;
       margin-bottom: 8px;
       font-weight: bold;
     }
@@ -326,14 +329,14 @@
 
 <script>
   const songList = [
-    { id: 'song_1', name: '1. きらきら星', totalNotes: 25, speed: '4.2', color: '#ff7675' },
-    { id: 'song_2', name: '2. チューリップ', totalNotes: 30, speed: '4.5', color: '#00b894' },
-    { id: 'song_3', name: '3. どんぐりころころ', totalNotes: 35, speed: '4.8', color: '#6c5ce7' },
-    { id: 'song_4', name: '4. ちょうちょう', totalNotes: 40, speed: '5.2', color: '#fdcb6e' },
-    { id: 'song_5', name: '5. 大きな栗の木の下で', totalNotes: 45, speed: '5.5', color: '#e84393' }
+    { id: 'song_1', name: '1. きらきら星', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
+    { id: 'song_2', name: '2. チューリップ', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
+    { id: 'song_3', name: '3. どんぐりころころ', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
+    { id: 'song_4', name: '4. ちょうちょう', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
   ];
 
-  const colors = ['#ff7675', '#00b894', '#6c5ce7', '#fdcb6e', '#e84393'];
+  const colors = ['#ffb8b8', '#85e3d4', '#b5b2ff', '#fbd28b', '#ffc1e3'];
   let currentSong = songList[0];
 
   const canvas = document.getElementById('gameCanvas');
@@ -794,7 +797,6 @@
       isLaneHolding[l] = true;
     });
 
-    // レーン区切り線
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
@@ -806,7 +808,6 @@
     }
     ctx.setLineDash([]);
 
-    // 判定ライン・ターゲット
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       ctx.save();
@@ -901,7 +902,6 @@
           ctx.fillRect(x - 16, tailY, 32, headY - tailY);
         }
 
-        // 始点
         ctx.save();
         ctx.translate(x, headY);
         ctx.scale(pulseScale, pulseScale);
@@ -912,7 +912,6 @@
         ctx.fill();
         ctx.restore();
 
-        // 終点（始点と同じ緑色系に変更）
         ctx.save();
         ctx.translate(x, tailY);
         ctx.scale(pulseScale, pulseScale);
@@ -959,7 +958,6 @@
         const startX = note.holding ? getHoldXAtY(note, targetY) : laneXPositions[note.path[0].lane];
         const endX = laneXPositions[note.path[note.path.length - 1].lane];
 
-        // 始点
         ctx.save();
         ctx.translate(startX, headY);
         ctx.scale(pulseScale, pulseScale);
@@ -970,7 +968,6 @@
         ctx.fill();
         ctx.restore();
 
-        // 終点（始点と同じ紫系＋白いハイライトに変更）
         ctx.save();
         ctx.translate(endX, tailY);
         ctx.scale(pulseScale, pulseScale);
