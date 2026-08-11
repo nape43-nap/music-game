@@ -13,6 +13,7 @@
     body {
       margin: 0;
       padding: 0;
+      /* もともとの綺麗な背景のグラデーション */
       background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #ffeaa7 100%);
       display: flex;
       flex-direction: column;
@@ -33,6 +34,7 @@
       justify-content: center;
     }
 
+    /* 1.png（大きなしおり）を背景として中央に配置 */
     #game-container {
       position: absolute;
       top: 0;
@@ -150,7 +152,7 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    /* 画像のように 3.png を横長カードの背景として配置 */
+    /* 3.png を横長カードの背景として綺麗に配置 */
     .song-card {
       position: absolute;
       left: 10px;
@@ -362,7 +364,6 @@
     particleContainer.innerHTML = '';
   }
 
-  /* 3.pngカードの高さに合わせてスクロールの間隔を設定 */
   const ITEM_HEIGHT = 85;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
@@ -394,7 +395,6 @@
       card.className = 'song-card';
       card.style.top = `${i * ITEM_HEIGHT}px`;
 
-      // 3.png の中に、ジャケット・曲名・アーティスト・ハイスコアをきれいに収める
       card.innerHTML = `
         <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
           <div style="font-size: 24px; width: 32px; text-align: center; margin-right: 6px; flex-shrink: 0;">
