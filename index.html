@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー フルノーツ版</title>
+  <title>絵本風音ゲー 光るノーツ版</title>
   <style>
     body {
       margin: 0;
@@ -26,7 +26,7 @@
       background-color: #fffdf9;
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
       overflow: hidden;
-      touch-action: none; /* スマホの標準スクロール等を無効化 */
+      touch-action: none;
       transform: translateY(-19px);
     }
     canvas {
@@ -89,6 +89,9 @@
   let judgeColor = '#2d3436';
   let judgeTimer = 0;
 
+  // タップ時の光のエフェクト（エフェクト粒子の配列）
+  let hitEffects = [];
+
   // レーン設定
   const laneCount = 4;
   const laneWidth = canvas.width / laneCount;
@@ -104,14 +107,12 @@
   const targetY = 500;
   const targetRadius = 28;
 
-  // 各レーンのホールド（長押し）状態管理
+  // ホールド状態
   let isLaneHolding = [false, false, false, false];
 
   // ノーツデータ
   let notes = [];
   let spawnTimer = 0;
-
-  const laneFrequencies = [300, 400, 500, 600];
 
   function playSound(freqMult = 1) {
     if (!audioCtx) return;
@@ -132,32 +133,48 @@
     osc.stop(audioCtx.currentTime + 0.08);
   }
 
-  // 判定適用共通関数
-  function applyJudgement(distance) {
+  // ヒット時の光の波紋エフェクトを発生させる関数
+  function createHitEffect(x, y, color) {
+    hitEffects.push({
+      x: x,
+      y: y,
+      radius: 20,
+      maxRadius: 55,
+      alpha: 1.0,
+      color: color
+    });
+  }
+
+  // 判定適用
+  function applyJudgement(distance, laneIndex) {
+    const x = laneXPositions[laneIndex];
+    
     if (distance < 25) {
       judgeText = 'PERFECT!';
       judgeColor = '#fdcb6e';
       score += 100;
       combo++;
       playSound(1.5);
+      createHitEffect(x, targetY, '#fdcb6e');
     } else if (distance < 45) {
       judgeText = 'GREAT!';
       judgeColor = '#00b894';
       score += 80;
       combo++;
       playSound(1.2);
+      createHitEffect(x, targetY, '#00b894');
     } else if (distance < 70) {
       judgeText = 'GOOD';
       judgeColor = '#0984e3';
       score += 50;
       combo++;
       playSound(1.0);
+      createHitEffect(x, targetY, '#0984e3');
     }
     judgeTimer = 30;
     scoreDisplay.textContent = `SCORE: ${score}`;
   }
 
-  // タップ＆長押し開始判定
   function handleTouchStart(laneIndex) {
     if (!isPlaying) return;
     isLaneHolding[laneIndex] = true;
@@ -179,32 +196,29 @@
       const note = notes[hitIndex];
       if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
-        applyJudgement(minDistance);
+        applyJudgement(minDistance, laneIndex);
       } else if (note.type === 'hold') {
-        note.holding = true; // 長押し開始
-        applyJudgement(minDistance);
+        note.holding = true;
+        applyJudgement(minDistance, laneIndex);
       }
     }
   }
 
-  // 長押し解除判定（指を離したとき）
   function handleTouchEnd(laneIndex) {
     if (!isPlaying) return;
     isLaneHolding[laneIndex] = false;
 
-    // ホールド中のノーツがあれば終点判定
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       if (note.lane === laneIndex && note.type === 'hold' && note.holding) {
         const tailY = note.y - note.length;
         const distance = Math.abs(tailY - targetY);
         notes.splice(i, 1);
-        applyJudgement(distance);
+        applyJudgement(distance, laneIndex);
       }
     }
   }
 
-  // スライド（なぞり）判定
   function handleSlide(laneIndex) {
     if (!isPlaying) return;
 
@@ -214,13 +228,12 @@
         const distance = Math.abs(note.y - targetY);
         if (distance < 70) {
           notes.splice(i, 1);
-          applyJudgement(distance);
+          applyJudgement(distance, laneIndex);
         }
       }
     }
   }
 
-  // さまざまな種類のノーツ生成
   function spawnNotes() {
     spawnTimer++;
     if (spawnTimer > 45) {
@@ -228,13 +241,10 @@
       const rand = Math.random();
 
       if (rand < 0.55) {
-        // 通常ノーツ (赤)
         notes.push({ type: 'normal', lane: lane, y: 0, speed: 4 });
       } else if (rand < 0.8) {
-        // ホールドノーツ (黄緑・長さ120px)
         notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: 4, holding: false });
       } else {
-        // スライドノーツ (青)
         notes.push({ type: 'slide', lane: lane, y: 0, speed: 4.5 });
       }
 
@@ -258,17 +268,23 @@
       ctx.stroke();
     }
 
-    // 2. 判定ライン
+    // 2. 判定ライン描画
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       
+      ctx.save();
+      if (isLaneHolding[i]) {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#55efc4';
+      }
       ctx.beginPath();
       ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = isLaneHolding[i] ? '#55efc4' : '#fdcb6e'; // 押し中はエメラルド色に光る
+      ctx.strokeStyle = isLaneHolding[i] ? '#55efc4' : '#fdcb6e';
       ctx.lineWidth = 5;
       ctx.stroke();
       ctx.fillStyle = isLaneHolding[i] ? 'rgba(85, 239, 196, 0.4)' : 'rgba(253, 203, 110, 0.2)';
       ctx.fill();
+      ctx.restore();
 
       ctx.fillStyle = '#b2bec3';
       ctx.font = 'bold 16px sans-serif';
@@ -279,17 +295,29 @@
     // 3. ノーツ生成
     spawnNotes();
 
-    // 4. ノーツの移動・描画
+    // 4. ノーツの移動・光る描写
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
       const x = laneXPositions[note.lane];
 
+      ctx.save(); // 発光処理用に描画状態を保存
+
       if (note.type === 'normal') {
-        // 通常ノーツ（赤色）
+        // 赤ノーツ（発光エフェクト）
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#ff7675';
         ctx.fillStyle = '#ff7675';
+        
         ctx.beginPath();
         ctx.arc(x, note.y, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 中心の白いくっきりしたハイライト
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2);
         ctx.fill();
 
         if (note.y > targetY + 70) {
@@ -297,9 +325,12 @@
           triggerMiss();
         }
       } else if (note.type === 'hold') {
-        // ロングノーツ（黄緑の帯）
-        const headY = note.holding ? targetY : note.y; // 押している間は先頭が判定ラインに固定
+        // ロングノーツ（緑発光）
+        const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
+
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#55efc4';
 
         ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
         ctx.fillRect(x - 16, tailY, 32, headY - tailY);
@@ -310,19 +341,21 @@
         ctx.arc(x, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
 
-        // 長押し失敗（おしそこない・離しそこない）
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
           triggerMiss();
         }
       } else if (note.type === 'slide') {
-        // スライドノーツ（青色・矢印）
+        // スライドノーツ（青発光）
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#74b9ff';
+
         ctx.fillStyle = '#74b9ff';
         ctx.beginPath();
         ctx.arc(x, note.y, 18, 0, Math.PI * 2);
         ctx.fill();
 
-        // 矢印マーク描画
+        ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 18px sans-serif';
         ctx.textAlign = 'center';
@@ -333,9 +366,31 @@
           triggerMiss();
         }
       }
+
+      ctx.restore(); // 発光処理をリセット
     }
 
-    // 5. 判定文字 & コンボ表示
+    // 5. ヒット時の光の波紋エフェクト描画
+    for (let i = hitEffects.length - 1; i >= 0; i--) {
+      let effect = hitEffects[i];
+      effect.radius += 2.5;
+      effect.alpha -= 0.05;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = effect.color;
+      ctx.globalAlpha = Math.max(0, effect.alpha);
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+
+      if (effect.alpha <= 0) {
+        hitEffects.splice(i, 1);
+      }
+    }
+
+    // 6. 判定文字 & コンボ表示
     if (judgeTimer > 0) {
       ctx.fillStyle = judgeColor;
       ctx.font = 'bold 28px sans-serif';
@@ -368,7 +423,7 @@
     gameLoop();
   });
 
-  // タッチイベント処理（スマホ・iPad）
+  // タッチ・マウス・キーボード操作
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -396,7 +451,6 @@
 
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    // 離したレーンの確認
     const rect = canvas.getBoundingClientRect();
     for (let lane = 0; lane < laneCount; lane++) {
       let stillTouching = false;
@@ -411,7 +465,6 @@
     }
   });
 
-  // PCのマウスクリック操作
   canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
     const laneIndex = Math.floor((e.clientX - rect.left) / (rect.width / laneCount));
@@ -423,9 +476,8 @@
     if (laneIndex >= 0 && laneIndex < laneCount) handleTouchEnd(laneIndex);
   });
 
-  // PCキーボード操作 (D, F, J, K キー)
   window.addEventListener('keydown', (e) => {
-    if (e.repeat) return; // キー押しっぱなしの連打防止
+    if (e.repeat) return;
     if (e.key === 'd' || e.key === 'D') handleTouchStart(0);
     if (e.key === 'f' || e.key === 'F') handleTouchStart(1);
     if (e.key === 'j' || e.key === 'J') handleTouchStart(2);
