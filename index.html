@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 仮想スクロール100曲対応版</title>
+  <title>絵本風音ゲー 5曲版 (ロングノーツ伸縮対応)</title>
   <style>
     body {
       margin: 0;
@@ -107,13 +107,11 @@
       display: none;
     }
 
-    /* 100曲分の高さを保持するスペーサー */
     #virtual-scroll-spacer {
       position: relative;
       width: 100%;
     }
 
-    /* 楽曲カード（絶対配置でY座標を動的に操作） */
     .song-card {
       position: absolute;
       left: 15px;
@@ -278,21 +276,16 @@
 </div>
 
 <script>
-  // 100曲の楽曲データを自動生成
-  const baseNames = ['きらきら星', 'チューリップ', 'どんぐりころころ', 'ちょうちょう', '大きな栗の木の下で', 'ぶんぶんぶん', 'むすんでひらいて', 'かえるの合唱', 'メリーさんのひつじ', 'アルプス一万尺'];
-  const colors = ['#ff7675', '#00b894', '#6c5ce7', '#fdcb6e', '#e84393', '#0984e3', '#10ac84', '#2e86de', '#ff9ff3', '#f39c12'];
+  // 厳選した5曲のデータ
+  const songList = [
+    { id: 'song_1', name: '1. きらきら星', totalNotes: 25, speed: '4.2', color: '#ff7675' },
+    { id: 'song_2', name: '2. チューリップ', totalNotes: 30, speed: '4.5', color: '#00b894' },
+    { id: 'song_3', name: '3. どんぐりころころ', totalNotes: 35, speed: '4.8', color: '#6c5ce7' },
+    { id: 'song_4', name: '4. ちょうちょう', totalNotes: 40, speed: '5.2', color: '#fdcb6e' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', totalNotes: 45, speed: '5.5', color: '#e84393' }
+  ];
 
-  const songList = Array.from({ length: 100 }, (_, i) => {
-    const baseIndex = i % baseNames.length;
-    return {
-      id: `song_${i + 1}`,
-      name: `${i + 1}. ${baseNames[baseIndex]}`,
-      totalNotes: 30 + (i % 5) * 10,
-      speed: (4.0 + (i % 10) * 0.1).toFixed(1),
-      color: colors[i % colors.length]
-    };
-  });
-
+  const colors = ['#ff7675', '#00b894', '#6c5ce7', '#fdcb6e', '#e84393'];
   let currentSong = songList[0];
 
   const canvas = document.getElementById('gameCanvas');
@@ -360,17 +353,15 @@
   }
 
   /* --- 仮想スクロール (Virtual Scroll) エンジン --- */
-  const ITEM_HEIGHT = 76; // カード高さ(64px) + マージン(12px)
+  const ITEM_HEIGHT = 76;
   const TOTAL_ITEMS = songList.length;
-  const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS; // 100曲分の高さ (7600px)
+  const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
   
-  // 無限ループ用に高さは3セット分確保
   spacer.style.height = `${SET_HEIGHT * 3}px`;
 
   function updateVirtualScroll() {
     let scrollTop = viewport.scrollTop;
 
-    // 無限ループ境界チェック（上下に達したら中央へワープ）
     if (scrollTop < SET_HEIGHT * 0.5) {
       viewport.scrollTop += SET_HEIGHT;
       scrollTop += SET_HEIGHT;
@@ -379,16 +370,13 @@
       scrollTop -= SET_HEIGHT;
     }
 
-    // 画面内に見えている要素のインデックス範囲を計算
     const viewportHeight = viewport.clientHeight;
     const startIndex = Math.floor((scrollTop - ITEM_HEIGHT) / ITEM_HEIGHT);
     const endIndex = Math.ceil((scrollTop + viewportHeight + ITEM_HEIGHT) / ITEM_HEIGHT);
 
-    // スペーサーの中身（DOM）をクリアして見えている部分だけ再生成
     spacer.innerHTML = '';
 
     for (let i = startIndex; i <= endIndex; i++) {
-      // 負の数にも対応した剰余算でデータインデックスを算出
       const dataIndex = ((i % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
       const song = songList[dataIndex];
       const savedScore = localStorage.getItem(`highscore_${song.id}`) || 0;
@@ -396,7 +384,7 @@
       const card = document.createElement('div');
       card.className = 'song-card';
       card.style.borderColor = song.color;
-      card.style.top = `${i * ITEM_HEIGHT}px`; // Y座標を計算して配置
+      card.style.top = `${i * ITEM_HEIGHT}px`;
 
       card.innerHTML = `
         <div class="song-info">
@@ -417,7 +405,6 @@
   viewport.addEventListener('scroll', updateVirtualScroll);
 
   function renderSongSelectUI() {
-    // 中央セットの先頭位置に初期化
     viewport.scrollTop = SET_HEIGHT;
     updateVirtualScroll();
     startParticles();
@@ -582,7 +569,7 @@
       if (rand < 0.50) {
         notes.push({ type: 'normal', lane: lane, y: 0, speed: spd });
       } else if (rand < 0.75) {
-        notes.push({ type: 'hold', lane: lane, y: 0, length: 120, speed: spd, holding: false });
+        notes.push({ type: 'hold', lane: lane, y: 0, length: 140, speed: spd, holding: false });
       } else {
         notes.push({ type: 'slide', lane: lane, y: 0, speed: spd });
       }
@@ -618,6 +605,7 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    /* レーン区切り線 */
     ctx.strokeStyle = '#dfe6e9';
     ctx.lineWidth = 3;
     ctx.setLineDash([8, 8]);
@@ -629,6 +617,7 @@
     }
     ctx.setLineDash([]);
 
+    /* 判定枠 */
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
       ctx.save();
@@ -653,6 +642,7 @@
 
     spawnNotes();
 
+    /* ノーツ描画 */
     for (let i = notes.length - 1; i >= 0; i--) {
       let note = notes[i];
       note.y += note.speed;
@@ -679,23 +669,30 @@
           triggerMiss();
         }
       } else if (note.type === 'hold') {
+        // ホールド中は頭のY座標を判定線（targetY）に固定して棒を縮める
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
 
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = '#55efc4';
-        ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
-        ctx.fillRect(x - 16, tailY, 32, headY - tailY);
+        // 棒（ボディ）の描画
+        if (headY > tailY) {
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = '#55efc4';
+          ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
+          ctx.fillRect(x - 16, tailY, 32, headY - tailY);
+        }
 
+        // 先頭（ヘッド）
         ctx.fillStyle = '#00b894';
         ctx.beginPath();
         ctx.arc(x, headY, 18, 0, Math.PI * 2);
         ctx.fill();
 
+        // 端末（テール）
         ctx.beginPath();
         ctx.arc(x, tailY, 18, 0, Math.PI * 2);
         ctx.fill();
 
+        // 途中で指を離して流れて行ってしまった場合、または押し切れずに過ぎ去った場合
         if (tailY > targetY + 70) {
           notes.splice(i, 1);
           triggerMiss();
@@ -723,6 +720,7 @@
       ctx.restore();
     }
 
+    /* エフェクト・文字描画 */
     for (let i = hitEffects.length - 1; i >= 0; i--) {
       let effect = hitEffects[i];
       effect.radius += 2.5;
