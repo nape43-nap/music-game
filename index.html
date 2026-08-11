@@ -559,7 +559,7 @@
     return laneXPositions[note.path[0].lane];
   }
 
-  // タッチ開始
+  // タッチ開始（通常・ホールド開始のみ。スライド単体は除外）
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
 
@@ -568,6 +568,7 @@
 
     notes.forEach((note, index) => {
       if (note.holding) return;
+      if (note.type === 'slide') return; // スライド単体はtouchstartでは反応させない
 
       let expectedX = laneXPositions[note.lane];
       if (note.type === 'curved_hold') {
@@ -577,7 +578,6 @@
       const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      // 通常・ホールド・スライドの開始位置タップ判定
       if (distanceY < 70 && distanceX < laneWidth * 0.8) {
         if (distanceY < minDistance) {
           minDistance = distanceY;
@@ -590,10 +590,11 @@
       const note = notes[hitIndex];
       const noteX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
 
-      if (note.type === 'normal' || note.type === 'slide') {
+      if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
       } else {
+        // ホールド系
         note.holding = true;
         note.touchId = touchId;
         activeTouches[touchId] = { x: touchX, activeNote: note };
@@ -604,7 +605,7 @@
     }
   }
 
-  // タッチ移動（スライドおよびホールド追従）
+  // タッチ移動（スライド単体およびホールド追従）
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
@@ -612,7 +613,7 @@
 
     touchData.x = touchX;
 
-    // スライド単体ノーツの通過検知
+    // スライド単体ノーツの通過検知（指が通過しているときのみ反応）
     notes.forEach((n, index) => {
       if (n.type === 'slide') {
         const distanceY = Math.abs(n.y - targetY);
@@ -629,7 +630,6 @@
       const expectedX = getHoldXAtY(note, targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      // 指が離れすぎたらホールド途切れミス
       if (distanceX > laneWidth * 0.9) {
         note.holding = false;
         touchData.activeNote = null;
@@ -647,21 +647,26 @@
       const note = touchData.activeNote;
       if (note.holding) {
         const tailY = note.y - note.length;
-        const distance = Math.abs(tailY - targetY);
-        const expectedX = getHoldXAtY(note, targetY);
         
-        // 指を離した実際のX座標と、終点の正しいX座標のズレをチェック
-        const actualTouchX = touchData.x;
-        const xDiff = Math.abs(actualTouchX - expectedX);
+        // 【重要】まだ終点が判定ライン（targetY）に到達していない場合は「早離し（ミス）」とする
+        if (tailY < targetY - 50) {
+          note.holding = false;
+          triggerMiss();
+        } else {
+          // 終点が判定ライン付近まで来ている場合の離し判定
+          const distance = Math.abs(tailY - targetY);
+          const expectedX = getHoldXAtY(note, targetY);
+          const actualTouchX = touchData.x;
+          const xDiff = Math.abs(actualTouchX - expectedX);
 
-        const index = notes.indexOf(note);
-        if (index !== -1) {
-          notes.splice(index, 1);
-          // 終点位置での正確な距離（Y軸のズレ + X軸のズレを総合）
-          if (distance < 70 && xDiff < laneWidth * 0.9) {
-            applyJudgement(distance, expectedX);
-          } else {
-            triggerMiss();
+          const index = notes.indexOf(note);
+          if (index !== -1) {
+            notes.splice(index, 1);
+            if (distance < 70 && xDiff < laneWidth * 0.9) {
+              applyJudgement(distance, expectedX);
+            } else {
+              triggerMiss();
+            }
           }
         }
       }
