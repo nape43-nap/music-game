@@ -13,7 +13,6 @@
     body {
       margin: 0;
       padding: 0;
-      /* もともとの綺麗な背景のグラデーション */
       background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #ffeaa7 100%);
       display: flex;
       flex-direction: column;
@@ -34,7 +33,7 @@
       justify-content: center;
     }
 
-    /* 1.png（大きなしおり）を背景として中央に配置 */
+    /* 1.png（大きなしおり）が縦につぶれないよう contain に設定 */
     #game-container {
       position: absolute;
       top: 0;
@@ -45,7 +44,7 @@
       background-image: url('images/1.png');
       background-repeat: no-repeat;
       background-position: center center;
-      background-size: 100% 100%;
+      background-size: contain;
       background-color: transparent;
       box-shadow: 0 12px 28px rgba(184, 74, 74, 0.25);
       overflow: hidden;
@@ -55,10 +54,10 @@
 
     #floating-title {
       position: absolute;
-      top: 20px;
-      left: 40px;
-      width: 150px;
-      height: 55px;
+      top: 15px;
+      left: 35px;
+      width: 140px;
+      height: 50px;
       background: url('images/2.png') no-repeat center/contain;
       display: flex;
       align-items: center;
@@ -75,52 +74,40 @@
     }
 
     canvas { display: block; width: 100%; height: 100%; }
-    .btn {
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
-      border: 3px solid #fff;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
-      font-family: "Kaisei Opti", serif;
-    }
-    .btn:active { transform: translateY(2px); }
 
+    /* スコア表示（ゲーム中のみ表示） */
     #score-display {
       position: absolute;
-      top: 14px;
-      left: 20px;
-      font-size: 24px;
+      top: 50px;
+      left: 35px;
+      font-size: 22px;
       font-weight: bold;
       color: #b84a4a;
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
-      z-index: 5;
+      z-index: 25;
       font-family: "Caveat", cursive;
       letter-spacing: 1px;
+      display: none; 
     }
 
+    /* 戻るボタン（ゲーム中のみ表示） */
     #back-to-select-btn {
       position: absolute;
-      top: 15px;
-      right: 20px;
-      font-size: 14px;
+      top: 50px;
+      right: 35px;
+      font-size: 13px;
       font-weight: bold;
       color: #b84a4a;
       background: rgba(255, 255, 255, 0.88);
       border: 2px solid #b84a4a;
       border-radius: 8px;
-      padding: 5px 12px;
+      padding: 4px 10px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      z-index: 20;
+      z-index: 25;
       font-family: "Kaisei Opti", serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: none;
     }
 
     .overlay-screen {
@@ -135,13 +122,13 @@
       align-items: center;
       justify-content: flex-start;
       z-index: 15;
-      padding-top: 85px;
+      padding-top: 105px;
       box-sizing: border-box;
     }
 
     #virtual-scroll-viewport {
-      width: 340px;
-      height: 540px;
+      width: 310px;
+      height: 490px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -152,13 +139,13 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    /* 3.png を横長カードの背景として綺麗に配置 */
+    /* 3.png の縦潰れを防ぎ文字が収まるサイズに調整 */
     .song-card {
       position: absolute;
-      left: 10px;
-      width: 320px;
-      height: 75px;
-      padding: 6px 16px;
+      left: 5px;
+      width: 300px;
+      height: 90px;
+      padding: 8px 14px;
       background: url('images/3.png') no-repeat center center;
       background-size: 100% 100%;
       border: none;
@@ -180,19 +167,20 @@
       min-width: 0;
     }
     .song-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
-      color: #718093;
+      color: #574b90;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .song-composer {
       font-size: 11px;
-      color: #a0aec0;
+      color: #718093;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-top: 2px;
     }
     .song-highscore {
       font-size: 12px;
@@ -218,7 +206,15 @@
       100% { transform: translateY(-600px) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
-    #result-card { width: 280px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
+    #result-screen {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding-top: 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.35);
+    }
+    #result-card { width: 270px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
     .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
     .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; }
     .tag-container { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; min-height: 22px; }
@@ -226,6 +222,19 @@
     .result-details { width: 100%; margin: 4px 0 12px 0; border-top: 2px dashed #dfe6e9; padding-top: 6px; font-size: 18px; font-family: "Caveat", cursive; }
     .result-row { display: flex; justify-content: space-between; margin: 3px 0; }
     .btn-group { display: flex; gap: 10px; justify-content: center; }
+    .btn {
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
+      border: 3px solid #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
+      font-family: "Kaisei Opti", serif;
+    }
+    .btn:active { transform: translateY(2px); }
   </style>
 </head>
 <body>
@@ -253,7 +262,7 @@
       </div>
     </div>
 
-    <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
+    <div id="result-screen" class="overlay-screen">
       <div id="result-card">
         <h2 class="result-title">STAGE CLEAR!</h2>
         <div class="tag-container">
@@ -279,6 +288,7 @@
     <canvas id="gameCanvas" width="380" height="660"></canvas>
   </div>
 </div>
+
 <script>
   const songList = [
     { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
@@ -346,7 +356,7 @@
     p.className = 'particle';
     p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
     p.style.color = colors[Math.floor(Math.random() * colors.length)];
-    p.style.left = Math.random() * 320 + 10 + 'px';
+    p.style.left = Math.random() * 280 + 10 + 'px';
     p.style.fontSize = Math.floor(Math.random() * 12 + 16) + 'px';
     const duration = (Math.random() * 2 + 3).toFixed(1);
     p.style.animationDuration = duration + 's';
@@ -364,7 +374,7 @@
     particleContainer.innerHTML = '';
   }
 
-  const ITEM_HEIGHT = 85;
+  const ITEM_HEIGHT = 95;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
   spacer.style.height = `${SET_HEIGHT * 3}px`;
@@ -420,6 +430,8 @@
 
   function renderSongSelectUI() {
     isPlaying = false;
+    scoreDisplay.style.display = 'none';
+    backToSelectBtn.style.display = 'none';
     viewport.scrollTop = SET_HEIGHT;
     updateVirtualScroll();
     startParticles();
@@ -450,6 +462,8 @@
   function startSong() {
     resetGame();
     isPlaying = true;
+    scoreDisplay.style.display = 'block';
+    backToSelectBtn.style.display = 'flex';
     gameLoop();
   }
 
