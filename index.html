@@ -25,56 +25,57 @@
 
     #stage-wrapper {
       position: relative;
-      width: 360px;
-      height: 640px;
+      width: 380px;
+      height: 660px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
 
-    /* Music Select の位置 (images/2.png を使用) */
+    #game-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 380px;
+      height: 660px;
+      border: none;
+      background-image: url('images/1.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 100% 100%;
+      background-color: #fcf9f2;
+      box-shadow: 0 12px 28px rgba(184, 74, 74, 0.25);
+      overflow: hidden;
+      touch-action: none;
+      z-index: 10;
+    }
+
     #floating-title {
       position: absolute;
-      top: 15px;
-      left: 30px;
-      width: 140px;
-      height: 50px;
+      top: 20px;
+      left: 40px;
+      width: 150px;
+      height: 55px;
       background: url('images/2.png') no-repeat center/contain;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 25;
-      animation: floatTitle 2s ease-in-out infinite alternate;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.08));
+      z-index: 30;
+      animation: floatTitle 2.5s ease-in-out infinite alternate;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
     }
-    #floating-title span {
-      display: none; /* テキストの代わりに画像を表示するため非表示に */
-    }
+    #floating-title span { display: none; }
 
     @keyframes floatTitle {
       0% { transform: translateY(0) rotate(-2deg); }
       100% { transform: translateY(-5px) rotate(2deg); }
     }
 
-    /* 一番外の枠 (images/1.png を背景・枠として使用) */
-    #game-container {
-      position: absolute;
-      top: 45px;
-      left: 0;
-      width: 360px;
-      height: 580px;
-      border: none; /* 従来のボーダーをなくし画像に置換 */
-      background: url('images/1.png') no-repeat center/contain;
-      background-color: #fcf9f2; /* 画像が読み込まれるまでの背景色 */
-      box-shadow: 0 12px 28px rgba(184, 74, 74, 0.25);
-      overflow: hidden;
-      touch-action: none;
-    }
-
     #girl-peek {
       position: absolute;
-      top: 15px;
-      right: 25px;
+      top: 20px;
+      right: 35px;
       width: 54px;
       height: 40px;
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45"><ellipse cx="30" cy="25" rx="22" ry="18" fill="%238b5a2b"/><circle cx="30" cy="22" r="16" fill="%23ffeaa7"/><path d="M18,18 Q30,8 42,18 Z" fill="%23654321"/><circle cx="23" cy="22" r="2" fill="%232d3436"/><circle cx="37" cy="22" r="2" fill="%232d3436"/><path d="M28,26 Q30,29 32,26" fill="none" stroke="%23d63031" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><circle cx="41" cy="25" r="3" fill="%23ff7675" opacity="0.6"/><path d="M10,32 Q15,22 22,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/><path d="M50,32 Q45,22 38,28" fill="%23ffeaa7" stroke="%238b5a2b" stroke-width="2" stroke-linecap="round"/></svg>') no-repeat center/contain;
@@ -82,11 +83,7 @@
       pointer-events: none;
     }
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+    canvas { display: block; width: 100%; height: 100%; }
     .btn {
       padding: 12px 20px;
       font-size: 16px;
@@ -99,9 +96,7 @@
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
       font-family: "Kaisei Opti", serif;
     }
-    .btn:active {
-      transform: translateY(2px);
-    }
+    .btn:active { transform: translateY(2px); }
 
     #score-display {
       position: absolute;
@@ -119,8 +114,8 @@
 
     #back-to-select-btn {
       position: absolute;
-      top: 12px;
-      right: 14px;
+      top: 15px;
+      right: 20px;
       font-size: 14px;
       font-weight: bold;
       color: #b84a4a;
@@ -130,16 +125,11 @@
       padding: 5px 12px;
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      transition: transform 0.1s ease, background 0.1s ease;
+      z-index: 20;
       font-family: "Kaisei Opti", serif;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    #back-to-select-btn:active {
-      transform: scale(0.92);
-      background: #fff;
     }
 
     .overlay-screen {
@@ -153,19 +143,18 @@
         radial-gradient(rgba(0, 0, 0, 0.03) 15%, transparent 16%),
         radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
       background-size: 4px 4px;
-      background-position: 0 0, 2px 2px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      z-index: 20;
+      z-index: 15;
       padding-top: 65px;
       box-sizing: border-box;
     }
 
     #virtual-scroll-viewport {
-      width: 330px;
-      height: 485px;
+      width: 350px;
+      height: 560px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -173,27 +162,19 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
-    #virtual-scroll-viewport::-webkit-scrollbar {
-      display: none;
-    }
+    #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
+    #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    #virtual-scroll-spacer {
-      position: relative;
-      width: 100%;
-    }
-
-    /* 曲一覧の枠 (images/3.png を使用) */
+    /* 3.png をカード枠として設定 */
     .song-card {
       position: absolute;
       left: 10px;
-      width: 310px;
-      height: 72px;
-      padding: 6px 14px 6px 14px;
-      background: url('images/3.png') no-repeat center/contain;
-      background-color: #ffffff; /* 画像が読み込まれるまでの背景 */
-      border: none; /* 従来のボーダーを外す */
-      border-radius: 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+      width: 330px;
+      height: 76px;
+      padding: 8px 18px;
+      background: url('images/3.png') no-repeat center center;
+      background-size: 100% 100%;
+      border: none;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -201,22 +182,16 @@
       box-sizing: border-box;
       transition: transform 0.1s ease;
       font-family: "Kaisei Opti", serif;
+      z-index: 25;
     }
-
-    .song-card::after {
-      display: none; /* 従来の丸ぽちを非表示 */
-    }
-
-    .song-card:active {
-      transform: scale(0.95) !important;
-    }
+    .song-card:active { transform: scale(0.95) !important; }
 
     .song-info {
       text-align: left;
       flex-grow: 1;
-      margin-left: 6px;
+      margin-left: 10px;
       min-width: 0;
-      padding-right: 15px;
+      padding-right: 10px;
     }
     .song-name {
       font-size: 13px;
@@ -228,7 +203,7 @@
       width: 100%;
     }
     .song-composer {
-      font-size: 12px;
+      font-size: 11px;
       color: #636e72;
       white-space: nowrap;
       overflow: hidden;
@@ -240,78 +215,17 @@
       color: #b84a4a;
       text-align: right;
       flex-shrink: 0;
-      margin-right: 16px;
     }
 
-    #credit-screen {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      z-index: 30;
-      background-color: rgba(252, 249, 242, 0.98);
-    }
-    .credit-card {
-      width: 280px;
-      padding: 24px;
-      background: #fff;
-      border: 4px solid #b84a4a;
-      border-radius: 16px;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-      font-family: "Kaisei Opti", serif;
-    }
-    @keyframes popIn {
-      0% { transform: scale(0.6); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .credit-jacket {
-      font-size: 64px;
-      margin-bottom: 12px;
-      animation: pulseJacket 1.5s ease-in-out infinite alternate;
-    }
-    @keyframes pulseJacket {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
-    }
-    .credit-title {
-      font-size: 20px;
-      font-weight: bold;
-      color: #2d3436;
-      margin-bottom: 6px;
-    }
-    .credit-composer-text {
-      font-size: 15px;
-      color: #b84a4a;
-      margin-bottom: 16px;
-    }
-    .credit-loading {
-      font-size: 22px;
-      color: #b2bec3;
-      font-family: "Caveat", cursive;
-      letter-spacing: 2px;
-    }
+    #credit-screen { display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 25; background-color: rgba(252, 249, 242, 0.98); }
+    .credit-card { width: 280px; padding: 24px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
+    .credit-jacket { font-size: 64px; margin-bottom: 12px; }
+    .credit-title { font-size: 20px; font-weight: bold; color: #2d3436; margin-bottom: 6px; }
+    .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
+    .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
 
-    #particle-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 1;
-    }
-
-    .particle {
-      position: absolute;
-      bottom: -30px;
-      pointer-events: none;
-      user-select: none;
-      animation: floatUp 4s linear forwards;
-    }
-
+    #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
+    .particle { position: absolute; bottom: -30px; pointer-events: none; animation: floatUp 4s linear forwards; }
     @keyframes floatUp {
       0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
       10% { opacity: 0.8; }
@@ -319,73 +233,14 @@
       100% { transform: translateY(-600px) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
-    #result-card {
-      width: 280px;
-      padding: 16px 20px;
-      background: #fff;
-      background-image: radial-gradient(rgba(0, 0, 0, 0.02) 15%, transparent 16%);
-      background-size: 4px 4px;
-      border: 4px solid #b84a4a;
-      border-radius: 16px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      font-family: "Kaisei Opti", serif;
-    }
-    .result-title {
-      font-size: 32px;
-      color: #ff7675;
-      margin: 0 0 4px 0;
-      font-weight: bold;
-      font-family: "Caveat", cursive;
-      letter-spacing: 1px;
-    }
-    .result-score-val {
-      font-size: 38px;
-      color: #b84a4a;
-      font-weight: bold;
-      margin-bottom: 2px;
-      font-family: "Caveat", cursive;
-    }
-    .tag-container {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 6px;
-      min-height: 22px;
-    }
-    .badge-tag {
-      display: inline-block;
-      color: #fff;
-      font-size: 15px;
-      padding: 2px 10px;
-      border-radius: 8px;
-      font-family: "Caveat", cursive;
-      font-weight: bold;
-    }
-    .result-details {
-      width: 100%;
-      margin: 4px 0 12px 0;
-      border-top: 2px dashed #dfe6e9;
-      padding-top: 6px;
-      font-size: 18px;
-      color: #2d3436;
-      font-family: "Caveat", cursive;
-    }
-    .result-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 3px 0;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-    #result-screen .btn {
-      font-family: "Kaisei Opti", serif;
-      font-size: 15px;
-    }
+    #result-card { width: 280px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
+    .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
+    .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; }
+    .tag-container { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; min-height: 22px; }
+    .badge-tag { color: #fff; font-size: 15px; padding: 2px 10px; border-radius: 8px; font-family: "Caveat", cursive; font-weight: bold; }
+    .result-details { width: 100%; margin: 4px 0 12px 0; border-top: 2px dashed #dfe6e9; padding-top: 6px; font-size: 18px; font-family: "Caveat", cursive; }
+    .result-row { display: flex; justify-content: space-between; margin: 3px 0; }
+    .btn-group { display: flex; gap: 10px; justify-content: center; }
   </style>
 </head>
 <body>
@@ -417,15 +272,12 @@
     <div id="result-screen" class="overlay-screen" style="display: none; justify-content: center; padding-top: 0;">
       <div id="result-card">
         <h2 class="result-title">STAGE CLEAR!</h2>
-        
         <div class="tag-container">
           <div id="new-record" class="badge-tag" style="background: #ff7675; display: none;">NEW RECORD!</div>
           <div id="all-perfect-tag" class="badge-tag" style="background: #fdcb6e; color: #2d3436; display: none;">ALL PERFECT!</div>
           <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
         </div>
-
         <div id="res-score" class="result-score-val">0</div>
-        
         <div class="result-details">
           <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #b84a4a; font-size: 20px;">0</strong></div>
           <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e; font-size: 20px;">0</strong></div>
@@ -433,7 +285,6 @@
           <div class="result-row"><span>GOOD</span><strong id="res-good" style="color: #0984e3; font-size: 20px;">0</strong></div>
           <div class="result-row"><span>MISS</span><strong id="res-miss" style="color: #d63031; font-size: 20px;">0</strong></div>
         </div>
-
         <div class="btn-group">
           <button id="select-btn" class="btn" style="background: #b2bec3;">曲選択へ戻る</button>
           <button id="retry-btn" class="btn">もう一度</button>
@@ -441,6 +292,579 @@
       </div>
     </div>
 
-    <canvas id="gameCanvas" width="360" height="580"></canvas>
+    <canvas id="gameCanvas" width="380" height="660"></canvas>
   </div>
 </div>
+<script>
+  const songList = [
+    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
+    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
+    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
+    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
+  ];
+
+  const colors = ['#ffb8b8', '#85e3d4', '#b5b2ff', '#fbd28b', '#ffc1e3'];
+  let currentSong = songList[0];
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const selectScreen = document.getElementById('select-screen');
+  const creditScreen = document.getElementById('credit-screen');
+  const resultScreen = document.getElementById('result-screen');
+  const viewport = document.getElementById('virtual-scroll-viewport');
+  const spacer = document.getElementById('virtual-scroll-spacer');
+  const particleContainer = document.getElementById('particle-container');
+  const scoreDisplay = document.getElementById('score-display');
+  const backToSelectBtn = document.getElementById('back-to-select-btn');
+  const retryBtn = document.getElementById('retry-btn');
+  const selectBtn = document.getElementById('select-btn');
+  const newRecordTag = document.getElementById('new-record');
+  const allPerfectTag = document.getElementById('all-perfect-tag');
+  const noMissTag = document.getElementById('no-miss-tag');
+
+  const KAISEI_FONT = '"Kaisei Opti", serif';
+  const CAVEAT_FONT = '"Caveat", cursive';
+
+  let audioCtx = null;
+  let isPlaying = false;
+  let score = 0;
+  let combo = 0;
+  let maxCombo = 0;
+  let counts = { perfect: 0, great: 0, good: 0, miss: 0 };
+
+  let judgeText = '';
+  let judgeColor = '#2d3436';
+  let judgeTimer = 0;
+  let hitEffects = [];
+  let particleInterval = null;
+  let globalAnimTimer = 0;
+
+  const laneCount = 4;
+  const laneWidth = canvas.width / laneCount;
+  const laneXPositions = [laneWidth * 0.5, laneWidth * 1.5, laneWidth * 2.5, laneWidth * 3.5];
+  const keyLabels = ['D', 'F', 'J', 'K'];
+
+  const targetY = 540;
+  const targetRadius = 26;
+  
+  let activeTouches = {};
+  let isLaneHolding = [false, false, false, false];
+
+  let notes = [];
+  let spawnTimer = 0;
+  let spawnedCount = 0;
+
+  const symbols = ['♪', '♫', '♬', '✨', '★', '🌸', '🎶'];
+  function createParticle() {
+    if (selectScreen.style.display === 'none') return;
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.color = colors[Math.floor(Math.random() * colors.length)];
+    p.style.left = Math.random() * 320 + 10 + 'px';
+    p.style.fontSize = Math.floor(Math.random() * 12 + 16) + 'px';
+    const duration = (Math.random() * 2 + 3).toFixed(1);
+    p.style.animationDuration = duration + 's';
+    particleContainer.appendChild(p);
+    setTimeout(() => { p.remove(); }, duration * 1000);
+  }
+
+  function startParticles() {
+    stopParticles();
+    particleInterval = setInterval(createParticle, 400);
+  }
+
+  function stopParticles() {
+    if (particleInterval) clearInterval(particleInterval);
+    particleContainer.innerHTML = '';
+  }
+
+  const ITEM_HEIGHT = 86;
+  const TOTAL_ITEMS = songList.length;
+  const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
+  spacer.style.height = `${SET_HEIGHT * 3}px`;
+
+  function updateVirtualScroll() {
+    let scrollTop = viewport.scrollTop;
+
+    if (scrollTop < SET_HEIGHT * 0.5) {
+      viewport.scrollTop += SET_HEIGHT;
+      scrollTop += SET_HEIGHT;
+    } else if (scrollTop > SET_HEIGHT * 2.2) {
+      viewport.scrollTop -= SET_HEIGHT;
+      scrollTop -= SET_HEIGHT;
+    }
+
+    const viewportHeight = viewport.clientHeight;
+    const startIndex = Math.floor((scrollTop - ITEM_HEIGHT) / ITEM_HEIGHT);
+    const endIndex = Math.ceil((scrollTop + viewportHeight + ITEM_HEIGHT) / ITEM_HEIGHT);
+
+    spacer.innerHTML = '';
+
+    for (let i = startIndex; i <= endIndex; i++) {
+      const dataIndex = ((i % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
+      const song = songList[dataIndex];
+      const savedScore = localStorage.getItem(`highscore_${song.id}`) || 0;
+
+      const card = document.createElement('div');
+      card.className = 'song-card';
+      card.style.top = `${i * ITEM_HEIGHT}px`;
+
+      // 3.png の枠内に各要素を配置
+      card.innerHTML = `
+        <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
+          <div style="font-size: 24px; width: 36px; text-align: center; margin-right: 6px; flex-shrink: 0;">
+            ${song.jacket}
+          </div>
+          <div class="song-info">
+            <div class="song-name">${song.name}</div>
+            <div class="song-composer">${song.composer}</div>
+          </div>
+        </div>
+        <div class="song-highscore">
+          <div style="font-size: 9px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
+          <div style="font-size: 14px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
+        </div>
+      `;
+      
+      card.addEventListener('click', () => triggerCreditAndStart(song));
+      spacer.appendChild(card);
+    }
+  }
+
+  viewport.addEventListener('scroll', updateVirtualScroll);
+
+  function renderSongSelectUI() {
+    isPlaying = false;
+    viewport.scrollTop = SET_HEIGHT;
+    updateVirtualScroll();
+    startParticles();
+    selectScreen.style.display = 'flex';
+    creditScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+  }
+
+  function triggerCreditAndStart(song) {
+    currentSong = song;
+    stopParticles();
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    selectScreen.style.display = 'none';
+    document.getElementById('credit-jacket').textContent = song.jacket;
+    document.getElementById('credit-title').textContent = song.name;
+    document.getElementById('credit-composer').textContent = song.composer;
+    creditScreen.style.display = 'flex';
+
+    setTimeout(() => {
+      creditScreen.style.display = 'none';
+      startSong();
+    }, 2200);
+  }
+
+  function startSong() {
+    resetGame();
+    isPlaying = true;
+    gameLoop();
+  }
+
+  function resetGame() {
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    counts = { perfect: 0, great: 0, good: 0, miss: 0 };
+    notes = [];
+    spawnTimer = 0;
+    spawnedCount = 0;
+    activeTouches = {};
+    isLaneHolding = [false, false, false, false];
+    globalAnimTimer = 0;
+    scoreDisplay.textContent = `SCORE: 0`;
+  }
+
+  function playSound(freqMult = 1) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400 * freqMult, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600 * freqMult, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+  }
+
+  function createHitEffect(x, y, color) {
+    hitEffects.push({ x: x, y: y, radius: 20, maxRadius: 55, alpha: 1.0, color: color });
+  }
+
+  function updateCombo(newCombo) {
+    combo = newCombo;
+    if (combo > maxCombo) maxCombo = combo;
+  }
+
+  function applyJudgement(distance, xPos) {
+    if (distance < 25) {
+      judgeText = 'PERFECT!';
+      judgeColor = '#fdcb6e';
+      score += 100;
+      counts.perfect++;
+      updateCombo(combo + 1);
+      playSound(1.5);
+      createHitEffect(xPos, targetY, '#fdcb6e');
+    } else if (distance < 45) {
+      judgeText = 'GREAT!';
+      judgeColor = '#00b894';
+      score += 80;
+      counts.great++;
+      updateCombo(combo + 1);
+      playSound(1.2);
+      createHitEffect(xPos, targetY, '#00b894');
+    } else if (distance < 70) {
+      judgeText = 'GOOD';
+      judgeColor = '#0984e3';
+      score += 50;
+      counts.good++;
+      updateCombo(combo + 1);
+      playSound(1.0);
+      createHitEffect(xPos, targetY, '#0984e3');
+    }
+    judgeTimer = 30;
+    scoreDisplay.textContent = `SCORE: ${score}`;
+  }
+
+  function triggerMiss() {
+    judgeText = 'MISS...';
+    judgeColor = '#d63031';
+    judgeTimer = 30;
+    counts.miss++;
+    updateCombo(0);
+  }
+
+  function getHoldXAtY(note, checkY) {
+    if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
+    for (let i = 0; i < note.path.length - 1; i++) {
+      const p1 = { x: laneXPositions[note.path[i].lane], y: note.y - note.path[i].offsetY };
+      const p2 = { x: laneXPositions[note.path[i+1].lane], y: note.y - note.path[i+1].offsetY };
+      const minY = Math.min(p1.y, p2.y);
+      const maxY = Math.max(p1.y, p2.y);
+      if (checkY >= minY && checkY <= maxY) {
+        if (Math.abs(p2.y - p1.y) < 0.1) return p1.x;
+        const t = (checkY - p1.y) / (p2.y - p1.y);
+        return p1.x + t * (p2.x - p1.x);
+      }
+    }
+    return laneXPositions[note.path[0].lane];
+  }
+
+  function handleTouchDown(touchId, touchX) {
+    if (!isPlaying) return;
+    let hitIndex = -1;
+    let minDistance = Infinity;
+
+    notes.forEach((note, index) => {
+      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) return;
+      let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+      const distanceY = Math.abs(note.y - targetY);
+      const distanceX = Math.abs(touchX - expectedX);
+
+      if (distanceY < 70 && distanceX < laneWidth * 0.8 && distanceY < minDistance) {
+        minDistance = distanceY;
+        hitIndex = index;
+      }
+    });
+
+    if (hitIndex !== -1) {
+      const note = notes[hitIndex];
+      let noteX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+      if (note.type === 'normal') {
+        notes.splice(hitIndex, 1);
+        applyJudgement(minDistance, noteX);
+      } else {
+        note.holding = true;
+        note.touchId = touchId;
+        activeTouches[touchId] = { x: touchX, activeNote: note };
+        applyJudgement(minDistance, noteX);
+      }
+    } else {
+      activeTouches[touchId] = { x: touchX, activeNote: null };
+    }
+  }
+
+  function handleTouchMove(touchId, touchX) {
+    if (!isPlaying) return;
+    const touchData = activeTouches[touchId];
+    if (!touchData) return;
+    touchData.x = touchX;
+
+    notes.forEach((n, index) => {
+      if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
+        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
+        const distanceY = Math.abs(targetCheckY - targetY);
+        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
+        if (distanceY < 70 && distanceX < laneWidth * 0.9) {
+          notes.splice(index, 1);
+          applyJudgement(distanceY, laneXPositions[n.lane]);
+        }
+      }
+    });
+
+    const note = touchData.activeNote;
+    if (note && note.holding && note.type !== 'hold_slide') {
+      let expectedX = (note.type === 'curved_hold') ? getHoldXAtY(note, targetY) : laneXPositions[note.lane];
+      if (Math.abs(touchX - expectedX) > laneWidth * 0.9) {
+        note.holding = false;
+        touchData.activeNote = null;
+        triggerMiss();
+      }
+    }
+  }
+
+  function handleTouchUp(touchId) {
+    if (!isPlaying) return;
+    const touchData = activeTouches[touchId];
+    if (touchData && touchData.activeNote) {
+      const note = touchData.activeNote;
+      if (note.holding) {
+        const tailY = note.y - note.length;
+        if (tailY < targetY - 50) {
+          note.holding = false;
+          triggerMiss();
+        } else {
+          if (note.type === 'hold_slide' && !note.holdCompleted) {
+            note.holding = false;
+            note.holdCompleted = true;
+            touchData.activeNote = null;
+            setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 600);
+          } else {
+            const distance = Math.abs(tailY - targetY);
+            let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
+            const index = notes.indexOf(note);
+            if (index !== -1) {
+              notes.splice(index, 1);
+              if (distance < 70 && Math.abs(touchData.x - expectedX) < laneWidth * 0.9) {
+                applyJudgement(distance, expectedX);
+              } else {
+                triggerMiss();
+              }
+            }
+            delete activeTouches[touchId];
+          }
+        }
+      }
+    } else {
+      delete activeTouches[touchId];
+    }
+  }
+
+  function spawnNotes() {
+    if (spawnedCount >= currentSong.totalNotes) return;
+    spawnTimer++;
+    if (spawnTimer > 45) {
+      const startLane = Math.floor(Math.random() * laneCount);
+      const rand = Math.random();
+      const spd = Number(currentSong.speed);
+
+      if (rand < 0.25) {
+        notes.push({ type: 'normal', lane: startLane, y: 0, speed: spd });
+      } else if (rand < 0.50) {
+        notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
+      } else if (rand < 0.70) {
+        const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
+        const length = 180;
+        notes.push({
+          type: 'curved_hold', y: 0, length: length, speed: spd, holding: false,
+          path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
+        });
+      } else if (rand < 0.85) {
+        notes.push({ type: 'hold_slide', lane: startLane, y: 0, length: 140, speed: spd, holding: false, holdCompleted: false });
+      } else {
+        notes.push({ type: 'slide', lane: startLane, y: 0, speed: spd });
+      }
+      spawnTimer = 0;
+      spawnedCount++;
+    }
+  }
+
+  function showResult() {
+    isPlaying = false;
+    const prevScore = Number(localStorage.getItem(`highscore_${currentSong.id}`)) || 0;
+    if (score > prevScore) {
+      localStorage.setItem(`highscore_${currentSong.id}`, score);
+      newRecordTag.style.display = 'inline-block';
+    } else {
+      newRecordTag.style.display = 'none';
+    }
+
+    if (counts.perfect === currentSong.totalNotes) {
+      allPerfectTag.style.display = 'inline-block';
+      noMissTag.style.display = 'none';
+    } else if (counts.miss === 0) {
+      allPerfectTag.style.display = 'none';
+      noMissTag.style.display = 'inline-block';
+    } else {
+      allPerfectTag.style.display = 'none';
+      noMissTag.style.display = 'none';
+    }
+
+    document.getElementById('res-score').textContent = score;
+    document.getElementById('res-combo').textContent = maxCombo;
+    document.getElementById('res-perfect').textContent = counts.perfect;
+    document.getElementById('res-great').textContent = counts.great;
+    document.getElementById('res-good').textContent = counts.good;
+    document.getElementById('res-miss').textContent = counts.miss;
+    resultScreen.style.display = 'flex';
+  }
+
+  function gameLoop() {
+    if (!isPlaying) return;
+    globalAnimTimer += 0.15;
+    const pulseScale = 1.0 + Math.sin(globalAnimTimer) * 0.08;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    isLaneHolding = [false, false, false, false];
+    Object.values(activeTouches).forEach(touch => {
+      isLaneHolding[Math.min(laneCount - 1, Math.max(0, Math.floor(touch.x / laneWidth)))] = true;
+    });
+
+    ctx.strokeStyle = '#dfe6e9';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 8]);
+    for (let i = 1; i < laneCount; i++) {
+      ctx.beginPath(); ctx.moveTo(laneWidth * i, 0); ctx.lineTo(laneWidth * i, canvas.height); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    for (let i = 0; i < laneCount; i++) {
+      const x = laneXPositions[i];
+      ctx.save();
+      if (isLaneHolding[i]) { ctx.shadowBlur = 15; ctx.shadowColor = '#55efc4'; }
+      ctx.beginPath(); ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = isLaneHolding[i] ? '#55efc4' : '#fdcb6e';
+      ctx.lineWidth = 5; ctx.stroke();
+      ctx.fillStyle = isLaneHolding[i] ? 'rgba(85, 239, 196, 0.4)' : 'rgba(253, 203, 110, 0.25)';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillStyle = '#b2bec3';
+      ctx.font = `bold 18px ${KAISEI_FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(keyLabels[i], x, targetY + 55);
+    }
+
+    spawnNotes();
+
+    for (let i = notes.length - 1; i >= 0; i--) {
+      let note = notes[i];
+      note.y += note.speed;
+
+      if (note.type === 'hold_slide' && !note.holdCompleted && (note.y - note.length) > targetY) {
+        note.holdCompleted = true;
+        note.holding = false;
+      }
+
+      let missCheckTailY = (note.type === 'normal' || note.type === 'slide') ? note.y : (note.y - note.length);
+      if (missCheckTailY > targetY + 70) {
+        notes.splice(i, 1);
+        if (note.type === 'hold_slide' && note.holdCompleted) {
+          triggerMiss();
+        } else if ((note.type === 'hold' || note.type === 'curved_hold') && note.holding) {
+          applyJudgement(0, note.type === 'curved_hold' ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane]);
+        } else {
+          triggerMiss();
+        }
+        continue;
+      }
+
+      ctx.save();
+      if (note.type === 'normal') {
+        const x = laneXPositions[note.lane];
+        ctx.shadowBlur = 12; ctx.shadowColor = '#ff7675'; ctx.fillStyle = '#ff7675';
+        ctx.save(); ctx.translate(x, note.y); ctx.scale(pulseScale, pulseScale); ctx.translate(-x, -note.y);
+        ctx.beginPath(); ctx.arc(x, note.y, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      } else if (note.type === 'hold') {
+        const x = laneXPositions[note.lane];
+        const headY = note.holding ? targetY : note.y;
+        const tailY = note.y - note.length;
+        if (headY > tailY) {
+          ctx.shadowBlur = 12; ctx.shadowColor = '#55efc4'; ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
+          ctx.fillRect(x - 16, tailY, 32, headY - tailY);
+        }
+        ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
+      } else if (note.type === 'curved_hold') {
+        const headY = note.holding ? targetY : note.y;
+        const tailY = note.y - note.length;
+        ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath();
+        note.path.forEach((pt, idx) => {
+          let ptY = note.y - pt.offsetY;
+          if (note.holding && ptY > targetY) ptY = targetY;
+          idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
+        });
+        ctx.stroke();
+      } else if (note.type === 'slide' || note.type === 'hold_slide') {
+        const x = laneXPositions[note.lane];
+        const drawY = (note.type === 'slide') ? note.y : (note.y - note.length);
+        ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 22, drawY - 14, 44, 28, 14); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, drawY + 6);
+      }
+      ctx.restore();
+    }
+
+    for (let i = hitEffects.length - 1; i >= 0; i--) {
+      let effect = hitEffects[i];
+      effect.radius += 2.5; effect.alpha -= 0.05;
+      ctx.save(); ctx.beginPath(); ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = effect.color; ctx.globalAlpha = Math.max(0, effect.alpha); ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
+      if (effect.alpha <= 0) hitEffects.splice(i, 1);
+    }
+
+    if (judgeTimer > 0) {
+      ctx.fillStyle = judgeColor; ctx.font = `bold 42px ${CAVEAT_FONT}`; ctx.textAlign = 'center';
+      ctx.fillText(judgeText, canvas.width / 2, targetY - 70);
+      judgeTimer--;
+    }
+
+    if (combo > 1) {
+      ctx.fillStyle = '#b84a4a'; ctx.font = `bold 36px ${CAVEAT_FONT}`; ctx.textAlign = 'center';
+      ctx.fillText(`${combo} COMBO!`, canvas.width / 2, targetY - 110);
+    }
+
+    if (spawnedCount >= currentSong.totalNotes && notes.length === 0) {
+      showResult();
+      return;
+    }
+    requestAnimationFrame(gameLoop);
+  }
+
+  backToSelectBtn.addEventListener('click', renderSongSelectUI);
+  retryBtn.addEventListener('click', () => triggerCreditAndStart(currentSong));
+  selectBtn.addEventListener('click', renderSongSelectUI);
+
+  const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
+  window.addEventListener('keydown', (e) => { if (!e.repeat && keyLaneMap[e.code] !== undefined) handleTouchDown(`key_${keyLaneMap[e.code]}`, laneXPositions[keyLaneMap[e.code]]); });
+  window.addEventListener('keyup', (e) => { if (keyLaneMap[e.code] !== undefined) handleTouchUp(`key_${keyLaneMap[e.code]}`); });
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width;
+    for (let i = 0; i < e.changedTouches.length; i++) handleTouchDown(e.changedTouches[i].identifier, (e.changedTouches[i].clientX - rect.left) * scaleX);
+  });
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault(); const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width;
+    for (let i = 0; i < e.changedTouches.length; i++) handleTouchMove(e.changedTouches[i].identifier, (e.changedTouches[i].clientX - rect.left) * scaleX);
+  });
+  canvas.addEventListener('touchend', (e) => { e.preventDefault(); for (let i = 0; i < e.changedTouches.length; i++) handleTouchUp(e.changedTouches[i].identifier); });
+  canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); for (let i = 0; i < e.changedTouches.length; i++) handleTouchUp(e.changedTouches[i].identifier); });
+
+  renderSongSelectUI();
+</script>
+</body>
+</html>
