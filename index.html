@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>絵本風音ゲー 5曲版</title>
   
-  <!-- ★ Google Fonts から手書き風・絵本風フォント (Zen Kurenaido / Kiwi Maru) を読み込み -->
+  <!-- ★ Google Fonts から「解星 デコール (Kaisei Decol)」を読み込み -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@400;500&family=Zen+Kurenaido&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -21,8 +21,8 @@
       justify-content: center;
       min-height: 100vh;
       
-      /* ★ 手書き風フォント (Zen Kurenaido) を最優先に指定 */
-      font-family: "Zen Kurenaido", "Kiwi Maru", "Chalkboard SE", "Hiragino Maru Gothic ProN", sans-serif;
+      /* ★ 全体に「解星 デコール」を適用 */
+      font-family: "Kaisei Decol", serif;
       overflow: hidden;
     }
     #game-container {
@@ -345,7 +345,7 @@
   const newRecordTag = document.getElementById('new-record');
 
   /* ★ Canvas内の文字用フォント設定 */
-  const GAME_FONT = '"Zen Kurenaido", "Kiwi Maru", sans-serif';
+  const GAME_FONT = '"Kaisei Decol", serif';
 
   let audioCtx = null;
   let isPlaying = false;
