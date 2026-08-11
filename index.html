@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版（クレジット＆リザルトフォント統一）</title>
+  <title>絵本風音ゲー 5曲版（フォント完全統一）</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      font-family: "Kaisei Opti", serif;
+      font-family: "Indie Flower", cursive;
       overflow: hidden;
     }
     #game-container {
@@ -54,7 +54,7 @@
       border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
       cursor: pointer;
       box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
-      font-family: inherit;
+      font-family: "Indie Flower", cursive;
     }
     .btn:active {
       transform: translateY(2px);
@@ -62,15 +62,15 @@
 
     #score-display {
       position: absolute;
-      top: 16px;
+      top: 14px;
       left: 20px;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       color: #6c5ce7;
       pointer-events: none;
       text-shadow: 1px 1px 0px #fff;
       z-index: 5;
-      font-family: inherit;
+      font-family: "Indie Flower", cursive;
     }
 
     #back-to-select-btn {
@@ -88,7 +88,7 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       z-index: 10;
       transition: transform 0.1s ease, background 0.1s ease;
-      font-family: inherit;
+      font-family: "Indie Flower", cursive;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -174,7 +174,7 @@
       align-items: center;
       box-sizing: border-box;
       transition: transform 0.1s ease;
-      font-family: inherit;
+      font-family: "Indie Flower", cursive;
     }
 
     .song-card:active {
@@ -188,32 +188,35 @@
       min-width: 0;
     }
     .song-name {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       color: #2d3436;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       width: 100%;
+      font-family: "Indie Flower", cursive;
     }
     .song-composer {
-      font-size: 12px;
-      color: #636e72;
+      font-size: 15px;
+      font-weight: bold;
+      color: #2d3436;
       font-family: "Indie Flower", cursive;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .song-highscore {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       color: #6c5ce7;
       text-align: right;
       flex-shrink: 0;
       margin-left: 6px;
+      font-family: "Indie Flower", cursive;
     }
 
-    /* クレジット（曲前演出）画面のスタイル */
+    /* クレジット画面 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -231,6 +234,7 @@
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       text-align: center;
       animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      font-family: "Indie Flower", cursive;
     }
     @keyframes popIn {
       0% { transform: scale(0.6); opacity: 0; }
@@ -246,10 +250,11 @@
       100% { transform: scale(1.1); }
     }
     .credit-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       color: #2d3436;
       margin-bottom: 6px;
+      font-family: "Indie Flower", cursive;
     }
     .credit-composer-text {
       font-size: 16px;
@@ -290,7 +295,7 @@
       100% { transform: translateY(-630px) rotate(360deg) scale(1.2); opacity: 0; }
     }
 
-    /* リザルト画面のスタイル（フォントをコンボ文字と同じ Indie Flower に統一） */
+    /* リザルト画面 */
     #result-card {
       width: 280px;
       padding: 16px 20px;
@@ -355,7 +360,6 @@
       gap: 10px;
       justify-content: center;
     }
-    /* ボタンの文字も統一する場合（必要に応じて） */
     #result-screen .btn {
       font-family: "Indie Flower", cursive;
       font-size: 16px;
@@ -449,7 +453,6 @@
   const allPerfectTag = document.getElementById('all-perfect-tag');
   const noMissTag = document.getElementById('no-miss-tag');
 
-  const GAME_FONT = '"Kaisei Opti", serif';
   const INDIE_FONT = '"Indie Flower", cursive';
 
   let audioCtx = null;
@@ -552,7 +555,7 @@
           </div>
         </div>
         <div class="song-highscore">
-          <div style="font-size: 10px; color: #b2bec3;">HIGH SCORE</div>
+          <div style="font-size: 11px; color: #b2bec3; font-family: ${INDIE_FONT};">HIGH SCORE</div>
           <div>${Number(savedScore).toLocaleString()}</div>
         </div>
       `;
@@ -950,9 +953,9 @@
       ctx.restore();
 
       ctx.fillStyle = '#b2bec3';
-      ctx.font = `bold 18px ${GAME_FONT}`;
+      ctx.font = `bold 22px ${INDIE_FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(keyLabels[i], x, targetY + 52);
+      ctx.fillText(keyLabels[i], x, targetY + 54);
     }
 
     spawnNotes();
@@ -1148,7 +1151,7 @@
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.font = `bold 20px ${GAME_FONT}`;
+        ctx.font = `bold 20px ${INDIE_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, tailY + 7);
         ctx.restore();
@@ -1170,7 +1173,7 @@
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.font = `bold 20px ${GAME_FONT}`;
+        ctx.font = `bold 20px ${INDIE_FONT}`;
         ctx.textAlign = 'center';
         ctx.fillText('〰', x, note.y + 7);
         ctx.restore();
