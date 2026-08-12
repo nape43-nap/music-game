@@ -33,7 +33,7 @@
       justify-content: center;
     }
 
-    /* 1.png（大きなしおり）が縦につぶれないよう contain に設定 */
+    /* 1.png（大きなしおり） */
     #game-container {
       position: absolute;
       top: 0;
@@ -52,12 +52,13 @@
       z-index: 10;
     }
 
+    /* 2.png（上の吹き出し）のサイズを調整 */
     #floating-title {
       position: absolute;
-      top: 15px;
-      left: 35px;
-      width: 140px;
-      height: 50px;
+      top: 10px;
+      left: 25px;
+      width: 180px;
+      height: 70px;
       background: url('images/2.png') no-repeat center/contain;
       display: flex;
       align-items: center;
@@ -139,7 +140,7 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    /* 3.png の縦潰れを防ぎ文字が収まるサイズに調整 */
+    /* 3.png のカード */
     .song-card {
       position: absolute;
       left: 5px;
