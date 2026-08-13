@@ -52,7 +52,7 @@
       z-index: 10;
     }
 
-    /* 2.png（上の吹き出し）のサイズを調整 */
+    /* 2.png（上の吹き出し） */
     #floating-title {
       position: absolute;
       top: 10px;
@@ -146,13 +146,12 @@
       left: 5px;
       width: 300px;
       height: 90px;
-      padding: 8px 14px;
+      padding: 10px 18px;
       background: url('images/3.png') no-repeat center center;
       background-size: 100% 100%;
       border: none;
       cursor: pointer;
       display: flex;
-      justify-content: space-between;
       align-items: center;
       box-sizing: border-box;
       transition: transform 0.1s ease;
@@ -164,31 +163,24 @@
     .song-info {
       text-align: left;
       flex-grow: 1;
-      margin-left: 8px;
+      margin-left: 10px;
       min-width: 0;
     }
     .song-name {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: bold;
       color: #574b90;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 4px;
     }
     .song-composer {
-      font-size: 11px;
+      font-size: 12px;
       color: #718093;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-top: 2px;
-    }
-    .song-highscore {
-      font-size: 12px;
-      font-weight: bold;
-      color: #718093;
-      text-align: right;
-      flex-shrink: 0;
     }
 
     #credit-screen { display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 25; background-color: rgba(252, 249, 242, 0.98); }
@@ -400,25 +392,18 @@
     for (let i = startIndex; i <= endIndex; i++) {
       const dataIndex = ((i % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
       const song = songList[dataIndex];
-      const savedScore = localStorage.getItem(`highscore_${song.id}`) || 0;
 
       const card = document.createElement('div');
       card.className = 'song-card';
       card.style.top = `${i * ITEM_HEIGHT}px`;
 
       card.innerHTML = `
-        <div style="display: flex; align-items: center; flex-grow: 1; min-width: 0;">
-          <div style="font-size: 24px; width: 32px; text-align: center; margin-right: 6px; flex-shrink: 0;">
-            ${song.jacket}
-          </div>
-          <div class="song-info">
-            <div class="song-name">${song.name}</div>
-            <div class="song-composer">${song.composer}</div>
-          </div>
+        <div style="font-size: 28px; width: 38px; text-align: center; margin-right: 6px; flex-shrink: 0;">
+          ${song.jacket}
         </div>
-        <div class="song-highscore">
-          <div style="font-size: 8px; color: #b2bec3; font-family: ${CAVEAT_FONT}; letter-spacing: 0.5px;">HIGH SCORE</div>
-          <div style="font-size: 13px; font-family: ${CAVEAT_FONT};">${Number(savedScore).toLocaleString()}</div>
+        <div class="song-info">
+          <div class="song-name">${song.name}</div>
+          <div class="song-composer">${song.composer}</div>
         </div>
       `;
       
