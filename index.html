@@ -472,7 +472,6 @@
     particleContainer.innerHTML = '';
   }
 
-  // スコアからランクと背景色を決定する関数
   function getRankDetails(s) {
     if (s >= 4500) return { rank: 'S', color: '#e17055' };
     if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
@@ -545,6 +544,7 @@
   }
 
   function triggerCreditAndStart(song) {
+    isPlaying = false; // 一旦停止して重複実行を防ぐ
     currentSong = song;
     stopParticles();
     if (!audioCtx) {
@@ -552,12 +552,14 @@
     }
 
     selectScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+    resultScreen.classList.remove('active');
     floatingTitle.style.display = 'none'; 
+    
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
 
-    // ロード画面にこれまでのハイスコアとランクを反映
     const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
     document.getElementById('credit-high-score').textContent = savedHighScore;
     const rankInfo = getRankDetails(savedHighScore);
@@ -579,7 +581,7 @@
     floatingTitle.style.display = 'none'; 
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
-    gameLoop();
+    requestAnimationFrame(gameLoop);
   }
 
   function resetGame() {
@@ -593,6 +595,8 @@
     activeTouches = {};
     isLaneHolding = [false, false, false, false];
     globalAnimTimer = 0;
+    judgeTimer = 0;
+    hitEffects = [];
     scoreDisplay.textContent = `SCORE: 0`;
   }
 
@@ -814,7 +818,6 @@
       newRecordTag.style.display = 'none';
     }
 
-    // 正確な総ノーツ数（perfect + great + good + miss）と比較するように修正
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
       allPerfectTag.style.display = 'inline-block';
@@ -827,7 +830,6 @@
       noMissTag.style.display = 'none';
     }
 
-    // スコアとランクの反映
     document.getElementById('res-score').textContent = score;
     const rankInfo = getRankDetails(score);
     const resRankEl = document.getElementById('res-rank');
