@@ -814,10 +814,12 @@
       newRecordTag.style.display = 'none';
     }
 
-    if (counts.perfect === currentSong.totalNotes) {
+    // 正確な総ノーツ数（perfect + great + good + miss）と比較するように修正
+    const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
+    if (counts.perfect === totalHitCount && totalHitCount > 0) {
       allPerfectTag.style.display = 'inline-block';
       noMissTag.style.display = 'none';
-    } else if (counts.miss === 0) {
+    } else if (counts.miss === 0 && totalHitCount > 0) {
       allPerfectTag.style.display = 'none';
       noMissTag.style.display = 'inline-block';
     } else {
