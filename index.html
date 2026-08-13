@@ -184,12 +184,64 @@
       text-overflow: ellipsis;
     }
 
-    #credit-screen { display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 25; background-color: rgba(252, 249, 242, 0.98); }
-    .credit-card { width: 280px; padding: 24px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
+    /* クレジット（ロード）画面：上に引き上げてセンターに配置 */
+    #credit-screen {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 25;
+      background-color: rgba(252, 249, 242, 0.98);
+      padding-top: 0;
+    }
+    .credit-card {
+      width: 280px;
+      padding: 24px;
+      background: #fff;
+      border: 4px solid #b84a4a;
+      border-radius: 16px;
+      text-align: center;
+      font-family: "Kaisei Opti", serif;
+      margin-bottom: 14px;
+    }
     .credit-jacket { font-size: 64px; margin-bottom: 12px; }
     .credit-title { font-size: 20px; font-weight: bold; color: #2d3436; margin-bottom: 6px; }
     .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
     .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
+
+    /* ロード画面下部のハイスコア・ランク表示枠 */
+    .credit-record-box {
+      width: 280px;
+      padding: 10px 16px;
+      background: #fff;
+      border: 2px dashed #b84a4a;
+      border-radius: 12px;
+      text-align: center;
+      font-family: "Kaisei Opti", serif;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .credit-record-item {
+      font-size: 13px;
+      color: #718093;
+    }
+    .credit-record-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #b84a4a;
+      font-family: "Caveat", cursive;
+    }
+    .credit-rank-badge {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #fff;
+      font-family: "Caveat", cursive;
+    }
 
     /* 背景のイラストパーティクル用 */
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
@@ -214,7 +266,29 @@
     }
     #result-card { width: 270px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
     .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
-    .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; }
+    
+    /* リザルト画面のスコア＆ランク表示エリア */
+    .result-score-rank-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 4px 0;
+    }
+    .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; line-height: 1; }
+    .result-rank-large {
+      font-size: 42px;
+      font-weight: bold;
+      font-family: "Caveat", cursive;
+      width: 55px;
+      height: 55px;
+      line-height: 55px;
+      border-radius: 50%;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
     .tag-container { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; min-height: 22px; }
     .badge-tag { color: #fff; font-size: 15px; padding: 2px 10px; border-radius: 8px; font-family: "Caveat", cursive; font-weight: bold; }
     .result-details { width: 100%; margin: 4px 0 12px 0; border-top: 2px dashed #dfe6e9; padding-top: 6px; font-size: 18px; font-family: "Caveat", cursive; }
@@ -251,6 +325,7 @@
       </div>
     </div>
 
+    <!-- 曲開始前（ロード）画面 -->
     <div id="credit-screen" class="overlay-screen">
       <div class="credit-card">
         <div id="credit-jacket" class="credit-jacket">🌟</div>
@@ -258,17 +333,36 @@
         <div id="credit-composer" class="credit-composer-text">Composer</div>
         <div class="credit-loading">Now Loading...</div>
       </div>
+      <!-- 枠外下あたりのハイスコア＆ランク表示 -->
+      <div class="credit-record-box">
+        <div>
+          <div class="credit-record-item">HIGH SCORE</div>
+          <div id="credit-high-score" class="credit-record-value">0</div>
+        </div>
+        <div>
+          <div class="credit-record-item">RANK</div>
+          <div><span id="credit-rank" class="credit-rank-badge" style="background: #b2bec3;">-</span></div>
+        </div>
+      </div>
     </div>
 
+    <!-- リザルト画面 -->
     <div id="result-screen" class="overlay-screen">
       <div id="result-card">
         <h2 class="result-title">STAGE CLEAR!</h2>
+        
         <div class="tag-container">
           <div id="new-record" class="badge-tag" style="background: #ff7675; display: none;">NEW RECORD!</div>
           <div id="all-perfect-tag" class="badge-tag" style="background: #fdcb6e; color: #2d3436; display: none;">ALL PERFECT!</div>
           <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
         </div>
-        <div id="res-score" class="result-score-val">0</div>
+
+        <!-- スコアとランクを横並びで配置 -->
+        <div class="result-score-rank-container">
+          <div id="res-score" class="result-score-val">0</div>
+          <div id="res-rank" class="result-rank-large" style="background: #b2bec3;">E</div>
+        </div>
+
         <div class="result-details">
           <div class="result-row"><span>MAX COMBO</span><strong id="res-combo" style="color: #b84a4a; font-size: 20px;">0</strong></div>
           <div class="result-row"><span>PERFECT</span><strong id="res-perfect" style="color: #fdcb6e; font-size: 20px;">0</strong></div>
@@ -348,21 +442,17 @@
   let spawnTimer = 0;
   let spawnedCount = 0;
 
-  // star1.png 〜 star5.png をランダムに生成してふわふわ流す関数
   const starImages = ['images/star1.png', 'images/star2.png', 'images/star3.png', 'images/star4.png', 'images/star5.png'];
   
   function createParticle() {
     if (selectScreen.style.display === 'none') return;
     const p = document.createElement('img');
     p.className = 'particle';
-    // ランダムに star1〜5 のいずれかを選択
     p.src = starImages[Math.floor(Math.random() * starImages.length)];
     
-    // サイズを 18px 〜 28px の間に設定
     const size = Math.floor(Math.random() * 11 + 18);
     p.style.width = size + 'px';
     p.style.height = 'auto';
-
     p.style.left = Math.random() * 280 + 10 + 'px';
     
     const duration = (Math.random() * 2 + 3).toFixed(1);
@@ -380,6 +470,16 @@
   function stopParticles() {
     if (particleInterval) clearInterval(particleInterval);
     particleContainer.innerHTML = '';
+  }
+
+  // スコアからランクと背景色を決定する関数
+  function getRankDetails(s) {
+    if (s >= 4500) return { rank: 'S', color: '#e17055' };
+    if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
+    if (s >= 3500) return { rank: 'B', color: '#00b894' };
+    if (s >= 3000) return { rank: 'C', color: '#0984e3' };
+    if (s >= 2500) return { rank: 'D', color: '#6c5ce7' };
+    return { rank: 'E', color: '#b2bec3' };
   }
 
   const ITEM_HEIGHT = 95;
@@ -456,6 +556,15 @@
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
+
+    // ロード画面にこれまでのハイスコアとランクを反映
+    const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
+    document.getElementById('credit-high-score').textContent = savedHighScore;
+    const rankInfo = getRankDetails(savedHighScore);
+    const creditRankEl = document.getElementById('credit-rank');
+    creditRankEl.textContent = savedHighScore > 0 ? rankInfo.rank : '-';
+    creditRankEl.style.background = savedHighScore > 0 ? rankInfo.color : '#b2bec3';
+
     creditScreen.style.display = 'flex';
 
     setTimeout(() => {
@@ -716,7 +825,13 @@
       noMissTag.style.display = 'none';
     }
 
+    // スコアとランクの反映
     document.getElementById('res-score').textContent = score;
+    const rankInfo = getRankDetails(score);
+    const resRankEl = document.getElementById('res-rank');
+    resRankEl.textContent = rankInfo.rank;
+    resRankEl.style.background = rankInfo.color;
+
     document.getElementById('res-combo').textContent = maxCombo;
     document.getElementById('res-perfect').textContent = counts.perfect;
     document.getElementById('res-great').textContent = counts.great;
@@ -856,7 +971,7 @@
   selectBtn.addEventListener('click', renderSongSelectUI);
 
   const keyLaneMap = { 'KeyD': 0, 'KeyF': 1, 'KeyJ': 2, 'KeyK': 3 };
-  window.addEventListener('keydown', (e) => { if (!e.repeat && keyLaneMap[e.code] !== undefined) handleTouchDown(`key_${keyLaneMap[e.code]}`, laneXPositions[keyLaneMap[e.code]]); });
+  window.addEventListener('keydown', (e) => { if (!e.repeat && keyLaneMap[e.code] !== undefined) handleTouchDown(`key_${keyLaneMap[e.code]}`, laneXPositions[keyLaneMap[e.code]] ); });
   window.addEventListener('keyup', (e) => { if (keyLaneMap[e.code] !== undefined) handleTouchUp(`key_${keyLaneMap[e.code]}`); });
 
   canvas.addEventListener('touchstart', (e) => {
