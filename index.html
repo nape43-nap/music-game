@@ -146,7 +146,7 @@
       left: 5px;
       width: 300px;
       height: 90px;
-      padding: 6px 18px 14px 18px; /* 上を詰めてテキスト全体を上に持ち上げ */
+      padding: 6px 18px 14px 18px;
       background: url('images/3.png') no-repeat center center;
       background-size: 100% 100%;
       border: none;
@@ -165,7 +165,7 @@
       flex-grow: 1;
       margin-left: 10px;
       min-width: 0;
-      transform: translateY(-3px); /* 気持ち3mm（約3px）上にオフセット */
+      transform: translateY(-3px);
     }
     .song-name {
       font-size: 15px;
@@ -300,6 +300,7 @@
   const selectScreen = document.getElementById('select-screen');
   const creditScreen = document.getElementById('credit-screen');
   const resultScreen = document.getElementById('result-screen');
+  const floatingTitle = document.getElementById('floating-title'); // 2.pngの要素
   const viewport = document.getElementById('virtual-scroll-viewport');
   const spacer = document.getElementById('virtual-scroll-spacer');
   const particleContainer = document.getElementById('particle-container');
@@ -417,6 +418,7 @@
 
   function renderSongSelectUI() {
     isPlaying = false;
+    floatingTitle.style.display = 'flex'; // 曲選択画面では2.pngを表示
     scoreDisplay.style.display = 'none';
     backToSelectBtn.style.display = 'none';
     viewport.scrollTop = SET_HEIGHT;
@@ -424,7 +426,7 @@
     startParticles();
     selectScreen.style.display = 'flex';
     creditScreen.style.display = 'none';
-    resultScreen.style.display = 'none';
+    resultScreen.style.display = 'none'; // リザルト画面が残らないよう確実に非表示にする
   }
 
   function triggerCreditAndStart(song) {
@@ -449,6 +451,7 @@
   function startSong() {
     resetGame();
     isPlaying = true;
+    floatingTitle.style.display = 'none'; // プレイ中も2.pngを非表示にする
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
     gameLoop();
@@ -677,6 +680,7 @@
 
   function showResult() {
     isPlaying = false;
+    floatingTitle.style.display = 'none'; // リザルト画面では2.pngを非表示にする
     const prevScore = Number(localStorage.getItem(`highscore_${currentSong.id}`)) || 0;
     if (score > prevScore) {
       localStorage.setItem(`highscore_${currentSong.id}`, score);
