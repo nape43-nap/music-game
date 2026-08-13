@@ -208,6 +208,9 @@
       z-index: 30;
       background: rgba(0, 0, 0, 0.35);
     }
+    #result-screen.active {
+      display: flex;
+    }
     #result-card { width: 270px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
     .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
     .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; }
@@ -426,7 +429,8 @@
     startParticles();
     selectScreen.style.display = 'flex';
     creditScreen.style.display = 'none';
-    resultScreen.style.display = 'none'; // リザルト画面が残らないよう確実に非表示にする
+    resultScreen.style.display = 'none';
+    resultScreen.classList.remove('active'); // クラスも確実に外す
   }
 
   function triggerCreditAndStart(song) {
@@ -437,6 +441,7 @@
     }
 
     selectScreen.style.display = 'none';
+    floatingTitle.style.display = 'none'; // Now Loading画面でも2.pngを非表示にする
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
@@ -451,7 +456,7 @@
   function startSong() {
     resetGame();
     isPlaying = true;
-    floatingTitle.style.display = 'none'; // プレイ中も2.pngを非表示にする
+    floatingTitle.style.display = 'none'; // プレイ中も2.pngを非表示
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
     gameLoop();
@@ -706,7 +711,9 @@
     document.getElementById('res-great').textContent = counts.great;
     document.getElementById('res-good').textContent = counts.good;
     document.getElementById('res-miss').textContent = counts.miss;
+    
     resultScreen.style.display = 'flex';
+    resultScreen.classList.add('active');
   }
 
   function gameLoop() {
