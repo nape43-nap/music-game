@@ -191,13 +191,14 @@
     .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
     .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
 
+    /* 背景のイラストパーティクル用 */
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
-    .particle { position: absolute; bottom: -30px; pointer-events: none; animation: floatUp 4s linear forwards; }
+    .particle { position: absolute; bottom: -40px; pointer-events: none; animation: floatUp 4s linear forwards; }
     @keyframes floatUp {
-      0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% { transform: translateY(-600px) rotate(360deg) scale(1.2); opacity: 0; }
+      0% { transform: translateY(0) rotate(0deg) scale(0.7); opacity: 0; }
+      15% { opacity: 0.85; }
+      85% { opacity: 0.85; }
+      100% { transform: translateY(-620px) rotate(360deg) scale(1.1); opacity: 0; }
     }
 
     #result-screen {
@@ -303,7 +304,7 @@
   const selectScreen = document.getElementById('select-screen');
   const creditScreen = document.getElementById('credit-screen');
   const resultScreen = document.getElementById('result-screen');
-  const floatingTitle = document.getElementById('floating-title'); // 2.pngの要素
+  const floatingTitle = document.getElementById('floating-title');
   const viewport = document.getElementById('virtual-scroll-viewport');
   const spacer = document.getElementById('virtual-scroll-spacer');
   const particleContainer = document.getElementById('particle-container');
@@ -347,24 +348,33 @@
   let spawnTimer = 0;
   let spawnedCount = 0;
 
-  const symbols = ['♪', '♫', '♬', '✨', '★', '🌸', '🎶'];
+  // star1.png 〜 star5.png をランダムに生成してふわふわ流す関数
+  const starImages = ['images/star1.png', 'images/star2.png', 'images/star3.png', 'images/star4.png', 'images/star5.png'];
+  
   function createParticle() {
     if (selectScreen.style.display === 'none') return;
-    const p = document.createElement('div');
+    const p = document.createElement('img');
     p.className = 'particle';
-    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    p.style.color = colors[Math.floor(Math.random() * colors.length)];
+    // ランダムに star1〜5 のいずれかを選択
+    p.src = starImages[Math.floor(Math.random() * starImages.length)];
+    
+    // サイズを 18px 〜 28px の間に設定
+    const size = Math.floor(Math.random() * 11 + 18);
+    p.style.width = size + 'px';
+    p.style.height = 'auto';
+
     p.style.left = Math.random() * 280 + 10 + 'px';
-    p.style.fontSize = Math.floor(Math.random() * 12 + 16) + 'px';
+    
     const duration = (Math.random() * 2 + 3).toFixed(1);
     p.style.animationDuration = duration + 's';
+    
     particleContainer.appendChild(p);
     setTimeout(() => { p.remove(); }, duration * 1000);
   }
 
   function startParticles() {
     stopParticles();
-    particleInterval = setInterval(createParticle, 400);
+    particleInterval = setInterval(createParticle, 450);
   }
 
   function stopParticles() {
@@ -421,7 +431,7 @@
 
   function renderSongSelectUI() {
     isPlaying = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // ★ここでキャンバスに残った描画を綺麗に消去する
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     floatingTitle.style.display = 'flex'; 
     scoreDisplay.style.display = 'none';
     backToSelectBtn.style.display = 'none';
