@@ -382,14 +382,15 @@
 </div>
 
 <script>
-  // ノーツ画像の読み込み
+  // ノーツおよび判定画像の読み込み
   const noteImages = {
     tap: new Image(),
     holdStart: new Image(),
     holdEnd: new Image(),
     curvedHoldStart: new Image(),
     curvedHoldEnd: new Image(),
-    slide: new Image()
+    slide: new Image(),
+    judge: new Image() // 追加：判定枠用画像
   };
 
   noteImages.tap.src = 'images/tap.png';
@@ -398,6 +399,7 @@
   noteImages.curvedHoldStart.src = 'images/curved_hold_start.png';
   noteImages.curvedHoldEnd.src = 'images/curved_hold_end.png';
   noteImages.slide.src = 'images/slide.png';
+  noteImages.judge.src = 'images/judge.png'; // 追加：判定画像のパス
 
   const songList = [
     { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
@@ -450,7 +452,7 @@
   const keyLabels = ['D', 'F', 'J', 'K'];
 
   const targetY = 540;
-  const targetRadius = 26;
+  const targetRadius = 26; // 判定画像のサイズ調整用としても活用できます
   
   let activeTouches = {};
   let isLaneHolding = [false, false, false, false];
@@ -882,17 +884,20 @@
     }
     ctx.setLineDash([]);
 
+    // 判定枠の描画部分を画像（images/judge.png）に置き換え
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
+      const jSize = 65; // 判定画像の表示サイズ（必要に応じて変更してください）
+      
       ctx.save();
-      if (isLaneHolding[i]) { ctx.shadowBlur = 15; ctx.shadowColor = '#55efc4'; }
-      ctx.beginPath(); ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = isLaneHolding[i] ? '#55efc4' : '#fdcb6e';
-      ctx.lineWidth = 5; ctx.stroke();
-      ctx.fillStyle = isLaneHolding[i] ? 'rgba(85, 239, 196, 0.4)' : 'rgba(253, 203, 110, 0.25)';
-      ctx.fill();
+      if (isLaneHolding[i]) { 
+        ctx.globalAlpha = 0.7; // 押している時の透過演出
+      }
+      // 画像を描画
+      ctx.drawImage(noteImages.judge, x - jSize / 2, targetY - jSize / 2, jSize, jSize);
       ctx.restore();
 
+      // キーラベルの描画
       ctx.fillStyle = '#b2bec3';
       ctx.font = `bold 18px ${KAISEI_FONT}`;
       ctx.textAlign = 'center';
@@ -927,14 +932,14 @@
       // 1. TAPノーツ
       if (note.type === 'normal') {
         const x = laneXPositions[note.lane];
-        const sz = 44; // 描画サイズ
+        const sz = 44; 
         ctx.save(); 
         ctx.translate(x, note.y); 
         ctx.scale(pulseScale, pulseScale); 
         ctx.drawImage(noteImages.tap, -sz / 2, -sz / 2, sz, sz);
         ctx.restore();
 
-      // 2. HOLDノーツ（通常長押し）
+      // 2. HOLDノーツ
       } else if (note.type === 'hold') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
@@ -947,7 +952,7 @@
         ctx.drawImage(noteImages.holdStart, x - imgSize/2, headY - imgSize/2, imgSize, imgSize);
         ctx.drawImage(noteImages.holdEnd, x - imgSize/2, tailY - imgSize/2, imgSize, imgSize);
 
-      // 3. CURVED_HOLDノーツ（曲がる長押し）
+      // 3. CURVED_HOLDノーツ
       } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
