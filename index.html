@@ -382,23 +382,6 @@
 </div>
 
 <script>
-  // ノーツ画像の読み込み
-  const noteImages = {
-    tap: new Image(),
-    holdStart: new Image(),
-    holdEnd: new Image(),
-    curvedHoldStart: new Image(),
-    curvedHoldEnd: new Image(),
-    slide: new Image()
-  };
-
-  noteImages.tap.src = 'images/tap.png';
-  noteImages.holdStart.src = 'images/hold_start.png';
-  noteImages.holdEnd.src = 'images/hold_end.png';
-  noteImages.curvedHoldStart.src = 'images/curved_hold_start.png';
-  noteImages.curvedHoldEnd.src = 'images/curved_hold_end.png';
-  noteImages.slide.src = 'images/slide.png';
-
   const songList = [
     { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
     { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
@@ -561,7 +544,7 @@
   }
 
   function triggerCreditAndStart(song) {
-    isPlaying = false;
+    isPlaying = false; // 一旦停止して重複実行を防ぐ
     currentSong = song;
     stopParticles();
     if (!audioCtx) {
@@ -882,21 +865,17 @@
     }
     ctx.setLineDash([]);
 
-    // 判定枠（以前の丸スタイル）の描画
     for (let i = 0; i < laneCount; i++) {
       const x = laneXPositions[i];
-      
       ctx.save();
-      ctx.beginPath();
-      ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
-      ctx.fillStyle = isLaneHolding[i] ? 'rgba(255, 118, 117, 0.5)' : 'rgba(255, 255, 255, 0.7)';
+      if (isLaneHolding[i]) { ctx.shadowBlur = 15; ctx.shadowColor = '#55efc4'; }
+      ctx.beginPath(); ctx.arc(x, targetY, targetRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = isLaneHolding[i] ? '#55efc4' : '#fdcb6e';
+      ctx.lineWidth = 5; ctx.stroke();
+      ctx.fillStyle = isLaneHolding[i] ? 'rgba(85, 239, 196, 0.4)' : 'rgba(253, 203, 110, 0.25)';
       ctx.fill();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = isLaneHolding[i] ? '#ff7675' : '#b84a4a';
-      ctx.stroke();
       ctx.restore();
 
-      // キーラベルの描画
       ctx.fillStyle = '#b2bec3';
       ctx.font = `bold 18px ${KAISEI_FONT}`;
       ctx.textAlign = 'center';
@@ -928,35 +907,27 @@
       }
 
       ctx.save();
-      // 1. TAPノーツ
       if (note.type === 'normal') {
         const x = laneXPositions[note.lane];
-        const sz = 44; 
-        ctx.save(); 
-        ctx.translate(x, note.y); 
-        ctx.scale(pulseScale, pulseScale); 
-        ctx.drawImage(noteImages.tap, -sz / 2, -sz / 2, sz, sz);
+        ctx.shadowBlur = 12; ctx.shadowColor = '#ff7675'; ctx.fillStyle = '#ff7675';
+        ctx.save(); ctx.translate(x, note.y); ctx.scale(pulseScale, pulseScale); ctx.translate(-x, -note.y);
+        ctx.beginPath(); ctx.arc(x, note.y, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
-
-      // 2. HOLDノーツ
       } else if (note.type === 'hold') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
         if (headY > tailY) {
-          ctx.strokeStyle = 'rgba(0, 184, 148, 0.6)'; ctx.lineWidth = 24; ctx.lineCap = 'round';
-          ctx.beginPath(); ctx.moveTo(x, tailY); ctx.lineTo(x, headY); ctx.stroke();
+          ctx.shadowBlur = 12; ctx.shadowColor = '#55efc4'; ctx.fillStyle = 'rgba(85, 239, 196, 0.7)';
+          ctx.fillRect(x - 16, tailY, 32, headY - tailY);
         }
-        const imgSize = 40;
-        ctx.drawImage(noteImages.holdStart, x - imgSize/2, headY - imgSize/2, imgSize, imgSize);
-        ctx.drawImage(noteImages.holdEnd, x - imgSize/2, tailY - imgSize/2, imgSize, imgSize);
-
-      // 3. CURVED_HOLDノーツ
+        ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
       } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
-        
-        ctx.strokeStyle = 'rgba(162, 155, 254, 0.7)'; ctx.lineWidth = 24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         ctx.beginPath();
         note.path.forEach((pt, idx) => {
           let ptY = note.y - pt.offsetY;
@@ -964,22 +935,11 @@
           idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
         });
         ctx.stroke();
-
-        const startPt = note.path[0];
-        const startX = laneXPositions[startPt.lane];
-        const imgSize = 40;
-        ctx.drawImage(noteImages.curvedHoldStart, startX - imgSize/2, headY - imgSize/2, imgSize, imgSize);
-
-        const endPt = note.path[note.path.length - 1];
-        const endX = laneXPositions[endPt.lane];
-        ctx.drawImage(noteImages.curvedHoldEnd, endX - imgSize/2, tailY - imgSize/2, imgSize, imgSize);
-
-      // 4. SLIDE & HOLD_SLIDEノーツ
       } else if (note.type === 'slide' || note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
         const drawY = (note.type === 'slide') ? note.y : (note.y - note.length);
-        const w = 50, h = 32;
-        ctx.drawImage(noteImages.slide, x - w/2, drawY - h/2, w, h);
+        ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 22, drawY - 14, 44, 28, 14); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, drawY + 6);
       }
       ctx.restore();
     }
