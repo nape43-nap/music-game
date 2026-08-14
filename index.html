@@ -480,17 +480,16 @@
 
     const perfectRate = countsObj.perfect / totalNotesCount;
 
-    // オールパーフェクト (100%)
     if (countsObj.perfect === totalNotesCount && countsObj.miss === 0 && countsObj.great === 0 && countsObj.good === 0) {
       return { rank: 'SSS', color: '#ff7675' };
     }
-    if (perfectRate >= 0.90) return { rank: 'SS', color: '#fdcb6e' }; // 90%以上
-    if (perfectRate >= 0.80) return { rank: 'S', color: '#e17055' };  // 80%以上
-    if (perfectRate >= 0.70) return { rank: 'A', color: '#00b894' };  // 70%以上
-    if (perfectRate >= 0.60) return { rank: 'B', color: '#0984e3' };  // 60%以上
-    if (perfectRate >= 0.50) return { rank: 'C', color: '#6c5ce7' };  // 50%以上
-    if (perfectRate >= 0.40) return { rank: 'D', color: '#a29bfe' };  // 40%以上
-    return { rank: 'E', color: '#b2bec3' };                           // それ以外
+    if (perfectRate >= 0.90) return { rank: 'SS', color: '#fdcb6e' };
+    if (perfectRate >= 0.80) return { rank: 'S', color: '#e17055' };
+    if (perfectRate >= 0.70) return { rank: 'A', color: '#00b894' };
+    if (perfectRate >= 0.60) return { rank: 'B', color: '#0984e3' };
+    if (perfectRate >= 0.50) return { rank: 'C', color: '#6c5ce7' };
+    if (perfectRate >= 0.40) return { rank: 'D', color: '#a29bfe' };
+    return { rank: 'E', color: '#b2bec3' };
   }
 
   const ITEM_HEIGHT = 95;
@@ -730,17 +729,20 @@
     if (!touchData) return;
     touchData.x = touchX;
 
-    notes.forEach((n, index) => {
-      if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
-        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
-        const distanceY = Math.abs(targetCheckY - targetY);
-        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-        if (distanceY < 70 && distanceX < laneWidth * 0.9) {
-          notes.splice(index, 1);
-          applyJudgement(distanceY, laneXPositions[n.lane]);
+    // 長押し中の指はスライドの誤爆判定を行わないようにガード
+    if (!touchData.activeNote || (touchData.activeNote.type !== 'curved_hold' && touchData.activeNote.type !== 'hold' && touchData.activeNote.type !== 'hold_slide')) {
+      notes.forEach((n, index) => {
+        if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
+          const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
+          const distanceY = Math.abs(targetCheckY - targetY);
+          const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
+          if (distanceY < 70 && distanceX < laneWidth * 0.9) {
+            notes.splice(index, 1);
+            applyJudgement(distanceY, laneXPositions[n.lane]);
+          }
         }
-      }
-    });
+      });
+    }
 
     const note = touchData.activeNote;
     if (note && note.holding && note.type !== 'hold_slide') {
@@ -844,7 +846,6 @@
 
     document.getElementById('res-score').textContent = score;
 
-    // リザルト画面でのランク判定（新基準）
     const rankInfo = getRankDetails(counts, totalHitCount);
     const resRankEl = document.getElementById('res-rank');
     resRankEl.textContent = rankInfo.rank;
