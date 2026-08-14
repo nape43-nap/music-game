@@ -423,12 +423,17 @@
     particleContainer.innerHTML = '';
   }
 
-  function getRankDetails(s) {
-    if (s >= 5400) return { rank: 'S', color: '#e17055' };
-    if (s >= 4800) return { rank: 'A', color: '#fdcb6e' };
-    if (s >= 4200) return { rank: 'B', color: '#00b894' };
-    if (s >= 3600) return { rank: 'C', color: '#0984e3' };
-    if (s >= 3000) return { rank: 'D', color: '#6c5ce7' };
+  // 【修正】以前の「PERFECTの割合」でランクを決定する方式に戻しました
+  function getRankDetails(counts, totalNotes) {
+    const totalHits = counts.perfect + counts.great + counts.good + counts.miss;
+    const totalEvaluated = totalHits > 0 ? totalHits : (totalNotes > 0 ? totalNotes : 1);
+    const perfectRate = (counts.perfect / totalEvaluated) * 100;
+
+    if (perfectRate >= 98 && counts.miss === 0) return { rank: 'S', color: '#e17055' };
+    if (perfectRate >= 90) return { rank: 'A', color: '#fdcb6e' };
+    if (perfectRate >= 80) return { rank: 'B', color: '#00b894' };
+    if (perfectRate >= 70) return { rank: 'C', color: '#0984e3' };
+    if (perfectRate >= 60) return { rank: 'D', color: '#6c5ce7' };
     return { rank: 'E', color: '#b2bec3' };
   }
 
@@ -507,7 +512,9 @@
 
     const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
     document.getElementById('credit-high-score').textContent = savedHighScore;
-    const rankInfo = getRankDetails(savedHighScore);
+    
+    const savedCounts = JSON.parse(localStorage.getItem(`counts_${song.id}`)) || { perfect: 0, great: 0, good: 0, miss: 0 };
+    const rankInfo = getRankDetails(savedCounts, song.totalNotes);
     const creditRankEl = document.getElementById('credit-rank');
     creditRankEl.textContent = savedHighScore > 0 ? rankInfo.rank : '-';
     creditRankEl.style.background = savedHighScore > 0 ? rankInfo.color : '#b2bec3';
@@ -527,7 +534,6 @@
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
 
-    // 6曲目テスト譜面：全6種類のノーツ（tap, hold, curved_hold, hold_slide, curved_hold_slide, slide）を各4回ずつ合計24ノーツ生成
     if (currentSong.id === 'song_6') {
       testChartQueue = [];
       const types = ['normal', 'hold', 'curved_hold', 'hold_slide', 'curved_hold_slide', 'slide'];
@@ -536,7 +542,6 @@
           testChartQueue.push(type);
         }
       });
-      // 順番通りに綺麗に出現させるためシャッフルはせずそのままキューに蓄積
     }
 
     gameLoop();
@@ -641,7 +646,6 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // 【完全修正】slide、および未完了のスライド（hold_slide, curved_hold_slide）はタップ判定の対象外とする
       if (note.holding || note.type === 'slide' || ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted)) return;
       
       let expectedX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
@@ -677,8 +681,6 @@
     if (!touchData) return;
     touchData.x = touchX;
 
-    // 【完全修正】スライド系ノーツ（slide, またはホールド完了後の hold_slide / curved_hold_slide）の判定
-    // 画面内にある有効なスライドのうち、判定ラインに最も近く、かつ指の範囲内にあるものを「1つだけ」見つけて処理し、即座にループを抜けることで連続誤爆を防止
     let targetSlideIndex = -1;
     let closestSlideDist = Infinity;
 
@@ -727,7 +729,7 @@
         } else {
           if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted) {
             note.holding = false;
-            note.holdCompleted = true; // ホールド部分完了、スライド待ち状態へ移行
+            note.holdCompleted = true;
             touchData.activeNote = null;
             setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 800);
           } else {
@@ -815,6 +817,8 @@
       newRecordTag.style.display = 'none';
     }
 
+    localStorage.setItem(`counts_${currentSong.id}`, JSON.stringify(counts));
+
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
       allPerfectTag.style.display = 'inline-block';
@@ -828,7 +832,7 @@
     }
 
     document.getElementById('res-score').textContent = score;
-    const rankInfo = getRankDetails(score);
+    const rankInfo = getRankDetails(counts, currentSong.totalNotes);
     const resRankEl = document.getElementById('res-rank');
     resRankEl.textContent = rankInfo.rank;
     resRankEl.style.background = rankInfo.color;
@@ -922,15 +926,15 @@
         ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
         
         if (note.type === 'hold_slide') {
+          // 【修正】ホールド終点とスライドを一体化して描画
           const slideDrawY = note.y - note.length;
-          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 22, slideDrawY - 14, 44, 28, 14); ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, slideDrawY + 6);
+          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 20, slideDrawY - 12, 40, 24, 12); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = `bold 16px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, slideDrawY + 5);
         } else {
           ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
         }
       } else if (note.type === 'curved_hold' || note.type === 'curved_hold_slide') {
         const headY = note.holding ? targetY : note.y;
-        const tailY = note.y - note.length;
         ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         ctx.beginPath();
         note.path.forEach((pt, idx) => {
@@ -941,11 +945,12 @@
         ctx.stroke();
 
         if (note.type === 'curved_hold_slide') {
+          // 【修正】カーブホールドの終点パス部分にスライドの見た目を一体化して描画
           const endPt = note.path[note.path.length - 1];
           const endX = laneXPositions[endPt.lane];
           const slideDrawY = note.y - endPt.offsetY;
-          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(endX - 22, slideDrawY - 14, 44, 28, 14); ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', endX, slideDrawY + 6);
+          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(endX - 20, slideDrawY - 12, 40, 24, 12); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = `bold 16px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', endX, slideDrawY + 5);
         }
       } else if (note.type === 'slide') {
         const x = laneXPositions[note.lane];
