@@ -423,7 +423,7 @@
     particleContainer.innerHTML = '';
   }
 
-  // 【修正】以前の「PERFECTの割合」でランクを決定する方式に戻しました
+  // ランク判定ロジック（PERFECTの割合ベース）
   function getRankDetails(counts, totalNotes) {
     const totalHits = counts.perfect + counts.great + counts.good + counts.miss;
     const totalEvaluated = totalHits > 0 ? totalHits : (totalNotes > 0 ? totalNotes : 1);
@@ -646,10 +646,25 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      if (note.holding || note.type === 'slide' || ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted)) return;
-      
-      let expectedX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
-      const distanceY = Math.abs(note.y - targetY);
+      // スライド単体の判定を確実に拾うように修正
+      if (note.holding) return;
+      if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted) return;
+
+      let expectedX;
+      let checkY = note.y;
+
+      if (note.type === 'slide') {
+        expectedX = laneXPositions[note.lane];
+      } else if (note.type === 'hold_slide' || note.type === 'curved_hold_slide') {
+        expectedX = (note.type === 'curved_hold_slide') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
+        checkY = note.y - note.length;
+      } else if (note.type === 'curved_hold') {
+        expectedX = laneXPositions[note.path[0].lane];
+      } else {
+        expectedX = laneXPositions[note.lane];
+      }
+
+      const distanceY = Math.abs(checkY - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
       if (distanceY < 80 && distanceX < laneWidth * 0.9 && distanceY < minDistance) {
@@ -660,10 +675,20 @@
 
     if (hitIndex !== -1) {
       const note = notes[hitIndex];
-      let noteX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
-      if (note.type === 'normal') {
+      let noteX = laneXPositions[note.lane];
+      if (note.type === 'curved_hold' || note.type === 'curved_hold_slide') {
+        noteX = laneXPositions[note.path[0].lane];
+      }
+
+      if (note.type === 'normal' || note.type === 'slide') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
+      } else if (note.type === 'hold_slide' || note.type === 'curved_hold_slide') {
+        if (note.holdCompleted) {
+          notes.splice(hitIndex, 1);
+          let finalX = (note.type === 'curved_hold_slide') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
+          applyJudgement(minDistance, finalX);
+        }
       } else {
         note.holding = true;
         note.touchId = touchId;
@@ -680,30 +705,6 @@
     const touchData = activeTouches[touchId];
     if (!touchData) return;
     touchData.x = touchX;
-
-    let targetSlideIndex = -1;
-    let closestSlideDist = Infinity;
-
-    notes.forEach((n, index) => {
-      if (n.type === 'slide' || ((n.type === 'hold_slide' || n.type === 'curved_hold_slide') && n.holdCompleted)) {
-        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
-        const distanceY = Math.abs(targetCheckY - targetY);
-        const expectedX = (n.type === 'curved_hold_slide') ? laneXPositions[n.path[n.path.length - 1].lane] : laneXPositions[n.lane];
-        const distanceX = Math.abs(touchX - expectedX);
-
-        if (distanceY < 65 && distanceX < laneWidth * 0.9 && distanceY < closestSlideDist) {
-          closestSlideDist = distanceY;
-          targetSlideIndex = index;
-        }
-      }
-    });
-
-    if (targetSlideIndex !== -1) {
-      const n = notes[targetSlideIndex];
-      const expectedX = (n.type === 'curved_hold_slide') ? laneXPositions[n.path[n.path.length - 1].lane] : laneXPositions[n.lane];
-      notes.splice(targetSlideIndex, 1);
-      applyJudgement(closestSlideDist, expectedX);
-    }
 
     const note = touchData.activeNote;
     if (note && note.holding && note.type !== 'hold_slide' && note.type !== 'curved_hold_slide') {
@@ -729,7 +730,7 @@
         } else {
           if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted) {
             note.holding = false;
-            note.holdCompleted = true;
+            note.holdCompleted = true; // ホールドが完了し、次のスライド判定待ち状態へ
             touchData.activeNote = null;
             setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 800);
           } else {
@@ -926,10 +927,13 @@
         ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
         
         if (note.type === 'hold_slide') {
-          // 【修正】ホールド終点とスライドを一体化して描画
+          // ホールド終点にスライドデザインを完璧に一体化
           const slideDrawY = note.y - note.length;
-          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 20, slideDrawY - 12, 40, 24, 12); ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 16px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, slideDrawY + 5);
+          ctx.fillStyle = '#74b9ff'; 
+          ctx.beginPath(); 
+          ctx.roundRect(x - 18, slideDrawY - 10, 36, 20, 10); 
+          ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = `bold 14px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, slideDrawY + 4);
         } else {
           ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
         }
@@ -945,12 +949,15 @@
         ctx.stroke();
 
         if (note.type === 'curved_hold_slide') {
-          // 【修正】カーブホールドの終点パス部分にスライドの見た目を一体化して描画
+          // カーブホールドの終点パスにスライドデザインを完璧に一体化
           const endPt = note.path[note.path.length - 1];
           const endX = laneXPositions[endPt.lane];
           const slideDrawY = note.y - endPt.offsetY;
-          ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(endX - 20, slideDrawY - 12, 40, 24, 12); ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 16px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', endX, slideDrawY + 5);
+          ctx.fillStyle = '#74b9ff'; 
+          ctx.beginPath(); 
+          ctx.roundRect(endX - 18, slideDrawY - 10, 36, 20, 10); 
+          ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.font = `bold 14px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', endX, slideDrawY + 4);
         }
       } else if (note.type === 'slide') {
         const x = laneXPositions[note.lane];
