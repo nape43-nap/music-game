@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版（完全版・修正）</title>
+  <title>絵本風音ゲー 5曲版（完全版・表示改善）</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -125,7 +125,7 @@
 
     #virtual-scroll-viewport {
       width: 310px;
-      height: 440px;
+      height: 400px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -179,26 +179,39 @@
       text-overflow: ellipsis;
     }
 
-    /* 曲選択画面の右下に常時表示するハイスコア・ランクウィンドウ */
+    /* 曲名がわかるように改良したスコア・ランクウィンドウ */
     #select-record-panel {
       position: absolute;
-      bottom: 20px;
+      bottom: 12px;
       left: 35px;
       width: 310px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 2px dashed #b84a4a;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #b84a4a;
       border-radius: 12px;
-      padding: 8px 14px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
+      padding: 8px 12px;
       box-sizing: border-box;
       z-index: 28;
       font-family: "Kaisei Opti", serif;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
-    .panel-item-title { font-size: 11px; color: #718093; text-align: center; }
-    .panel-item-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; text-align: center; }
+    .panel-song-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #574b90;
+      border-bottom: 1px dashed #fab1a0;
+      padding-bottom: 3px;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .panel-content-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .panel-item-title { font-size: 10px; color: #718093; text-align: center; }
+    .panel-item-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; text-align: center; line-height: 1.1; }
     .panel-rank-badge {
       display: inline-block;
       font-size: 16px;
@@ -312,15 +325,18 @@
       <div id="virtual-scroll-viewport">
         <div id="virtual-scroll-spacer"></div>
       </div>
-      <!-- 曲選択画面の右下に常時表示するウィンドウ -->
+      <!-- 曲名付きのレコードパネル -->
       <div id="select-record-panel">
-        <div>
-          <div class="panel-item-title">SELECTED HIGH SCORE</div>
-          <div id="panel-high-score" class="panel-item-value">0</div>
-        </div>
-        <div>
-          <div class="panel-item-title">RANK</div>
-          <div><span id="panel-rank" class="panel-rank-badge" style="background: #b2bec3;">-</span></div>
+        <div id="panel-song-title" class="panel-song-title">選択中の曲名</div>
+        <div class="panel-content-row">
+          <div>
+            <div class="panel-item-title">HIGH SCORE</div>
+            <div id="panel-high-score" class="panel-item-value">0</div>
+          </div>
+          <div>
+            <div class="panel-item-title">RANK</div>
+            <div><span id="panel-rank" class="panel-rank-badge" style="background: #b2bec3;">-</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -470,13 +486,13 @@
     return { rank: 'E', color: '#b2bec3' };
   }
 
-  // 選択中の曲のスコア・ランクを読み込んで選択画面右下に表示する関数
   function updateSelectScreenPanel() {
     const songId = currentSong.id;
     const highScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
     const savedCounts = JSON.parse(localStorage.getItem(`counts_${songId}`)) || { perfect: 0, great: 0, good: 0, miss: 0 };
     const rankInfo = getRankDetails(savedCounts, currentSong.totalNotes);
 
+    document.getElementById('panel-song-title').textContent = `${currentSong.jacket} ${currentSong.name}`;
     document.getElementById('panel-high-score').textContent = highScore;
     const rankEl = document.getElementById('panel-rank');
     rankEl.textContent = rankInfo.rank;
@@ -523,7 +539,6 @@
       spacer.appendChild(card);
     }
 
-    // スクロール位置に応じた中央付近の曲を自動選択状態にしてパネルを更新
     const centerCardIndex = Math.floor((scrollTop + viewportHeight / 2) / ITEM_HEIGHT);
     const activeDataIndex = ((centerCardIndex % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
     currentSong = songList[activeDataIndex];
@@ -710,12 +725,10 @@
     activeTouches[touchId] = touchData;
     touchData.x = touchX;
 
-    // スライドおよび曲がる長押しスライドの判定を徹底強化
     notes.forEach((n, index) => {
       if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted) || (n.type === 'curved_hold_slide' && n.slideReady)) {
         if (n.type === 'curved_hold_slide') {
           const endLaneX = laneXPositions[n.slideTargetLane];
-          // 指が動いたとき、スライド目標レーン付近か、あるいはどのレーンであっても横方向の判定内ならOK
           if (Math.abs(touchX - endLaneX) < laneWidth * 2.2) {
             n.slideCompleted = true;
             notes.splice(index, 1);
@@ -741,10 +754,9 @@
     if (touchData && touchData.activeNote) {
       const note = touchData.activeNote;
       
-      // 曲がる長押し+スライドのホールド完了時
       if (note.type === 'curved_hold_slide') {
         note.holding = false;
-        note.slideReady = true; // 指を離してもスライド受付状態に移行
+        note.slideReady = true;
         touchData.activeNote = null;
         return;
       }
@@ -826,7 +838,6 @@
     const songId = currentSong.id;
     const prevScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
     
-    // ハイスコア・判定データの保存
     if (score > prevScore) {
       localStorage.setItem(`highscore_${songId}`, score);
       newRecordTag.style.display = 'inline-block';
