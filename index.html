@@ -33,7 +33,6 @@
       justify-content: center;
     }
 
-    /* 1.png（大きなしおり） */
     #game-container {
       position: absolute;
       top: 0;
@@ -52,7 +51,6 @@
       z-index: 10;
     }
 
-    /* 2.png（上の吹き出し） */
     #floating-title {
       position: absolute;
       top: 10px;
@@ -76,7 +74,6 @@
 
     canvas { display: block; width: 100%; height: 100%; }
 
-    /* スコア表示（ゲーム中のみ表示） */
     #score-display {
       position: absolute;
       top: 50px;
@@ -92,7 +89,6 @@
       display: none; 
     }
 
-    /* 戻るボタン（ゲーム中のみ表示） */
     #back-to-select-btn {
       position: absolute;
       top: 50px;
@@ -140,7 +136,6 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
-    /* 3.png のカード */
     .song-card {
       position: absolute;
       left: 5px;
@@ -184,7 +179,6 @@
       text-overflow: ellipsis;
     }
 
-    /* クレジット（ロード）画面 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -631,12 +625,13 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) return;
+      // 【修正】slideと、まだホールド中のhold_slideの終点は「タップ（touchstart）」では反応させない（なぞる専用にする）
+      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && !note.holdCompleted)) return;
+      
       let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
       const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      // タップ系の判定を少し広げる (distanceY < 80)
       if (distanceY < 80 && distanceX < laneWidth * 0.9 && distanceY < minDistance) {
         minDistance = distanceY;
         hitIndex = index;
@@ -666,7 +661,7 @@
     if (!touchData) return;
     touchData.x = touchX;
 
-    // 【修正】スライドおよびホールド終わりのスライド判定を大幅に緩く、確実にキャッチできるように変更
+    // スライド（slide）および、ホールド完了後のスライド終点（hold_slide）の判定
     notes.forEach((n, index) => {
       if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
         const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
@@ -674,7 +669,6 @@
         const expectedX = laneXPositions[n.lane];
         const distanceX = Math.abs(touchX - expectedX);
 
-        // 通過判定エリアを広げる (Y軸±90、X軸も画面幅いっぱいに近く)
         if (distanceY < 90 && distanceX < laneWidth * 1.2) {
           notes.splice(index, 1);
           applyJudgement(distanceY, expectedX);
@@ -706,7 +700,7 @@
         } else {
           if (note.type === 'hold_slide' && !note.holdCompleted) {
             note.holding = false;
-            note.holdCompleted = true;
+            note.holdCompleted = true; // ホールド部分が終わり、スライド待ち状態に切り替える
             touchData.activeNote = null;
             setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 600);
           } else {
@@ -738,18 +732,19 @@
       const rand = Math.random();
       const spd = Number(currentSong.speed);
 
-      if (rand < 0.25) {
+      // 【修正】すべてのノーツタイプ（normal, hold, curved_hold, hold_slide, slide）が均等に出現するように確率を調整
+      if (rand < 0.20) {
         notes.push({ type: 'normal', lane: startLane, y: 0, speed: spd });
-      } else if (rand < 0.50) {
+      } else if (rand < 0.40) {
         notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
-      } else if (rand < 0.70) {
+      } else if (rand < 0.60) {
         const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
         const length = 180;
         notes.push({
           type: 'curved_hold', y: 0, length: length, speed: spd, holding: false,
           path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
         });
-      } else if (rand < 0.85) {
+      } else if (rand < 0.80) {
         notes.push({ type: 'hold_slide', lane: startLane, y: 0, length: 140, speed: spd, holding: false, holdCompleted: false });
       } else {
         notes.push({ type: 'slide', lane: startLane, y: 0, speed: spd });
@@ -846,7 +841,6 @@
       }
 
       let missCheckTailY = (note.type === 'normal' || note.type === 'slide') ? note.y : (note.y - note.length);
-      // ミス判定のラインを少し下方に余裕を持たせる
       if (missCheckTailY > targetY + 85) {
         notes.splice(i, 1);
         if (note.type === 'hold_slide' && note.holdCompleted) {
