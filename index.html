@@ -472,7 +472,6 @@
     particleContainer.innerHTML = '';
   }
 
-  // ご希望のPerfect割合によるランク判定
   function getRankDetails(countsObj, totalNotesCount) {
     if (!totalNotesCount || totalNotesCount <= 0) {
       return { rank: '-', color: '#b2bec3' };
@@ -729,7 +728,6 @@
     if (!touchData) return;
     touchData.x = touchX;
 
-    // 長押し中の指はスライドの誤爆判定を行わないようにガード
     if (!touchData.activeNote || (touchData.activeNote.type !== 'curved_hold' && touchData.activeNote.type !== 'hold' && touchData.activeNote.type !== 'hold_slide')) {
       notes.forEach((n, index) => {
         if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
@@ -914,7 +912,7 @@
         if (note.type === 'hold_slide' && note.holdCompleted) {
           triggerMiss();
         } else if ((note.type === 'hold' || note.type === 'curved_hold') && note.holding) {
-          applyJudgement(0, note.type === 'curved_hold' ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane]);
+          applyJudgement(0, laneXPositions[note.path[note.path.length - 1].lane]);
         } else {
           triggerMiss();
         }
@@ -940,6 +938,7 @@
         ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
       } else if (note.type === 'curved_hold') {
+        // 曲がる長押しノーツの線を描画
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
         ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
@@ -950,6 +949,19 @@
           idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
         });
         ctx.stroke();
+
+        // ★頭と終点の丸（ヘッド＆テール）を描画
+        const startPt = note.path[0];
+        const endPt = note.path[note.path.length - 1];
+        const headDrawY = note.holding ? targetY : note.y;
+        const tailDrawY = note.y - note.length;
+
+        // ヘッドの丸
+        ctx.fillStyle = '#6c5ce7';
+        ctx.beginPath(); ctx.arc(laneXPositions[startPt.lane], headDrawY, 18, 0, Math.PI * 2); ctx.fill();
+        // テールの丸
+        ctx.beginPath(); ctx.arc(laneXPositions[endPt.lane], tailDrawY, 18, 0, Math.PI * 2); ctx.fill();
+
       } else if (note.type === 'slide' || note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
         const drawY = (note.type === 'slide') ? note.y : (note.y - note.length);
