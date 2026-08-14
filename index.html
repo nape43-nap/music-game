@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版（完全版・修正済）</title>
+  <title>絵本風音ゲー 5曲版</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,7 @@
       justify-content: center;
     }
 
+    /* 1.png（大きなしおり） */
     #game-container {
       position: absolute;
       top: 0;
@@ -51,6 +52,7 @@
       z-index: 10;
     }
 
+    /* 2.png（上の吹き出し） */
     #floating-title {
       position: absolute;
       top: 10px;
@@ -74,6 +76,7 @@
 
     canvas { display: block; width: 100%; height: 100%; }
 
+    /* スコア表示（ゲーム中のみ表示） */
     #score-display {
       position: absolute;
       top: 50px;
@@ -89,6 +92,7 @@
       display: none; 
     }
 
+    /* 戻るボタン（ゲーム中のみ表示） */
     #back-to-select-btn {
       position: absolute;
       top: 50px;
@@ -125,7 +129,7 @@
 
     #virtual-scroll-viewport {
       width: 310px;
-      height: 400px;
+      height: 490px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -136,6 +140,7 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
+    /* 3.png のカード */
     .song-card {
       position: absolute;
       left: 5px;
@@ -179,49 +184,7 @@
       text-overflow: ellipsis;
     }
 
-    #select-record-panel {
-      position: absolute;
-      bottom: 12px;
-      left: 35px;
-      width: 310px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 2px solid #b84a4a;
-      border-radius: 12px;
-      padding: 8px 12px;
-      box-sizing: border-box;
-      z-index: 28;
-      font-family: "Kaisei Opti", serif;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-    .panel-song-title {
-      font-size: 13px;
-      font-weight: bold;
-      color: #574b90;
-      border-bottom: 1px dashed #fab1a0;
-      padding-bottom: 3px;
-      margin-bottom: 5px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .panel-content-row {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-    .panel-item-title { font-size: 10px; color: #718093; text-align: center; }
-    .panel-item-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; text-align: center; line-height: 1.1; }
-    .panel-rank-badge {
-      display: inline-block;
-      font-size: 16px;
-      font-weight: bold;
-      padding: 0 8px;
-      border-radius: 6px;
-      color: #fff;
-      font-family: "Caveat", cursive;
-      text-align: center;
-    }
-
+    /* クレジット（ロード）画面 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -246,6 +209,23 @@
     .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
     .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
 
+    .credit-record-box {
+      width: 280px;
+      padding: 10px 16px;
+      background: #fff;
+      border: 2px dashed #b84a4a;
+      border-radius: 12px;
+      text-align: center;
+      font-family: "Kaisei Opti", serif;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .credit-record-item { font-size: 13px; color: #718093; }
+    .credit-record-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; }
+    .credit-rank-badge { display: inline-block; font-size: 18px; font-weight: bold; padding: 0 8px; border-radius: 6px; color: #fff; font-family: "Caveat", cursive; }
+
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
     .particle { position: absolute; bottom: -40px; pointer-events: none; animation: floatUp 4s linear forwards; }
     @keyframes floatUp {
@@ -263,31 +243,16 @@
       z-index: 30;
       background: rgba(0, 0, 0, 0.35);
     }
-    #result-screen.active {
-      display: flex;
-    }
+    #result-screen.active { display: flex; }
     #result-card { width: 270px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
     .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
     
-    .result-score-rank-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin: 4px 0;
-    }
+    .result-score-rank-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 4px 0; }
     .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; line-height: 1; }
     .result-rank-large {
-      font-size: 42px;
-      font-weight: bold;
-      font-family: "Caveat", cursive;
-      width: 55px;
-      height: 55px;
-      line-height: 55px;
-      border-radius: 50%;
-      color: #fff;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      font-size: 42px; font-weight: bold; font-family: "Caveat", cursive;
+      width: 55px; height: 55px; line-height: 55px; border-radius: 50%;
+      color: #fff; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .tag-container { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; min-height: 22px; }
@@ -296,16 +261,10 @@
     .result-row { display: flex; justify-content: space-between; margin: 3px 0; }
     .btn-group { display: flex; gap: 10px; justify-content: center; }
     .btn {
-      padding: 10px 18px;
-      font-size: 15px;
-      font-weight: bold;
-      color: #fff;
+      padding: 10px 18px; font-size: 15px; font-weight: bold; color: #fff;
       background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
-      border: 3px solid #fff;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
-      font-family: "Kaisei Opti", serif;
+      border: 3px solid #fff; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4); font-family: "Kaisei Opti", serif;
     }
     .btn:active { transform: translateY(2px); }
   </style>
@@ -324,19 +283,6 @@
       <div id="virtual-scroll-viewport">
         <div id="virtual-scroll-spacer"></div>
       </div>
-      <div id="select-record-panel">
-        <div id="panel-song-title" class="panel-song-title">選択中の曲名</div>
-        <div class="panel-content-row">
-          <div>
-            <div class="panel-item-title">HIGH SCORE</div>
-            <div id="panel-high-score" class="panel-item-value">0</div>
-          </div>
-          <div>
-            <div class="panel-item-title">RANK</div>
-            <div><span id="panel-rank" class="panel-rank-badge" style="background: #b2bec3;">-</span></div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="credit-screen" class="overlay-screen">
@@ -345,6 +291,16 @@
         <div id="credit-title" class="credit-title">曲名</div>
         <div id="credit-composer" class="credit-composer-text">Composer</div>
         <div class="credit-loading">Now Loading...</div>
+      </div>
+      <div class="credit-record-box">
+        <div>
+          <div class="credit-record-item">HIGH SCORE</div>
+          <div id="credit-high-score" class="credit-record-value">0</div>
+        </div>
+        <div>
+          <div class="credit-record-item">RANK</div>
+          <div><span id="credit-rank" class="credit-rank-badge" style="background: #b2bec3;">-</span></div>
+        </div>
       </div>
     </div>
 
@@ -471,30 +427,13 @@
     particleContainer.innerHTML = '';
   }
 
-  function getRankDetails(countsObj, totalNotesCount) {
-    if (!totalNotesCount || totalNotesCount <= 0) return { rank: '-', color: '#b2bec3' };
-    const perfectRate = countsObj.perfect / totalNotesCount;
-    if (countsObj.perfect === totalNotesCount && countsObj.miss === 0 && countsObj.great === 0 && countsObj.good === 0) return { rank: 'SSS', color: '#ff7675' };
-    if (perfectRate >= 0.90) return { rank: 'SS', color: '#fdcb6e' };
-    if (perfectRate >= 0.80) return { rank: 'S', color: '#e17055' };
-    if (perfectRate >= 0.70) return { rank: 'A', color: '#00b894' };
-    if (perfectRate >= 0.60) return { rank: 'B', color: '#0984e3' };
-    if (perfectRate >= 0.50) return { rank: 'C', color: '#6c5ce7' };
-    if (perfectRate >= 0.40) return { rank: 'D', color: '#a29bfe' };
+  function getRankDetails(s) {
+    if (s >= 4500) return { rank: 'S', color: '#e17055' };
+    if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
+    if (s >= 3500) return { rank: 'B', color: '#00b894' };
+    if (s >= 3000) return { rank: 'C', color: '#0984e3' };
+    if (s >= 2500) return { rank: 'D', color: '#6c5ce7' };
     return { rank: 'E', color: '#b2bec3' };
-  }
-
-  function updateSelectScreenPanel() {
-    const songId = currentSong.id;
-    const highScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
-    const savedCounts = JSON.parse(localStorage.getItem(`counts_${songId}`)) || { perfect: 0, great: 0, good: 0, miss: 0 };
-    const rankInfo = getRankDetails(savedCounts, currentSong.totalNotes);
-
-    document.getElementById('panel-song-title').textContent = `${currentSong.jacket} ${currentSong.name}`;
-    document.getElementById('panel-high-score').textContent = highScore;
-    const rankEl = document.getElementById('panel-rank');
-    rankEl.textContent = rankInfo.rank;
-    rankEl.style.background = rankInfo.color;
   }
 
   const ITEM_HEIGHT = 95;
@@ -517,30 +456,27 @@
     const endIndex = Math.ceil((scrollTop + viewportHeight + ITEM_HEIGHT) / ITEM_HEIGHT);
 
     spacer.innerHTML = '';
+
     for (let i = startIndex; i <= endIndex; i++) {
       const dataIndex = ((i % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
       const song = songList[dataIndex];
+
       const card = document.createElement('div');
       card.className = 'song-card';
       card.style.top = `${i * ITEM_HEIGHT}px`;
+
       card.innerHTML = `
-        <div style="font-size: 28px; width: 38px; text-align: center; margin-right: 6px; flex-shrink: 0;">${song.jacket}</div>
+        <div style="font-size: 28px; width: 38px; text-align: center; margin-right: 6px; flex-shrink: 0;">
+          ${song.jacket}
+        </div>
         <div class="song-info">
           <div class="song-name">${song.name}</div>
           <div class="song-composer">${song.composer}</div>
         </div>
       `;
-      card.addEventListener('click', () => {
-        currentSong = song;
-        triggerCreditAndStart(song);
-      });
+      card.addEventListener('click', () => triggerCreditAndStart(song));
       spacer.appendChild(card);
     }
-
-    const centerCardIndex = Math.floor((scrollTop + viewportHeight / 2) / ITEM_HEIGHT);
-    const activeDataIndex = ((centerCardIndex % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
-    currentSong = songList[activeDataIndex];
-    updateSelectScreenPanel();
   }
 
   viewport.addEventListener('scroll', updateVirtualScroll);
@@ -558,29 +494,34 @@
     creditScreen.style.display = 'none';
     resultScreen.style.display = 'none';
     resultScreen.classList.remove('active'); 
-    updateSelectScreenPanel();
   }
 
   function triggerCreditAndStart(song) {
-    isPlaying = false;
     currentSong = song;
     stopParticles();
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
 
     selectScreen.style.display = 'none';
-    resultScreen.style.display = 'none';
-    resultScreen.classList.remove('active');
     floatingTitle.style.display = 'none'; 
-    
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
 
+    const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
+    document.getElementById('credit-high-score').textContent = savedHighScore;
+    const rankInfo = getRankDetails(savedHighScore);
+    const creditRankEl = document.getElementById('credit-rank');
+    creditRankEl.textContent = savedHighScore > 0 ? rankInfo.rank : '-';
+    creditRankEl.style.background = savedHighScore > 0 ? rankInfo.color : '#b2bec3';
+
     creditScreen.style.display = 'flex';
+
     setTimeout(() => {
       creditScreen.style.display = 'none';
       startSong();
-    }, 1800);
+    }, 2200);
   }
 
   function startSong() {
@@ -589,7 +530,7 @@
     floatingTitle.style.display = 'none'; 
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
-    requestAnimationFrame(gameLoop);
+    gameLoop();
   }
 
   function resetGame() {
@@ -603,8 +544,6 @@
     activeTouches = {};
     isLaneHolding = [false, false, false, false];
     globalAnimTimer = 0;
-    judgeTimer = 0;
-    hitEffects = [];
     scoreDisplay.textContent = `SCORE: 0`;
   }
 
@@ -633,7 +572,7 @@
   }
 
   function applyJudgement(distance, xPos) {
-    if (distance < 35) {
+    if (distance < 30) {
       judgeText = 'PERFECT!';
       judgeColor = '#fdcb6e';
       score += 100;
@@ -649,7 +588,7 @@
       updateCombo(combo + 1);
       playSound(1.2);
       createHitEffect(xPos, targetY, '#00b894');
-    } else if (distance < 80) {
+    } else {
       judgeText = 'GOOD';
       judgeColor = '#0984e3';
       score += 50;
@@ -670,20 +609,35 @@
     updateCombo(0);
   }
 
+  function getHoldXAtY(note, checkY) {
+    if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
+    for (let i = 0; i < note.path.length - 1; i++) {
+      const p1 = { x: laneXPositions[note.path[i].lane], y: note.y - note.path[i].offsetY };
+      const p2 = { x: laneXPositions[note.path[i+1].lane], y: note.y - note.path[i+1].offsetY };
+      const minY = Math.min(p1.y, p2.y);
+      const maxY = Math.max(p1.y, p2.y);
+      if (checkY >= minY && checkY <= maxY) {
+        if (Math.abs(p2.y - p1.y) < 0.1) return p1.x;
+        const t = (checkY - p1.y) / (p2.y - p1.y);
+        return p1.x + t * (p2.x - p1.x);
+      }
+    }
+    return laneXPositions[note.path[0].lane];
+  }
+
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
     let hitIndex = -1;
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // 既にホールド中やスライド待機中のものは対象外
-      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted) || (note.type === 'curved_hold_slide' && (note.holdCompleted || note.slideReady || note.slideCompleted))) return;
-      
-      let expectedX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) return;
+      let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
       const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      if (distanceY < 80 && distanceX < laneWidth * 1.2 && distanceY < minDistance) {
+      // タップ系の判定を少し広げる (distanceY < 80)
+      if (distanceY < 80 && distanceX < laneWidth * 0.9 && distanceY < minDistance) {
         minDistance = distanceY;
         hitIndex = index;
       }
@@ -691,12 +645,10 @@
 
     if (hitIndex !== -1) {
       const note = notes[hitIndex];
-      let noteX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
-
+      let noteX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
       if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
-        activeTouches[touchId] = { x: touchX, activeNote: null };
       } else {
         note.holding = true;
         note.touchId = touchId;
@@ -704,50 +656,41 @@
         applyJudgement(minDistance, noteX);
       }
     } else {
-      // タップ時に近くにあるスライド系ノーツ（単体スライドなど）を即座に判定する
-      let slideHitIndex = -1;
-      let minSlideDist = Infinity;
-      notes.forEach((note, index) => {
-        if (note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) {
-          let checkY = (note.type === 'slide') ? note.y : (note.y - note.length);
-          let dY = Math.abs(checkY - targetY);
-          let dX = Math.abs(touchX - laneXPositions[note.lane]);
-          if (dY < 70 && dX < laneWidth * 1.2 && dY < minSlideDist) {
-            minSlideDist = dY;
-            slideHitIndex = index;
-          }
-        }
-      });
-
-      if (slideHitIndex !== -1) {
-        const note = notes[slideHitIndex];
-        const nLaneX = laneXPositions[note.lane];
-        notes.splice(slideHitIndex, 1);
-        applyJudgement(minSlideDist, nLaneX);
-        activeTouches[touchId] = { x: touchX, activeNote: null };
-      } else {
-        activeTouches[touchId] = { x: touchX, activeNote: null };
-      }
+      activeTouches[touchId] = { x: touchX, activeNote: null };
     }
   }
 
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
-    const touchData = activeTouches[touchId] || { x: touchX, activeNote: null };
-    activeTouches[touchId] = touchData;
+    const touchData = activeTouches[touchId];
+    if (!touchData) return;
     touchData.x = touchX;
 
-    // もしこの指がcurved_hold_slideのフィニッシュ待ち状態ならそこをチェック
+    // 【修正】スライドおよびホールド終わりのスライド判定を大幅に緩く、確実にキャッチできるように変更
     notes.forEach((n, index) => {
-      if (n.type === 'curved_hold_slide' && n.slideReady && n.touchId === touchId) {
-        const endLaneX = laneXPositions[n.slideTargetLane];
-        if (Math.abs(touchX - endLaneX) < laneWidth * 1.8) {
-          n.slideCompleted = true;
+      if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
+        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
+        const distanceY = Math.abs(targetCheckY - targetY);
+        const expectedX = laneXPositions[n.lane];
+        const distanceX = Math.abs(touchX - expectedX);
+
+        // 通過判定エリアを広げる (Y軸±90、X軸も画面幅いっぱいに近く)
+        if (distanceY < 90 && distanceX < laneWidth * 1.2) {
           notes.splice(index, 1);
-          applyJudgement(0, endLaneX);
+          applyJudgement(distanceY, expectedX);
         }
       }
     });
+
+    const note = touchData.activeNote;
+    if (note && note.holding && note.type !== 'hold_slide') {
+      let expectedX = (note.type === 'curved_hold') ? getHoldXAtY(note, targetY) : laneXPositions[note.lane];
+      if (Math.abs(touchX - expectedX) > laneWidth * 1.1) {
+        note.holding = false;
+        touchData.activeNote = null;
+        triggerMiss();
+      }
+    }
   }
 
   function handleTouchUp(touchId) {
@@ -755,15 +698,6 @@
     const touchData = activeTouches[touchId];
     if (touchData && touchData.activeNote) {
       const note = touchData.activeNote;
-      
-      // curved_hold_slideで長押しが終わってスライド待ち状態に移行する場合
-      if (note.type === 'curved_hold_slide') {
-        note.holding = false;
-        note.slideReady = true;
-        delete activeTouches[touchId];
-        return;
-      }
-
       if (note.holding) {
         const tailY = note.y - note.length;
         if (tailY < targetY - 60) {
@@ -773,23 +707,27 @@
           if (note.type === 'hold_slide' && !note.holdCompleted) {
             note.holding = false;
             note.holdCompleted = true;
+            touchData.activeNote = null;
+            setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 600);
           } else {
             const distance = Math.abs(tailY - targetY);
             let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
             const index = notes.indexOf(note);
             if (index !== -1) {
               notes.splice(index, 1);
-              if (distance < 90 && Math.abs(touchData.x - expectedX) < laneWidth * 2.0) {
+              if (distance < 80 && Math.abs(touchData.x - expectedX) < laneWidth * 1.1) {
                 applyJudgement(distance, expectedX);
               } else {
                 triggerMiss();
               }
             }
+            delete activeTouches[touchId];
           }
         }
       }
+    } else {
+      delete activeTouches[touchId];
     }
-    delete activeTouches[touchId];
   }
 
   function spawnNotes() {
@@ -800,28 +738,18 @@
       const rand = Math.random();
       const spd = Number(currentSong.speed);
 
-      if (rand < 0.20) {
+      if (rand < 0.25) {
         notes.push({ type: 'normal', lane: startLane, y: 0, speed: spd });
-      } else if (rand < 0.40) {
+      } else if (rand < 0.50) {
         notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
-      } else if (rand < 0.60) {
+      } else if (rand < 0.70) {
         const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
         const length = 180;
         notes.push({
           type: 'curved_hold', y: 0, length: length, speed: spd, holding: false,
           path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
         });
-      } else if (rand < 0.78) {
-        const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
-        const slideTarget = (targetLane < laneCount - 1) ? targetLane + 1 : targetLane - 1;
-        const length = 180;
-        notes.push({
-          type: 'curved_hold_slide', y: 0, length: length, speed: spd, holding: false, slideReady: false, slideCompleted: false,
-          lane: slideTarget,
-          slideTargetLane: slideTarget,
-          path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
-        });
-      } else if (rand < 0.90) {
+      } else if (rand < 0.85) {
         notes.push({ type: 'hold_slide', lane: startLane, y: 0, length: 140, speed: spd, holding: false, holdCompleted: false });
       } else {
         notes.push({ type: 'slide', lane: startLane, y: 0, speed: spd });
@@ -834,17 +762,13 @@
   function showResult() {
     isPlaying = false;
     floatingTitle.style.display = 'none'; 
-
-    const songId = currentSong.id;
-    const prevScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
-    
+    const prevScore = Number(localStorage.getItem(`highscore_${currentSong.id}`)) || 0;
     if (score > prevScore) {
-      localStorage.setItem(`highscore_${songId}`, score);
+      localStorage.setItem(`highscore_${currentSong.id}`, score);
       newRecordTag.style.display = 'inline-block';
     } else {
       newRecordTag.style.display = 'none';
     }
-    localStorage.setItem(`counts_${songId}`, JSON.stringify(counts));
 
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
@@ -859,7 +783,7 @@
     }
 
     document.getElementById('res-score').textContent = score;
-    const rankInfo = getRankDetails(counts, totalHitCount);
+    const rankInfo = getRankDetails(score);
     const resRankEl = document.getElementById('res-rank');
     resRankEl.textContent = rankInfo.rank;
     resRankEl.style.background = rankInfo.color;
@@ -921,20 +845,14 @@
         note.holding = false;
       }
 
-      if (note.type === 'curved_hold_slide' && !note.slideReady && (note.y - note.length) > targetY + 40) {
-        note.holding = false;
-        note.slideReady = true;
-      }
-
       let missCheckTailY = (note.type === 'normal' || note.type === 'slide') ? note.y : (note.y - note.length);
-      if (missCheckTailY > targetY + 120) {
+      // ミス判定のラインを少し下方に余裕を持たせる
+      if (missCheckTailY > targetY + 85) {
         notes.splice(i, 1);
         if (note.type === 'hold_slide' && note.holdCompleted) {
           triggerMiss();
-        } else if (note.type === 'curved_hold_slide' && note.slideReady) {
-          triggerMiss();
-        } else if ((note.type === 'hold' || note.type === 'curved_hold' || note.type === 'curved_hold_slide') && (note.holding || note.slideReady)) {
-          applyJudgement(0, laneXPositions[note.path[note.path.length - 1].lane]);
+        } else if ((note.type === 'hold' || note.type === 'curved_hold') && note.holding) {
+          applyJudgement(0, note.type === 'curved_hold' ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane]);
         } else {
           triggerMiss();
         }
@@ -970,32 +888,6 @@
           idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
         });
         ctx.stroke();
-
-        const startPt = note.path[0];
-        const endPt = note.path[note.path.length - 1];
-        ctx.fillStyle = '#6c5ce7';
-        ctx.beginPath(); ctx.arc(laneXPositions[startPt.lane], headY, 18, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(laneXPositions[endPt.lane], tailY, 18, 0, Math.PI * 2); ctx.fill();
-      } else if (note.type === 'curved_hold_slide') {
-        const headY = (note.holding || note.slideReady) ? targetY : note.y;
-        const tailY = note.y - note.length;
-        ctx.strokeStyle = 'rgba(116, 185, 255, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        ctx.beginPath();
-        note.path.forEach((pt, idx) => {
-          let ptY = note.y - pt.offsetY;
-          if ((note.holding || note.slideReady) && ptY > targetY) ptY = targetY;
-          idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
-        });
-        ctx.stroke();
-
-        const startPt = note.path[0];
-        const endPt = note.path[note.path.length - 1];
-        ctx.fillStyle = '#0984e3';
-        ctx.beginPath(); ctx.arc(laneXPositions[startPt.lane], headY, 18, 0, Math.PI * 2); ctx.fill();
-        
-        ctx.fillStyle = '#74b9ff';
-        ctx.beginPath(); ctx.roundRect(laneXPositions[endPt.lane] - 22, tailY - 14, 44, 28, 14); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', laneXPositions[endPt.lane], tailY + 6);
       } else if (note.type === 'slide' || note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
         const drawY = (note.type === 'slide') ? note.y : (note.y - note.length);
