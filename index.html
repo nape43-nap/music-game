@@ -677,7 +677,7 @@
 
     notes.forEach((note, index) => {
       // 既にホールド中やスライド待機中のものは対象外
-      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted) || (note.type === 'curved_hold_slide' && (note.holding || note.slideReady || note.slideCompleted))) return;
+      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted) || (note.type === 'curved_hold_slide' && (note.holdCompleted || note.slideReady || note.slideCompleted))) return;
       
       let expectedX = (note.type === 'curved_hold' || note.type === 'curved_hold_slide') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
       const distanceY = Math.abs(note.y - targetY);
@@ -696,6 +696,7 @@
       if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
+        activeTouches[touchId] = { x: touchX, activeNote: null };
       } else {
         note.holding = true;
         note.touchId = touchId;
@@ -703,7 +704,30 @@
         applyJudgement(minDistance, noteX);
       }
     } else {
-      activeTouches[touchId] = { x: touchX, activeNote: null };
+      // タップ時に近くにあるスライド系ノーツ（単体スライドなど）を即座に判定する
+      let slideHitIndex = -1;
+      let minSlideDist = Infinity;
+      notes.forEach((note, index) => {
+        if (note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) {
+          let checkY = (note.type === 'slide') ? note.y : (note.y - note.length);
+          let dY = Math.abs(checkY - targetY);
+          let dX = Math.abs(touchX - laneXPositions[note.lane]);
+          if (dY < 70 && dX < laneWidth * 1.2 && dY < minSlideDist) {
+            minSlideDist = dY;
+            slideHitIndex = index;
+          }
+        }
+      });
+
+      if (slideHitIndex !== -1) {
+        const note = notes[slideHitIndex];
+        const nLaneX = laneXPositions[note.lane];
+        notes.splice(slideHitIndex, 1);
+        applyJudgement(minSlideDist, nLaneX);
+        activeTouches[touchId] = { x: touchX, activeNote: null };
+      } else {
+        activeTouches[touchId] = { x: touchX, activeNote: null };
+      }
     }
   }
 
@@ -713,23 +737,14 @@
     activeTouches[touchId] = touchData;
     touchData.x = touchX;
 
+    // もしこの指がcurved_hold_slideのフィニッシュ待ち状態ならそこをチェック
     notes.forEach((n, index) => {
-      // curved_hold_slideのフィニッシュスライド判定
-      if (n.type === 'curved_hold_slide' && n.slideReady) {
+      if (n.type === 'curved_hold_slide' && n.slideReady && n.touchId === touchId) {
         const endLaneX = laneXPositions[n.slideTargetLane];
-        if (Math.abs(touchX - endLaneX) < laneWidth * 2.2) {
+        if (Math.abs(touchX - endLaneX) < laneWidth * 1.8) {
           n.slideCompleted = true;
           notes.splice(index, 1);
           applyJudgement(0, endLaneX);
-          return;
-        }
-      } else if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
-        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
-        const distanceY = Math.abs(targetCheckY - targetY);
-        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-        if (distanceY < 100 && distanceX < laneWidth * 2.0) {
-          notes.splice(index, 1);
-          applyJudgement(distanceY, laneXPositions[n.lane]);
         }
       }
     });
@@ -745,7 +760,7 @@
       if (note.type === 'curved_hold_slide') {
         note.holding = false;
         note.slideReady = true;
-        touchData.activeNote = null;
+        delete activeTouches[touchId];
         return;
       }
 
@@ -758,7 +773,6 @@
           if (note.type === 'hold_slide' && !note.holdCompleted) {
             note.holding = false;
             note.holdCompleted = true;
-            touchData.activeNote = null;
           } else {
             const distance = Math.abs(tailY - targetY);
             let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
@@ -771,13 +785,11 @@
                 triggerMiss();
               }
             }
-            delete activeTouches[touchId];
           }
         }
       }
-    } else {
-      delete activeTouches[touchId];
     }
+    delete activeTouches[touchId];
   }
 
   function spawnNotes() {
