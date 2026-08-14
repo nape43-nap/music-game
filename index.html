@@ -184,7 +184,7 @@
       text-overflow: ellipsis;
     }
 
-    /* クレジット（ロード）画面：上に引き上げてセンターに配置 */
+    /* クレジット（ロード）画面 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -472,13 +472,25 @@
     particleContainer.innerHTML = '';
   }
 
-  function getRankDetails(s) {
-    if (s >= 4500) return { rank: 'S', color: '#e17055' };
-    if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
-    if (s >= 3500) return { rank: 'B', color: '#00b894' };
-    if (s >= 3000) return { rank: 'C', color: '#0984e3' };
-    if (s >= 2500) return { rank: 'D', color: '#6c5ce7' };
-    return { rank: 'E', color: '#b2bec3' };
+  // ご希望のPerfect割合によるランク判定
+  function getRankDetails(countsObj, totalNotesCount) {
+    if (!totalNotesCount || totalNotesCount <= 0) {
+      return { rank: '-', color: '#b2bec3' };
+    }
+
+    const perfectRate = countsObj.perfect / totalNotesCount;
+
+    // オールパーフェクト (100%)
+    if (countsObj.perfect === totalNotesCount && countsObj.miss === 0 && countsObj.great === 0 && countsObj.good === 0) {
+      return { rank: 'SSS', color: '#ff7675' };
+    }
+    if (perfectRate >= 0.90) return { rank: 'SS', color: '#fdcb6e' }; // 90%以上
+    if (perfectRate >= 0.80) return { rank: 'S', color: '#e17055' };  // 80%以上
+    if (perfectRate >= 0.70) return { rank: 'A', color: '#00b894' };  // 70%以上
+    if (perfectRate >= 0.60) return { rank: 'B', color: '#0984e3' };  // 60%以上
+    if (perfectRate >= 0.50) return { rank: 'C', color: '#6c5ce7' };  // 50%以上
+    if (perfectRate >= 0.40) return { rank: 'D', color: '#a29bfe' };  // 40%以上
+    return { rank: 'E', color: '#b2bec3' };                           // それ以外
   }
 
   const ITEM_HEIGHT = 95;
@@ -544,7 +556,7 @@
   }
 
   function triggerCreditAndStart(song) {
-    isPlaying = false; // 一旦停止して重複実行を防ぐ
+    isPlaying = false;
     currentSong = song;
     stopParticles();
     if (!audioCtx) {
@@ -562,10 +574,10 @@
 
     const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
     document.getElementById('credit-high-score').textContent = savedHighScore;
-    const rankInfo = getRankDetails(savedHighScore);
+    
     const creditRankEl = document.getElementById('credit-rank');
-    creditRankEl.textContent = savedHighScore > 0 ? rankInfo.rank : '-';
-    creditRankEl.style.background = savedHighScore > 0 ? rankInfo.color : '#b2bec3';
+    creditRankEl.textContent = '-';
+    creditRankEl.style.background = '#b2bec3';
 
     creditScreen.style.display = 'flex';
 
@@ -831,7 +843,9 @@
     }
 
     document.getElementById('res-score').textContent = score;
-    const rankInfo = getRankDetails(score);
+
+    // リザルト画面でのランク判定（新基準）
+    const rankInfo = getRankDetails(counts, totalHitCount);
     const resRankEl = document.getElementById('res-rank');
     resRankEl.textContent = rankInfo.rank;
     resRankEl.style.background = rankInfo.color;
