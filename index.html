@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版</title>
+  <title>絵本風音ゲー テスト譜面付き</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -333,11 +333,12 @@
 
 <script>
   const songList = [
-    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
-    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
-    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
-    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
-    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
+    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2' },
+    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5' },
+    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8' },
+    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5' },
+    { id: 'song_6', name: '6. 【テスト用】全ノーツ確認譜面', composer: 'デバッグ用', jacket: '🧪', totalNotes: 20, speed: '4.0' }
   ];
 
   let currentSong = songList[0];
@@ -390,6 +391,7 @@
   let notes = [];
   let spawnTimer = 0;
   let spawnedCount = 0;
+  let testChartQueue = [];
 
   const starImages = ['images/star1.png', 'images/star2.png', 'images/star3.png', 'images/star4.png', 'images/star5.png'];
   
@@ -524,6 +526,20 @@
     floatingTitle.style.display = 'none'; 
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
+
+    // もしテスト曲（song_6）が選ばれたら、各4回ずつの全20ノーツを順番に生成するキューを作成
+    if (currentSong.id === 'song_6') {
+      testChartQueue = [];
+      const types = ['normal', 'hold', 'curved_hold', 'hold_slide', 'slide'];
+      types.forEach(type => {
+        for (let i = 0; i < 4; i++) {
+          testChartQueue.push(type);
+        }
+      });
+      // ランダムに並び替えたい場合は shuffle しても良いですが、ここでは順番またはランダムに配置
+      testChartQueue.sort(() => Math.random() - 0.5);
+    }
+
     gameLoop();
   }
 
@@ -535,6 +551,7 @@
     notes = [];
     spawnTimer = 0;
     spawnedCount = 0;
+    testChartQueue = [];
     activeTouches = {};
     isLaneHolding = [false, false, false, false];
     globalAnimTimer = 0;
@@ -625,7 +642,7 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // 【修正】slideと、まだホールド中のhold_slideの終点は「タップ（touchstart）」では反応させない（なぞる専用にする）
+      // 【完全修正】slide および hold_slideの未完了スライド部分は絶対にタップ（touchstart）で反応させない
       if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && !note.holdCompleted)) return;
       
       let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
@@ -661,20 +678,24 @@
     if (!touchData) return;
     touchData.x = touchX;
 
-    // スライド（slide）および、ホールド完了後のスライド終点（hold_slide）の判定
-    notes.forEach((n, index) => {
+    // 【完全修正】スライド（slide）およびホールド完了後のスライド（hold_slide）の判定。
+    // 同時に複数のスライドが巻き込まれないよう、一度判定にヒットしたらループを即座に抜ける（1度の移動につき1ノーツだけ処理）
+    for (let i = notes.length - 1; i >= 0; i--) {
+      let n = notes[i];
       if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
         const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
         const distanceY = Math.abs(targetCheckY - targetY);
         const expectedX = laneXPositions[n.lane];
         const distanceX = Math.abs(touchX - expectedX);
 
-        if (distanceY < 90 && distanceX < laneWidth * 1.2) {
-          notes.splice(index, 1);
+        // 判定幅を適切に保ちつつ、指がそのレーン付近を通過した瞬間にキャッチ
+        if (distanceY < 65 && distanceX < laneWidth * 0.9) {
+          notes.splice(i, 1);
           applyJudgement(distanceY, expectedX);
+          break; // 連鎖誤爆を防ぐため、1度のmoveにつき1つだけ処理して終了
         }
       }
-    });
+    }
 
     const note = touchData.activeNote;
     if (note && note.holding && note.type !== 'hold_slide') {
@@ -700,7 +721,7 @@
         } else {
           if (note.type === 'hold_slide' && !note.holdCompleted) {
             note.holding = false;
-            note.holdCompleted = true; // ホールド部分が終わり、スライド待ち状態に切り替える
+            note.holdCompleted = true; // ホールドが終わり、スライド待ち状態にする
             touchData.activeNote = null;
             setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 600);
           } else {
@@ -727,28 +748,45 @@
   function spawnNotes() {
     if (spawnedCount >= currentSong.totalNotes) return;
     spawnTimer++;
-    if (spawnTimer > 45) {
+    if (spawnTimer > 48) {
       const startLane = Math.floor(Math.random() * laneCount);
-      const rand = Math.random();
       const spd = Number(currentSong.speed);
+      let noteType = '';
 
-      // 【修正】すべてのノーツタイプ（normal, hold, curved_hold, hold_slide, slide）が均等に出現するように確率を調整
-      if (rand < 0.20) {
+      if (currentSong.id === 'song_6') {
+        // テスト用譜面の場合は、用意したキューから順番に取り出す
+        if (testChartQueue.length > 0) {
+          noteType = testChartQueue.shift();
+        } else {
+          return;
+        }
+      } else {
+        // 通常の曲の場合は確率でランダム生成
+        const rand = Math.random();
+        if (rand < 0.20) noteType = 'normal';
+        else if (rand < 0.40) noteType = 'hold';
+        else if (rand < 0.60) noteType = 'curved_hold';
+        else if (rand < 0.80) noteType = 'hold_slide';
+        else noteType = 'slide';
+      }
+
+      if (noteType === 'normal') {
         notes.push({ type: 'normal', lane: startLane, y: 0, speed: spd });
-      } else if (rand < 0.40) {
+      } else if (noteType === 'hold') {
         notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
-      } else if (rand < 0.60) {
+      } else if (noteType === 'curved_hold') {
         const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
         const length = 180;
         notes.push({
           type: 'curved_hold', y: 0, length: length, speed: spd, holding: false,
           path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
         });
-      } else if (rand < 0.80) {
+      } else if (noteType === 'hold_slide') {
         notes.push({ type: 'hold_slide', lane: startLane, y: 0, length: 140, speed: spd, holding: false, holdCompleted: false });
-      } else {
+      } else if (noteType === 'slide') {
         notes.push({ type: 'slide', lane: startLane, y: 0, speed: spd });
       }
+
       spawnTimer = 0;
       spawnedCount++;
     }
