@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー 5曲版（完全版）</title>
+  <title>絵本風音ゲー 5曲版（完全版・修正）</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -125,7 +125,7 @@
 
     #virtual-scroll-viewport {
       width: 310px;
-      height: 490px;
+      height: 440px;
       overflow-y: scroll;
       overflow-x: hidden;
       z-index: 2;
@@ -179,6 +179,37 @@
       text-overflow: ellipsis;
     }
 
+    /* 曲選択画面の右下に常時表示するハイスコア・ランクウィンドウ */
+    #select-record-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 35px;
+      width: 310px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 2px dashed #b84a4a;
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-sizing: border-box;
+      z-index: 28;
+      font-family: "Kaisei Opti", serif;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .panel-item-title { font-size: 11px; color: #718093; text-align: center; }
+    .panel-item-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; text-align: center; }
+    .panel-rank-badge {
+      display: inline-block;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #fff;
+      font-family: "Caveat", cursive;
+      text-align: center;
+    }
+
     #credit-screen {
       display: none;
       justify-content: center;
@@ -202,39 +233,6 @@
     .credit-title { font-size: 20px; font-weight: bold; color: #2d3436; margin-bottom: 6px; }
     .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
     .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
-
-    .credit-record-box {
-      width: 280px;
-      padding: 10px 16px;
-      background: #fff;
-      border: 2px dashed #b84a4a;
-      border-radius: 12px;
-      text-align: center;
-      font-family: "Kaisei Opti", serif;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-sizing: border-box;
-    }
-    .credit-record-item {
-      font-size: 13px;
-      color: #718093;
-    }
-    .credit-record-value {
-      font-size: 18px;
-      font-weight: bold;
-      color: #b84a4a;
-      font-family: "Caveat", cursive;
-    }
-    .credit-rank-badge {
-      display: inline-block;
-      font-size: 18px;
-      font-weight: bold;
-      padding: 0 8px;
-      border-radius: 6px;
-      color: #fff;
-      font-family: "Caveat", cursive;
-    }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
     .particle { position: absolute; bottom: -40px; pointer-events: none; animation: floatUp 4s linear forwards; }
@@ -314,6 +312,17 @@
       <div id="virtual-scroll-viewport">
         <div id="virtual-scroll-spacer"></div>
       </div>
+      <!-- 曲選択画面の右下に常時表示するウィンドウ -->
+      <div id="select-record-panel">
+        <div>
+          <div class="panel-item-title">SELECTED HIGH SCORE</div>
+          <div id="panel-high-score" class="panel-item-value">0</div>
+        </div>
+        <div>
+          <div class="panel-item-title">RANK</div>
+          <div><span id="panel-rank" class="panel-rank-badge" style="background: #b2bec3;">-</span></div>
+        </div>
+      </div>
     </div>
 
     <div id="credit-screen" class="overlay-screen">
@@ -322,16 +331,6 @@
         <div id="credit-title" class="credit-title">曲名</div>
         <div id="credit-composer" class="credit-composer-text">Composer</div>
         <div class="credit-loading">Now Loading...</div>
-      </div>
-      <div class="credit-record-box">
-        <div>
-          <div class="credit-record-item">HIGH SCORE</div>
-          <div id="credit-high-score" class="credit-record-value">0</div>
-        </div>
-        <div>
-          <div class="credit-record-item">RANK</div>
-          <div><span id="credit-rank" class="credit-rank-badge" style="background: #b2bec3;">-</span></div>
-        </div>
       </div>
     </div>
 
@@ -471,6 +470,19 @@
     return { rank: 'E', color: '#b2bec3' };
   }
 
+  // 選択中の曲のスコア・ランクを読み込んで選択画面右下に表示する関数
+  function updateSelectScreenPanel() {
+    const songId = currentSong.id;
+    const highScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
+    const savedCounts = JSON.parse(localStorage.getItem(`counts_${songId}`)) || { perfect: 0, great: 0, good: 0, miss: 0 };
+    const rankInfo = getRankDetails(savedCounts, currentSong.totalNotes);
+
+    document.getElementById('panel-high-score').textContent = highScore;
+    const rankEl = document.getElementById('panel-rank');
+    rankEl.textContent = rankInfo.rank;
+    rankEl.style.background = rankInfo.color;
+  }
+
   const ITEM_HEIGHT = 95;
   const TOTAL_ITEMS = songList.length;
   const SET_HEIGHT = ITEM_HEIGHT * TOTAL_ITEMS;
@@ -504,9 +516,18 @@
           <div class="song-composer">${song.composer}</div>
         </div>
       `;
-      card.addEventListener('click', () => triggerCreditAndStart(song));
+      card.addEventListener('click', () => {
+        currentSong = song;
+        triggerCreditAndStart(song);
+      });
       spacer.appendChild(card);
     }
+
+    // スクロール位置に応じた中央付近の曲を自動選択状態にしてパネルを更新
+    const centerCardIndex = Math.floor((scrollTop + viewportHeight / 2) / ITEM_HEIGHT);
+    const activeDataIndex = ((centerCardIndex % TOTAL_ITEMS) + TOTAL_ITEMS) % TOTAL_ITEMS;
+    currentSong = songList[activeDataIndex];
+    updateSelectScreenPanel();
   }
 
   viewport.addEventListener('scroll', updateVirtualScroll);
@@ -524,6 +545,7 @@
     creditScreen.style.display = 'none';
     resultScreen.style.display = 'none';
     resultScreen.classList.remove('active'); 
+    updateSelectScreenPanel();
   }
 
   function triggerCreditAndStart(song) {
@@ -541,18 +563,11 @@
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
 
-    const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
-    document.getElementById('credit-high-score').textContent = savedHighScore;
-    
-    const creditRankEl = document.getElementById('credit-rank');
-    creditRankEl.textContent = '-';
-    creditRankEl.style.background = '#b2bec3';
-
     creditScreen.style.display = 'flex';
     setTimeout(() => {
       creditScreen.style.display = 'none';
       startSong();
-    }, 2200);
+    }, 1800);
   }
 
   function startSong() {
@@ -642,22 +657,6 @@
     updateCombo(0);
   }
 
-  function getHoldXAtY(note, checkY) {
-    if (!note.path || note.path.length < 2) return laneXPositions[note.lane];
-    for (let i = 0; i < note.path.length - 1; i++) {
-      const p1 = { x: laneXPositions[note.path[i].lane], y: note.y - note.path[i].offsetY };
-      const p2 = { x: laneXPositions[note.path[i+1].lane], y: note.y - note.path[i+1].offsetY };
-      const minY = Math.min(p1.y, p2.y);
-      const maxY = Math.max(p1.y, p2.y);
-      if (checkY >= minY && checkY <= maxY) {
-        if (Math.abs(p2.y - p1.y) < 0.1) return p1.x;
-        const t = (checkY - p1.y) / (p2.y - p1.y);
-        return p1.x + t * (p2.x - p1.x);
-      }
-    }
-    return laneXPositions[note.path[0].lane];
-  }
-
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
     let hitIndex = -1;
@@ -669,14 +668,13 @@
       const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      // スライド待ち状態のcurved_hold_slideがあればどこをタップしても即スライド成功に
       if (note.type === 'curved_hold_slide' && note.slideReady) {
         hitIndex = index;
         minDistance = 0;
         return;
       }
 
-      if (distanceY < 80 && distanceX < laneWidth * 1.0 && distanceY < minDistance) {
+      if (distanceY < 80 && distanceX < laneWidth * 1.2 && distanceY < minDistance) {
         minDistance = distanceY;
         hitIndex = index;
       }
@@ -712,40 +710,29 @@
     activeTouches[touchId] = touchData;
     touchData.x = touchX;
 
-    // スライド・ホールド終了後のスライド判定を全探索で強力にチェック
+    // スライドおよび曲がる長押しスライドの判定を徹底強化
     notes.forEach((n, index) => {
       if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted) || (n.type === 'curved_hold_slide' && n.slideReady)) {
-        const targetCheckY = (n.type === 'slide' || n.type === 'curved_hold_slide') ? n.y : (n.y - n.length);
-        const distanceY = Math.abs(targetCheckY - targetY);
-        
         if (n.type === 'curved_hold_slide') {
           const endLaneX = laneXPositions[n.slideTargetLane];
-          // 指が動いたとき、スライド目標レーン周辺（または画面全体の横幅判定）に入っていれば即クリア
-          if (Math.abs(touchX - endLaneX) < laneWidth * 2.0) {
+          // 指が動いたとき、スライド目標レーン付近か、あるいはどのレーンであっても横方向の判定内ならOK
+          if (Math.abs(touchX - endLaneX) < laneWidth * 2.2) {
             n.slideCompleted = true;
             notes.splice(index, 1);
             applyJudgement(0, endLaneX);
             return;
           }
         } else {
+          const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
+          const distanceY = Math.abs(targetCheckY - targetY);
           const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
-          if (distanceY < 90 && distanceX < laneWidth * 1.8) {
+          if (distanceY < 100 && distanceX < laneWidth * 2.0) {
             notes.splice(index, 1);
             applyJudgement(distanceY, laneXPositions[n.lane]);
           }
         }
       }
     });
-
-    const note = touchData.activeNote;
-    if (note && note.holding && note.type !== 'hold_slide' && note.type !== 'curved_hold_slide') {
-      let expectedX = (note.type === 'curved_hold') ? getHoldXAtY(note, targetY) : laneXPositions[note.lane];
-      if (Math.abs(touchX - expectedX) > laneWidth * 1.5) {
-        note.holding = false;
-        touchData.activeNote = null;
-        triggerMiss();
-      }
-    }
   }
 
   function handleTouchUp(touchId) {
@@ -754,10 +741,10 @@
     if (touchData && touchData.activeNote) {
       const note = touchData.activeNote;
       
-      // 曲がる長押し+スライドのホールドが完了した瞬間
+      // 曲がる長押し+スライドのホールド完了時
       if (note.type === 'curved_hold_slide') {
         note.holding = false;
-        note.slideReady = true; // 指を離しても「スライド待ち状態」へ完全移行させる
+        note.slideReady = true; // 指を離してもスライド受付状態に移行
         touchData.activeNote = null;
         return;
       }
@@ -778,7 +765,7 @@
             const index = notes.indexOf(note);
             if (index !== -1) {
               notes.splice(index, 1);
-              if (distance < 90 && Math.abs(touchData.x - expectedX) < laneWidth * 1.8) {
+              if (distance < 90 && Math.abs(touchData.x - expectedX) < laneWidth * 2.0) {
                 applyJudgement(distance, expectedX);
               } else {
                 triggerMiss();
@@ -835,13 +822,18 @@
   function showResult() {
     isPlaying = false;
     floatingTitle.style.display = 'none'; 
-    const prevScore = Number(localStorage.getItem(`highscore_${currentSong.id}`)) || 0;
+
+    const songId = currentSong.id;
+    const prevScore = Number(localStorage.getItem(`highscore_${songId}`)) || 0;
+    
+    // ハイスコア・判定データの保存
     if (score > prevScore) {
-      localStorage.setItem(`highscore_${currentSong.id}`, score);
+      localStorage.setItem(`highscore_${songId}`, score);
       newRecordTag.style.display = 'inline-block';
     } else {
       newRecordTag.style.display = 'none';
     }
+    localStorage.setItem(`counts_${songId}`, JSON.stringify(counts));
 
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
