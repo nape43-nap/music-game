@@ -325,7 +325,6 @@
       </div>
     </div>
 
-    <!-- 曲開始前（ロード）画面 -->
     <div id="credit-screen" class="overlay-screen">
       <div class="credit-card">
         <div id="credit-jacket" class="credit-jacket">🌟</div>
@@ -333,7 +332,6 @@
         <div id="credit-composer" class="credit-composer-text">Composer</div>
         <div class="credit-loading">Now Loading...</div>
       </div>
-      <!-- 枠外下あたりのハイスコア＆ランク表示 -->
       <div class="credit-record-box">
         <div>
           <div class="credit-record-item">HIGH SCORE</div>
@@ -346,7 +344,6 @@
       </div>
     </div>
 
-    <!-- リザルト画面 -->
     <div id="result-screen" class="overlay-screen">
       <div id="result-card">
         <h2 class="result-title">STAGE CLEAR!</h2>
@@ -357,7 +354,6 @@
           <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
         </div>
 
-        <!-- スコアとランクを横並びで配置 -->
         <div class="result-score-rank-container">
           <div id="res-score" class="result-score-val">0</div>
           <div id="res-rank" class="result-rank-large" style="background: #b2bec3;">E</div>
@@ -472,7 +468,6 @@
     particleContainer.innerHTML = '';
   }
 
-  // スコアからランクと背景色を決定する関数
   function getRankDetails(s) {
     if (s >= 4500) return { rank: 'S', color: '#e17055' };
     if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
@@ -555,9 +550,8 @@
     floatingTitle.style.display = 'none'; 
     document.getElementById('credit-jacket').textContent = song.jacket;
     document.getElementById('credit-title').textContent = song.name;
-    document.getElementById('credit-composer').textContent = song.composer;
+    document.getElementById('credit-composer').textContent = song.composer];
 
-    // ロード画面にこれまでのハイスコアとランクを反映
     const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
     document.getElementById('credit-high-score').textContent = savedHighScore;
     const rankInfo = getRankDetails(savedHighScore);
@@ -674,12 +668,14 @@
     return laneXPositions[note.path[0].lane];
   }
 
+  // --- タップ開始時（通常の単タップやホールド開始のみ。スライド単体はここでは反応させない） ---
   function handleTouchDown(touchId, touchX) {
     if (!isPlaying) return;
     let hitIndex = -1;
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
+      // スライド単体はtouchstart（タップ）では反応させない
       if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) return;
       let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
       const distanceY = Math.abs(note.y - targetY);
@@ -708,12 +704,14 @@
     }
   }
 
+  // --- タップ中 / スライド中の動き（スライド単体はここでなぞることで反応する） ---
   function handleTouchMove(touchId, touchX) {
     if (!isPlaying) return;
     const touchData = activeTouches[touchId];
     if (!touchData) return;
     touchData.x = touchX;
 
+    // スライド単体、またはホールド後半のスライド部分の判定
     notes.forEach((n, index) => {
       if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
         const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
@@ -814,7 +812,6 @@
       newRecordTag.style.display = 'none';
     }
 
-    // 正確な総ノーツ数（perfect + great + good + miss）と比較するように修正
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
       allPerfectTag.style.display = 'inline-block';
@@ -827,7 +824,6 @@
       noMissTag.style.display = 'none';
     }
 
-    // スコアとランクの反映
     document.getElementById('res-score').textContent = score;
     const rankInfo = getRankDetails(score);
     const resRankEl = document.getElementById('res-rank');
