@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>絵本風音ゲー デバッグ対応版</title>
+  <title>絵本風音ゲー 5曲版</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,7 @@
       justify-content: center;
     }
 
+    /* 1.png（大きなしおり） */
     #game-container {
       position: absolute;
       top: 0;
@@ -51,6 +52,7 @@
       z-index: 10;
     }
 
+    /* 2.png（上の吹き出し） */
     #floating-title {
       position: absolute;
       top: 10px;
@@ -74,6 +76,7 @@
 
     canvas { display: block; width: 100%; height: 100%; }
 
+    /* スコア表示（ゲーム中のみ表示） */
     #score-display {
       position: absolute;
       top: 50px;
@@ -89,6 +92,7 @@
       display: none; 
     }
 
+    /* 戻るボタン（ゲーム中のみ表示） */
     #back-to-select-btn {
       position: absolute;
       top: 50px;
@@ -136,6 +140,7 @@
     #virtual-scroll-viewport::-webkit-scrollbar { display: none; }
     #virtual-scroll-spacer { position: relative; width: 100%; }
 
+    /* 3.png のカード */
     .song-card {
       position: absolute;
       left: 5px;
@@ -179,6 +184,7 @@
       text-overflow: ellipsis;
     }
 
+    /* クレジット（ロード）画面：上に引き上げてセンターに配置 */
     #credit-screen {
       display: none;
       justify-content: center;
@@ -203,6 +209,7 @@
     .credit-composer-text { font-size: 15px; color: #b84a4a; margin-bottom: 16px; }
     .credit-loading { font-size: 22px; color: #b2bec3; font-family: "Caveat", cursive; }
 
+    /* ロード画面下部のハイスコア・ランク表示枠 */
     .credit-record-box {
       width: 280px;
       padding: 10px 16px;
@@ -216,10 +223,27 @@
       align-items: center;
       box-sizing: border-box;
     }
-    .credit-record-item { font-size: 13px; color: #718093; }
-    .credit-record-value { font-size: 18px; font-weight: bold; color: #b84a4a; font-family: "Caveat", cursive; }
-    .credit-rank-badge { display: inline-block; font-size: 18px; font-weight: bold; padding: 0 8px; border-radius: 6px; color: #fff; font-family: "Caveat", cursive; }
+    .credit-record-item {
+      font-size: 13px;
+      color: #718093;
+    }
+    .credit-record-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #b84a4a;
+      font-family: "Caveat", cursive;
+    }
+    .credit-rank-badge {
+      display: inline-block;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 0 8px;
+      border-radius: 6px;
+      color: #fff;
+      font-family: "Caveat", cursive;
+    }
 
+    /* 背景のイラストパーティクル用 */
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
     .particle { position: absolute; bottom: -40px; pointer-events: none; animation: floatUp 4s linear forwards; }
     @keyframes floatUp {
@@ -237,16 +261,32 @@
       z-index: 30;
       background: rgba(0, 0, 0, 0.35);
     }
-    #result-screen.active { display: flex; }
+    #result-screen.active {
+      display: flex;
+    }
     #result-card { width: 270px; padding: 16px 20px; background: #fff; border: 4px solid #b84a4a; border-radius: 16px; text-align: center; font-family: "Kaisei Opti", serif; }
     .result-title { font-size: 32px; color: #ff7675; margin: 0 0 4px 0; font-family: "Caveat", cursive; }
     
-    .result-score-rank-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 4px 0; }
+    /* リザルト画面のスコア＆ランク表示エリア */
+    .result-score-rank-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 4px 0;
+    }
     .result-score-val { font-size: 38px; color: #b84a4a; font-weight: bold; font-family: "Caveat", cursive; line-height: 1; }
     .result-rank-large {
-      font-size: 42px; font-weight: bold; font-family: "Caveat", cursive;
-      width: 55px; height: 55px; line-height: 55px; border-radius: 50%;
-      color: #fff; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      font-size: 42px;
+      font-weight: bold;
+      font-family: "Caveat", cursive;
+      width: 55px;
+      height: 55px;
+      line-height: 55px;
+      border-radius: 50%;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     .tag-container { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; min-height: 22px; }
@@ -255,10 +295,16 @@
     .result-row { display: flex; justify-content: space-between; margin: 3px 0; }
     .btn-group { display: flex; gap: 10px; justify-content: center; }
     .btn {
-      padding: 10px 18px; font-size: 15px; font-weight: bold; color: #fff;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
       background: linear-gradient(180deg, #ff7675 0%, #d63031 100%);
-      border: 3px solid #fff; border-radius: 12px; cursor: pointer;
-      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4); font-family: "Kaisei Opti", serif;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(214, 48, 49, 0.4);
+      font-family: "Kaisei Opti", serif;
     }
     .btn:active { transform: translateY(2px); }
   </style>
@@ -279,6 +325,7 @@
       </div>
     </div>
 
+    <!-- 曲開始前（ロード）画面 -->
     <div id="credit-screen" class="overlay-screen">
       <div class="credit-card">
         <div id="credit-jacket" class="credit-jacket">🌟</div>
@@ -286,6 +333,7 @@
         <div id="credit-composer" class="credit-composer-text">Composer</div>
         <div class="credit-loading">Now Loading...</div>
       </div>
+      <!-- 枠外下あたりのハイスコア＆ランク表示 -->
       <div class="credit-record-box">
         <div>
           <div class="credit-record-item">HIGH SCORE</div>
@@ -298,6 +346,7 @@
       </div>
     </div>
 
+    <!-- リザルト画面 -->
     <div id="result-screen" class="overlay-screen">
       <div id="result-card">
         <h2 class="result-title">STAGE CLEAR!</h2>
@@ -308,6 +357,7 @@
           <div id="no-miss-tag" class="badge-tag" style="background: #00b894; display: none;">NO MISS!</div>
         </div>
 
+        <!-- スコアとランクを横並びで配置 -->
         <div class="result-score-rank-container">
           <div id="res-score" class="result-score-val">0</div>
           <div id="res-rank" class="result-rank-large" style="background: #b2bec3;">E</div>
@@ -333,14 +383,14 @@
 
 <script>
   const songList = [
-    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2' },
-    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5' },
-    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8' },
-    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2' },
-    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5' },
-    { id: 'song_6', name: '6. 【テスト用】全ノーツ確認譜面', composer: 'デバッグ用', jacket: '🧪', totalNotes: 24, speed: '3.8' }
+    { id: 'song_1', name: '1. きらきら星', composer: 'フランス民謡', jacket: '🌟', totalNotes: 25, speed: '4.2', color: '#ffb8b8' },
+    { id: 'song_2', name: '2. チューリップ', composer: '井上武士', jacket: '🌷', totalNotes: 30, speed: '4.5', color: '#85e3d4' },
+    { id: 'song_3', name: '3. どんぐりころころ', composer: '梁田貞', jacket: '🌰', totalNotes: 35, speed: '4.8', color: '#b5b2ff' },
+    { id: 'song_4', name: '4. ちょうちょう', composer: 'スペイン民謡', jacket: '🦋', totalNotes: 40, speed: '5.2', color: '#fbd28b' },
+    { id: 'song_5', name: '5. 大きな栗の木の下で', composer: 'アメリカ民謡', jacket: '🌳', totalNotes: 45, speed: '5.5', color: '#ffc1e3' }
   ];
 
+  const colors = ['#ffb8b8', '#85e3d4', '#b5b2ff', '#fbd28b', '#ffc1e3'];
   let currentSong = songList[0];
 
   const canvas = document.getElementById('gameCanvas');
@@ -391,7 +441,6 @@
   let notes = [];
   let spawnTimer = 0;
   let spawnedCount = 0;
-  let testChartQueue = [];
 
   const starImages = ['images/star1.png', 'images/star2.png', 'images/star3.png', 'images/star4.png', 'images/star5.png'];
   
@@ -423,17 +472,13 @@
     particleContainer.innerHTML = '';
   }
 
-  // ランク判定ロジック（PERFECTの割合ベース）
-  function getRankDetails(counts, totalNotes) {
-    const totalHits = counts.perfect + counts.great + counts.good + counts.miss;
-    const totalEvaluated = totalHits > 0 ? totalHits : (totalNotes > 0 ? totalNotes : 1);
-    const perfectRate = (counts.perfect / totalEvaluated) * 100;
-
-    if (perfectRate >= 98 && counts.miss === 0) return { rank: 'S', color: '#e17055' };
-    if (perfectRate >= 90) return { rank: 'A', color: '#fdcb6e' };
-    if (perfectRate >= 80) return { rank: 'B', color: '#00b894' };
-    if (perfectRate >= 70) return { rank: 'C', color: '#0984e3' };
-    if (perfectRate >= 60) return { rank: 'D', color: '#6c5ce7' };
+  // スコアからランクと背景色を決定する関数
+  function getRankDetails(s) {
+    if (s >= 4500) return { rank: 'S', color: '#e17055' };
+    if (s >= 4000) return { rank: 'A', color: '#fdcb6e' };
+    if (s >= 3500) return { rank: 'B', color: '#00b894' };
+    if (s >= 3000) return { rank: 'C', color: '#0984e3' };
+    if (s >= 2500) return { rank: 'D', color: '#6c5ce7' };
     return { rank: 'E', color: '#b2bec3' };
   }
 
@@ -444,6 +489,7 @@
 
   function updateVirtualScroll() {
     let scrollTop = viewport.scrollTop;
+
     if (scrollTop < SET_HEIGHT * 0.5) {
       viewport.scrollTop += SET_HEIGHT;
       scrollTop += SET_HEIGHT;
@@ -475,6 +521,7 @@
           <div class="song-composer">${song.composer}</div>
         </div>
       `;
+      
       card.addEventListener('click', () => triggerCreditAndStart(song));
       spacer.appendChild(card);
     }
@@ -510,11 +557,10 @@
     document.getElementById('credit-title').textContent = song.name;
     document.getElementById('credit-composer').textContent = song.composer;
 
+    // ロード画面にこれまでのハイスコアとランクを反映
     const savedHighScore = Number(localStorage.getItem(`highscore_${song.id}`)) || 0;
     document.getElementById('credit-high-score').textContent = savedHighScore;
-    
-    const savedCounts = JSON.parse(localStorage.getItem(`counts_${song.id}`)) || { perfect: 0, great: 0, good: 0, miss: 0 };
-    const rankInfo = getRankDetails(savedCounts, song.totalNotes);
+    const rankInfo = getRankDetails(savedHighScore);
     const creditRankEl = document.getElementById('credit-rank');
     creditRankEl.textContent = savedHighScore > 0 ? rankInfo.rank : '-';
     creditRankEl.style.background = savedHighScore > 0 ? rankInfo.color : '#b2bec3';
@@ -533,17 +579,6 @@
     floatingTitle.style.display = 'none'; 
     scoreDisplay.style.display = 'block';
     backToSelectBtn.style.display = 'flex';
-
-    if (currentSong.id === 'song_6') {
-      testChartQueue = [];
-      const types = ['normal', 'hold', 'curved_hold', 'hold_slide', 'curved_hold_slide', 'slide'];
-      types.forEach(type => {
-        for (let i = 0; i < 4; i++) {
-          testChartQueue.push(type);
-        }
-      });
-    }
-
     gameLoop();
   }
 
@@ -555,7 +590,6 @@
     notes = [];
     spawnTimer = 0;
     spawnedCount = 0;
-    testChartQueue = [];
     activeTouches = {};
     isLaneHolding = [false, false, false, false];
     globalAnimTimer = 0;
@@ -587,7 +621,7 @@
   }
 
   function applyJudgement(distance, xPos) {
-    if (distance < 30) {
+    if (distance < 25) {
       judgeText = 'PERFECT!';
       judgeColor = '#fdcb6e';
       score += 100;
@@ -595,7 +629,7 @@
       updateCombo(combo + 1);
       playSound(1.5);
       createHitEffect(xPos, targetY, '#fdcb6e');
-    } else if (distance < 55) {
+    } else if (distance < 45) {
       judgeText = 'GREAT!';
       judgeColor = '#00b894';
       score += 80;
@@ -603,7 +637,7 @@
       updateCombo(combo + 1);
       playSound(1.2);
       createHitEffect(xPos, targetY, '#00b894');
-    } else {
+    } else if (distance < 70) {
       judgeText = 'GOOD';
       judgeColor = '#0984e3';
       score += 50;
@@ -646,28 +680,12 @@
     let minDistance = Infinity;
 
     notes.forEach((note, index) => {
-      // スライド単体の判定を確実に拾うように修正
-      if (note.holding) return;
-      if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted) return;
-
-      let expectedX;
-      let checkY = note.y;
-
-      if (note.type === 'slide') {
-        expectedX = laneXPositions[note.lane];
-      } else if (note.type === 'hold_slide' || note.type === 'curved_hold_slide') {
-        expectedX = (note.type === 'curved_hold_slide') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
-        checkY = note.y - note.length;
-      } else if (note.type === 'curved_hold') {
-        expectedX = laneXPositions[note.path[0].lane];
-      } else {
-        expectedX = laneXPositions[note.lane];
-      }
-
-      const distanceY = Math.abs(checkY - targetY);
+      if (note.holding || note.type === 'slide' || (note.type === 'hold_slide' && note.holdCompleted)) return;
+      let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+      const distanceY = Math.abs(note.y - targetY);
       const distanceX = Math.abs(touchX - expectedX);
 
-      if (distanceY < 80 && distanceX < laneWidth * 0.9 && distanceY < minDistance) {
+      if (distanceY < 70 && distanceX < laneWidth * 0.8 && distanceY < minDistance) {
         minDistance = distanceY;
         hitIndex = index;
       }
@@ -675,20 +693,10 @@
 
     if (hitIndex !== -1) {
       const note = notes[hitIndex];
-      let noteX = laneXPositions[note.lane];
-      if (note.type === 'curved_hold' || note.type === 'curved_hold_slide') {
-        noteX = laneXPositions[note.path[0].lane];
-      }
-
-      if (note.type === 'normal' || note.type === 'slide') {
+      let noteX = (note.type === 'curved_hold') ? laneXPositions[note.path[0].lane] : laneXPositions[note.lane];
+      if (note.type === 'normal') {
         notes.splice(hitIndex, 1);
         applyJudgement(minDistance, noteX);
-      } else if (note.type === 'hold_slide' || note.type === 'curved_hold_slide') {
-        if (note.holdCompleted) {
-          notes.splice(hitIndex, 1);
-          let finalX = (note.type === 'curved_hold_slide') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
-          applyJudgement(minDistance, finalX);
-        }
       } else {
         note.holding = true;
         note.touchId = touchId;
@@ -706,10 +714,22 @@
     if (!touchData) return;
     touchData.x = touchX;
 
+    notes.forEach((n, index) => {
+      if (n.type === 'slide' || (n.type === 'hold_slide' && n.holdCompleted)) {
+        const targetCheckY = (n.type === 'slide') ? n.y : (n.y - n.length);
+        const distanceY = Math.abs(targetCheckY - targetY);
+        const distanceX = Math.abs(touchX - laneXPositions[n.lane]);
+        if (distanceY < 70 && distanceX < laneWidth * 0.9) {
+          notes.splice(index, 1);
+          applyJudgement(distanceY, laneXPositions[n.lane]);
+        }
+      }
+    });
+
     const note = touchData.activeNote;
-    if (note && note.holding && note.type !== 'hold_slide' && note.type !== 'curved_hold_slide') {
+    if (note && note.holding && note.type !== 'hold_slide') {
       let expectedX = (note.type === 'curved_hold') ? getHoldXAtY(note, targetY) : laneXPositions[note.lane];
-      if (Math.abs(touchX - expectedX) > laneWidth * 1.1) {
+      if (Math.abs(touchX - expectedX) > laneWidth * 0.9) {
         note.holding = false;
         touchData.activeNote = null;
         triggerMiss();
@@ -724,22 +744,22 @@
       const note = touchData.activeNote;
       if (note.holding) {
         const tailY = note.y - note.length;
-        if (tailY < targetY - 60) {
+        if (tailY < targetY - 50) {
           note.holding = false;
           triggerMiss();
         } else {
-          if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted) {
+          if (note.type === 'hold_slide' && !note.holdCompleted) {
             note.holding = false;
-            note.holdCompleted = true; // ホールドが完了し、次のスライド判定待ち状態へ
+            note.holdCompleted = true;
             touchData.activeNote = null;
-            setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 800);
+            setTimeout(() => { if (activeTouches[touchId] === touchData) delete activeTouches[touchId]; }, 600);
           } else {
             const distance = Math.abs(tailY - targetY);
             let expectedX = (note.type === 'curved_hold') ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane];
             const index = notes.indexOf(note);
             if (index !== -1) {
               notes.splice(index, 1);
-              if (distance < 80 && Math.abs(touchData.x - expectedX) < laneWidth * 1.1) {
+              if (distance < 70 && Math.abs(touchData.x - expectedX) < laneWidth * 0.9) {
                 applyJudgement(distance, expectedX);
               } else {
                 triggerMiss();
@@ -757,51 +777,27 @@
   function spawnNotes() {
     if (spawnedCount >= currentSong.totalNotes) return;
     spawnTimer++;
-    if (spawnTimer > 48) {
+    if (spawnTimer > 45) {
       const startLane = Math.floor(Math.random() * laneCount);
+      const rand = Math.random();
       const spd = Number(currentSong.speed);
-      let noteType = '';
 
-      if (currentSong.id === 'song_6') {
-        if (testChartQueue.length > 0) {
-          noteType = testChartQueue.shift();
-        } else {
-          return;
-        }
-      } else {
-        const rand = Math.random();
-        if (rand < 0.16) noteType = 'normal';
-        else if (rand < 0.33) noteType = 'hold';
-        else if (rand < 0.50) noteType = 'curved_hold';
-        else if (rand < 0.66) noteType = 'hold_slide';
-        else if (rand < 0.83) noteType = 'curved_hold_slide';
-        else noteType = 'slide';
-      }
-
-      if (noteType === 'normal') {
+      if (rand < 0.25) {
         notes.push({ type: 'normal', lane: startLane, y: 0, speed: spd });
-      } else if (noteType === 'hold') {
+      } else if (rand < 0.50) {
         notes.push({ type: 'hold', lane: startLane, y: 0, length: 140, speed: spd, holding: false });
-      } else if (noteType === 'curved_hold') {
+      } else if (rand < 0.70) {
         const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
         const length = 180;
         notes.push({
           type: 'curved_hold', y: 0, length: length, speed: spd, holding: false,
           path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
         });
-      } else if (noteType === 'hold_slide') {
+      } else if (rand < 0.85) {
         notes.push({ type: 'hold_slide', lane: startLane, y: 0, length: 140, speed: spd, holding: false, holdCompleted: false });
-      } else if (noteType === 'curved_hold_slide') {
-        const targetLane = (startLane < laneCount - 1) ? startLane + 1 : startLane - 1;
-        const length = 180;
-        notes.push({
-          type: 'curved_hold_slide', y: 0, length: length, speed: spd, holding: false, holdCompleted: false,
-          path: [{ lane: startLane, offsetY: 0 }, { lane: startLane, offsetY: 60 }, { lane: targetLane, offsetY: 120 }, { lane: targetLane, offsetY: length }]
-        });
-      } else if (noteType === 'slide') {
+      } else {
         notes.push({ type: 'slide', lane: startLane, y: 0, speed: spd });
       }
-
       spawnTimer = 0;
       spawnedCount++;
     }
@@ -818,8 +814,7 @@
       newRecordTag.style.display = 'none';
     }
 
-    localStorage.setItem(`counts_${currentSong.id}`, JSON.stringify(counts));
-
+    // 正確な総ノーツ数（perfect + great + good + miss）と比較するように修正
     const totalHitCount = counts.perfect + counts.great + counts.good + counts.miss;
     if (counts.perfect === totalHitCount && totalHitCount > 0) {
       allPerfectTag.style.display = 'inline-block';
@@ -832,8 +827,9 @@
       noMissTag.style.display = 'none';
     }
 
+    // スコアとランクの反映
     document.getElementById('res-score').textContent = score;
-    const rankInfo = getRankDetails(counts, currentSong.totalNotes);
+    const rankInfo = getRankDetails(score);
     const resRankEl = document.getElementById('res-rank');
     resRankEl.textContent = rankInfo.rank;
     resRankEl.style.background = rankInfo.color;
@@ -890,15 +886,15 @@
       let note = notes[i];
       note.y += note.speed;
 
-      if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && !note.holdCompleted && (note.y - note.length) > targetY) {
+      if (note.type === 'hold_slide' && !note.holdCompleted && (note.y - note.length) > targetY) {
         note.holdCompleted = true;
         note.holding = false;
       }
 
       let missCheckTailY = (note.type === 'normal' || note.type === 'slide') ? note.y : (note.y - note.length);
-      if (missCheckTailY > targetY + 85) {
+      if (missCheckTailY > targetY + 70) {
         notes.splice(i, 1);
-        if ((note.type === 'hold_slide' || note.type === 'curved_hold_slide') && note.holdCompleted) {
+        if (note.type === 'hold_slide' && note.holdCompleted) {
           triggerMiss();
         } else if ((note.type === 'hold' || note.type === 'curved_hold') && note.holding) {
           applyJudgement(0, note.type === 'curved_hold' ? laneXPositions[note.path[note.path.length - 1].lane] : laneXPositions[note.lane]);
@@ -916,7 +912,7 @@
         ctx.beginPath(); ctx.arc(x, note.y, 18, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x - 4, note.y - 4, 5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
-      } else if (note.type === 'hold' || note.type === 'hold_slide') {
+      } else if (note.type === 'hold') {
         const x = laneXPositions[note.lane];
         const headY = note.holding ? targetY : note.y;
         const tailY = note.y - note.length;
@@ -925,20 +921,10 @@
           ctx.fillRect(x - 16, tailY, 32, headY - tailY);
         }
         ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, headY, 18, 0, Math.PI * 2); ctx.fill();
-        
-        if (note.type === 'hold_slide') {
-          // ホールド終点にスライドデザインを完璧に一体化
-          const slideDrawY = note.y - note.length;
-          ctx.fillStyle = '#74b9ff'; 
-          ctx.beginPath(); 
-          ctx.roundRect(x - 18, slideDrawY - 10, 36, 20, 10); 
-          ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 14px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, slideDrawY + 4);
-        } else {
-          ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
-        }
-      } else if (note.type === 'curved_hold' || note.type === 'curved_hold_slide') {
+        ctx.fillStyle = '#00b894'; ctx.beginPath(); ctx.arc(x, tailY, 18, 0, Math.PI * 2); ctx.fill();
+      } else if (note.type === 'curved_hold') {
         const headY = note.holding ? targetY : note.y;
+        const tailY = note.y - note.length;
         ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)'; ctx.lineWidth = 32; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         ctx.beginPath();
         note.path.forEach((pt, idx) => {
@@ -947,22 +933,11 @@
           idx === 0 ? ctx.moveTo(laneXPositions[pt.lane], ptY) : ctx.lineTo(laneXPositions[pt.lane], ptY);
         });
         ctx.stroke();
-
-        if (note.type === 'curved_hold_slide') {
-          // カーブホールドの終点パスにスライドデザインを完璧に一体化
-          const endPt = note.path[note.path.length - 1];
-          const endX = laneXPositions[endPt.lane];
-          const slideDrawY = note.y - endPt.offsetY;
-          ctx.fillStyle = '#74b9ff'; 
-          ctx.beginPath(); 
-          ctx.roundRect(endX - 18, slideDrawY - 10, 36, 20, 10); 
-          ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.font = `bold 14px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', endX, slideDrawY + 4);
-        }
-      } else if (note.type === 'slide') {
+      } else if (note.type === 'slide' || note.type === 'hold_slide') {
         const x = laneXPositions[note.lane];
-        ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 22, note.y - 14, 44, 28, 14); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, note.y + 6);
+        const drawY = (note.type === 'slide') ? note.y : (note.y - note.length);
+        ctx.fillStyle = '#74b9ff'; ctx.beginPath(); ctx.roundRect(x - 22, drawY - 14, 44, 28, 14); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = `bold 18px ${CAVEAT_FONT}`; ctx.textAlign = 'center'; ctx.fillText('〰', x, drawY + 6);
       }
       ctx.restore();
     }
